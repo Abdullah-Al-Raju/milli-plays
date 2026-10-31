@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Milli-Reflex: The 5-Minute Precision Human Gauntlet</title>
+  <link rel="stylesheet" href="/static/gauntlet.css">
+  <style>
+    .top-nav {
+      background: #0d1424;
+      border-bottom: 1px solid #1e293b;
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: #fff;
+      text-decoration: none;
+    }
+    .nav-badge {
+      background: rgba(246, 130, 31, 0.2);
+      border: 1px solid #f6821f;
+      color: #f6821f;
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .nav-links {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .nav-link {
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+    }
+    .nav-link:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .nav-link.active {
+      color: #00f0ff;
+      background: rgba(0, 240, 255, 0.1);
+      border-color: rgba(0, 240, 255, 0.3);
+    }
+    body {
+      padding-top: 70px;
+    }
+  </style>
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="/" class="nav-brand">
+      <span>⚡ CLOUDFLARE EDGE ARENA</span>
+      <span class="nav-badge">LIVE</span>
+    </a>
+    <div class="nav-links">
+      <a href="/" class="nav-link">🏠 Master Gate</a>
+      <a href="/drive" class="nav-link">🏎️ Milli-Drive</a>
+      <a href="/scalper-royale" class="nav-link">🏟️ Scalper Royale</a>
+      <a href="/matrix" class="nav-link">🌀 Laser Matrix</a>
+      <a href="/milli-clicks" class="nav-link">⚡ Milli-Clicks</a>
+      <a href="/clicker" class="nav-link">⚡ Reflex &amp; CPS</a>
+      <a href="/gauntlet" class="nav-link active">🎯 5-Min Gauntlet</a>
+      <a href="/arena" class="nav-link">🎫 Drop Rush</a>
+      <a href="/challenge" class="nav-link">🛡️ Turnstile</a>
+      <a href="/biometrics" class="nav-link">🔬 Biometrics</a>
+      <a href="javascript:void(0)" onclick="lockGate()" class="nav-link" style="color:#ef4444;">🔒 Lock</a>
+    </div>
+  </nav>
+
+  <div class="gauntlet-wrapper">
+    <header class="hud-header">
+      <div class="hud-brand">
+        <span class="hud-badge">⚡ THE 5-MINUTE GAUNTLET</span>
+        <h2>Precision Circuit Drawing & Cryptographic Writing</h2>
+      </div>
+      <div class="hud-stats">
+        <div class="hud-stat-box">
+          <span class="hud-label">ELAPSED TIME</span>
+          <span id="timer-display" class="hud-value text-amber">0.000s</span>
+        </div>
+        <div class="hud-stat-box">
+          <span class="hud-label">ACTIVE STAGE</span>
+          <span id="stage-display" class="hud-value text-cyan">STAGE 1: CIRCUIT</span>
+        </div>
+        <div class="hud-stat-box">
+          <span class="hud-label">STAGE PROGRESS</span>
+          <span id="progress-display" class="hud-value font-mono text-green">0%</span>
+        </div>
+        <div class="hud-stat-box">
+          <span class="hud-label">INSTANT SPEED</span>
+          <span id="speed-display" class="hud-value font-mono">-- ms/action</span>
+        </div>
+      </div>
+      <div class="hud-actions">
+        <button id="start-btn" class="btn btn-primary">▶ Start Gauntlet</button>
+        <button id="reset-btn" class="btn btn-outline">↺ Reset</button>
+        <a href="/" class="btn btn-outline" style="text-decoration:none;">🎫 Back to Arena</a>
+      </div>
+    </header>
+
+    <!-- Stage Progress Indicator Bar -->
+    <div class="stage-stepper">
+      <div id="step-1" class="step-item active">
+        <span class="step-num">1</span>
+        <span class="step-title">Vector Circuit Drawing (60 Pins)</span>
+      </div>
+      <div class="step-arrow">➔</div>
+      <div id="step-2" class="step-item">
+        <span class="step-num">2</span>
+        <span class="step-title">Continuous Signature Tracing</span>
+      </div>
+      <div class="step-arrow">➔</div>
+      <div id="step-3" class="step-item">
+        <span class="step-num">3</span>
+        <span class="step-title">Cryptographic Speed Writing</span>
+      </div>
+    </div>
+
+    <!-- Main Gauntlet Canvas / Workspace -->
+    <main class="gauntlet-workspace">
+      <!-- Stage 1 Container: Circuit Board Vector Drawing -->
+      <section id="stage-1-container" class="stage-section active">
+        <div class="stage-header">
+          <h3>⚡ STAGE 1: High-Density Micro-Circuit Vector Drawing</h3>
+          <p>Connect all 60 terminal pads in strict numerical sequence (Pin 1 ➔ Pin 60) without breaking trace contact.<br>
+          <span class="dim-text">Typical Human Speed: ~160 seconds (2.7 minutes)</span></p>
+        </div>
+        <div class="canvas-box">
+          <canvas id="circuit-canvas" width="880" height="380"></canvas>
+          <div id="circuit-overlay" class="stage-overlay">Click "Start Gauntlet" to Arm System</div>
+        </div>
+      </section>
+
+      <!-- Stage 2 Container: Continuous Waveform Vector Signature -->
+      <section id="stage-2-container" class="stage-section" style="display: none;">
+        <div class="stage-header">
+          <h3>🖋️ STAGE 2: Continuous Parametric Vector Signature Tracing</h3>
+          <p>Trace the complex multi-axis spline curve from START to FINISH with continuous pointer drag without lifting.<br>
+          <span class="dim-text">Typical Human Speed: ~50 seconds</span></p>
+        </div>
+        <div class="canvas-box">
+          <canvas id="signature-canvas" width="880" height="380"></canvas>
+          <div id="signature-overlay" class="stage-overlay" style="display: none;"></div>
+        </div>
+      </section>
+
+      <!-- Stage 3 Container: Cryptographic Speed Writing -->
+      <section id="stage-3-container" class="stage-section" style="display: none;">
+        <div class="stage-header">
+          <h3>⌨️ STAGE 3: Cryptographic Authorization Speed Writing</h3>
+          <p>Type the exact cryptographic security authorization clause with zero typos to unlock atomic booking approval.<br>
+          <span class="dim-text">Typical Human Speed: ~90 seconds (1.5 minutes)</span></p>
+        </div>
+        <div class="writing-box">
+          <div class="prompt-clause-label">SECURITY VERIFICATION TRANSCRIPT TO TRANSCRIBE:</div>
+          <div id="target-transcript" class="transcript-display"></div>
+          <div class="input-wrapper">
+            <textarea id="writing-input" placeholder="Awaiting stage activation..." disabled></textarea>
+          </div>
+          <div class="writing-metrics">
+            <span>Accuracy: <b id="writing-accuracy">0%</b></span>
+            <span>Matched Characters: <b id="writing-chars">0 / 0</b></span>
+            <span>Status: <b id="writing-status" class="text-amber">LOCKED</b></span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Telemetry Log -->
+    <footer class="telemetry-footer">
+      <div class="footer-title">⚡ REAL-TIME GAUNTLET TELEMETRY FEED</div>
+      <div id="gauntlet-log" class="game-log-feed">
+        <div class="log-line system">Ready. Awaiting gauntlet initialization...</div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Scorecard Modal -->
+  <div id="gauntlet-modal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-badge">5-MINUTE GAUNTLET COMPLETE</div>
+      <h2>Precision Performance Scorecard</h2>
+      <p class="modal-sub">Comparing Hyper-Reflex Execution vs. 5-Minute Human Benchmark</p>
+
+      <div class="modal-grid">
+        <div class="modal-metric">
+          <span class="m-label">TOTAL GAUNTLET TIME</span>
+          <span id="final-total-time" class="m-val text-green">--</span>
+        </div>
+        <div class="modal-metric">
+          <span class="m-label">HUMAN TIME EQUIVALENT</span>
+          <span class="m-val text-amber">300.0s (5.0 min)</span>
+        </div>
+        <div class="modal-metric">
+          <span class="m-label">STAGE 1: CIRCUIT (60 PINS)</span>
+          <span id="final-stage1-time" class="m-val font-mono">--</span>
+        </div>
+        <div class="modal-metric">
+          <span class="m-label">STAGE 2: VECTOR SIGNATURE</span>
+          <span id="final-stage2-time" class="m-val font-mono">--</span>
+        </div>
+        <div class="modal-metric">
+          <span class="m-label">STAGE 3: CRYPTO WRITING</span>
+          <span id="final-stage3-time" class="m-val font-mono">--</span>
+        </div>
+        <div class="modal-metric">
+          <span class="m-label">OVERALL SPEEDUP FACTOR</span>
+          <span id="final-speedup" class="m-val text-cyan">--</span>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button id="modal-restart-btn" class="btn btn-primary">Try Again</button>
+        <button id="modal-close-btn" class="btn btn-outline">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/gauntlet.js"></script>
+  <script>
+    function lockGate() {
+      localStorage.removeItem("sentinel_unlocked");
+      document.cookie = "sentinel_admin_key=; path=/; max-age=0";
+      window.location.href = "/";
+    }
+  </script>
+</body>
+</html>

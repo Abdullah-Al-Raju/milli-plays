@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Milli Portal Velocity | Non-Euclidean Momentum Redirection</title>
+  <style>
+    :root {
+      --bg-dark: #04060d;
+      --card-bg: #090e1a;
+      --accent-blue: #00aaff;
+      --accent-orange: #ff7700;
+      --accent-green: #00ff88;
+      --accent-gold: #ffd700;
+      --accent-purple: #a855f7;
+      --border-color: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg-dark);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "JetBrains Mono", sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+      user-select: none;
+    }
+    .top-nav {
+      background: #0d1424;
+      border-bottom: 1px solid var(--border-color);
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900;
+      font-size: 1.1rem;
+      color: #fff;
+      text-decoration: none;
+    }
+    .nav-badge {
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-orange));
+      color: #fff;
+      font-size: 0.7rem;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 900;
+    }
+    .nav-links {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .nav-link:hover { color: #fff; background: rgba(255, 255, 255, 0.05); }
+    .nav-link.active {
+      color: var(--accent-orange);
+      background: rgba(255, 119, 0, 0.12);
+      border: 1px solid rgba(255, 119, 0, 0.4);
+    }
+
+    .wrapper {
+      max-width: 1360px;
+      margin: 14px auto;
+      padding: 0 16px;
+    }
+    .status-bar {
+      background: linear-gradient(90deg, #091a29 0%, #261509 100%);
+      border: 1px solid var(--accent-orange);
+      border-radius: 12px;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 12px;
+      box-shadow: 0 4px 25px rgba(255, 119, 0, 0.2);
+    }
+    .hud-stats {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .hud-box {
+      flex: 1;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px 14px;
+      text-align: center;
+      min-width: 120px;
+    }
+    .hud-label { font-size: 0.65rem; color: var(--text-muted); font-weight: 800; letter-spacing: 0.5px; }
+    .hud-val { font-size: 1.25rem; font-weight: 900; font-family: monospace; color: #fff; margin-top: 2px; }
+
+    .arena-grid {
+      display: grid;
+      grid-template-columns: 2.7fr 1fr;
+      gap: 16px;
+    }
+    .canvas-container {
+      position: relative;
+      background: #020308;
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      overflow: hidden;
+      height: 640px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    canvas { display: block; background: #020308; }
+
+    .side-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .btn {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-weight: 800;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+      width: 100%;
+    }
+    .btn-orange { background: var(--accent-orange); color: #fff; box-shadow: 0 0 16px rgba(255, 119, 0, 0.4); }
+    .btn-orange:hover { background: #ff9933; }
+    .btn-blue { background: var(--accent-blue); color: #fff; }
+    .btn-green { background: var(--accent-green); color: #000; }
+
+    .feed-box {
+      height: 180px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.72rem;
+      background: #03060f;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px;
+      color: #94a3b8;
+      display: flex;
+      flex-direction: column-reverse;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="/" class="nav-brand">
+      <span>🌀 MILLI PORTAL VELOCITY</span>
+      <span class="nav-badge">NON-EUCLIDEAN MOMENTUM</span>
+    </a>
+    <div class="nav-links">
+      <a href="/" class="nav-link">🏠 Master Gate</a>
+      <a href="/drive" class="nav-link">🏎️ Drive</a>
+      <a href="/maze" class="nav-link">🌀 Maze</a>
+      <a href="/danmaku" class="nav-link">🌸 Danmaku</a>
+      <a href="/orbit" class="nav-link">🌌 Orbit</a>
+      <a href="/pong" class="nav-link">🏓 Pong</a>
+      <a href="/rhythm" class="nav-link">🎵 Rhythm</a>
+      <a href="/snake" class="nav-link">🐍 Snake</a>
+      <a href="/swarm" class="nav-link">⚔️ Swarm</a>
+      <a href="/stealth" class="nav-link">🕶️ Stealth</a>
+      <a href="/trader" class="nav-link">📈 Trader</a>
+      <a href="/sweeper" class="nav-link">💣 Sweeper</a>
+      <a href="/defense" class="nav-link">🛸 Defense</a>
+      <a href="/portal" class="nav-link active">🌀 Portal</a>
+      <a href="/circuit" class="nav-link">⚡ Circuit</a>
+    </div>
+  </nav>
+
+  <div class="wrapper">
+    <div class="status-bar">
+      <div>
+        <b style="color:var(--accent-orange); font-size:1rem;">⚡ NON-EUCLIDEAN MOMENTUM REDIRECTION &amp; GRAVITY FLIPS</b>
+        <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">
+          Seamless vector transformation through blue &amp; orange portal gates. Milli chains hypersonic slingshots without touching the floor!
+        </div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-orange" onclick="toggleMilli()" id="btn-milli" style="width:auto; padding:8px 18px;">
+          🤖 Milli Portal AI: ACTIVE
+        </button>
+        <button class="btn btn-blue" onclick="resetPortal()" style="width:auto; padding:8px 16px;">
+          🔄 Reset Runner
+        </button>
+      </div>
+    </div>
+
+    <div class="hud-stats">
+      <div class="hud-box">
+        <div class="hud-label">MOMENTUM VELOCITY</div>
+        <div id="hud-vel" class="hud-val" style="color:var(--accent-orange);">12.5 M/S</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">PORTAL WARP CHAIN</div>
+        <div id="hud-chain" class="hud-val" style="color:var(--accent-blue);">0 WARPS</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">ENERGY CRYSTALS</div>
+        <div id="hud-crystals" class="hud-val" style="color:var(--accent-gold);">0 / 8</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">GRAVITATIONAL VECTOR</div>
+        <div id="hud-grav" class="hud-val" style="color:var(--accent-green);">+Y (NORMAL)</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">AIR TIME</div>
+        <div id="hud-air" class="hud-val" style="color:var(--accent-cyan);">0.0s</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">STATUS</div>
+        <div id="hud-status" class="hud-val" style="color:var(--accent-green);">FLIGHT LOCKED</div>
+      </div>
+    </div>
+
+    <div class="arena-grid">
+      <div class="canvas-container" id="container">
+        <canvas id="portal-canvas"></canvas>
+      </div>
+
+      <div class="side-panel">
+        <div>
+          <div style="font-size:0.85rem; font-weight:800; color:#fff; margin-bottom:8px;">⚡ ACTIONS</div>
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <button class="btn btn-orange" onclick="flipGravity()">🔄 Flip Global Gravity Vector</button>
+            <button class="btn btn-blue" onclick="slingshotBoost()">🚀 Hypersonic Portal Slingshot</button>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:0.85rem; font-weight:800; color:#fff; margin-bottom:8px;">🕹️ HUMAN PORTAL CONTROLS</div>
+          <div style="font-size:0.75rem; color:var(--text-muted); line-height:1.5;">
+            Toggle Auto-Pilot OFF to manually control the runner using <b>A/D</b> to move and <b>W / Space</b> to jump. Aim portals with mouse.
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:0.8rem; font-weight:700; color:#fff; margin-bottom:6px;">⚡ MILLI COGNITIVE LOGS</div>
+          <div class="feed-box" id="feed-box">
+            <div>[READY] Portal Velocity Engine armed. Non-Euclidean transforms online.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("portal-canvas");
+    const ctx = canvas.getContext("2d");
+
+    let W = 880;
+    let H = 640;
+    canvas.width = W;
+    canvas.height = H;
+
+    let milliAuto = true;
+    let gravity = 0.35;
+    let gravityDir = 1; // 1 = down, -1 = up
+
+    let runner = {
+      x: 100, y: 300,
+      vx: 6.0, vy: 0,
+      r: 10,
+      trail: [],
+      airTime: 0
+    };
+
+    // Portals
+    let portalA = { x: 180, y: 520, w: 12, h: 65, color: "#00aaff", normal: { x: 0, y: -1 } }; // Blue Portal
+    let portalB = { x: 700, y: 140, w: 12, h: 65, color: "#ff7700", normal: { x: -1, y: 0 } }; // Orange Portal
+
+    // Floating Platforms
+    let platforms = [
+      { x: 60, y: 400, w: 150, h: 16 },
+      { x: 300, y: 480, w: 180, h: 16 },
+      { x: 550, y: 360, w: 160, h: 16 },
+      { x: 340, y: 220, w: 150, h: 16 }
+    ];
+
+    // Energy Crystals
+    let crystals = [
+      { x: 200, y: 250, collected: false },
+      { x: 420, y: 150, collected: false },
+      { x: 620, y: 200, collected: false },
+      { x: 380, y: 380, collected: false },
+      { x: 750, y: 420, collected: false }
+    ];
+
+    let warps = 0;
+    let crystalsCount = 0;
+
+    const keys = {};
+    window.addEventListener("keydown", e => { keys[e.key] = true; });
+    window.addEventListener("keyup", e => { keys[e.key] = false; });
+
+    function logFeed(msg) {
+      const feed = document.getElementById("feed-box");
+      const time = new Date().toISOString().substring(14, 23);
+      const div = document.createElement("div");
+      div.innerText = `[${time}] ${msg}`;
+      feed.prepend(div);
+      if (feed.children.length > 25) feed.removeChild(feed.lastChild);
+    }
+
+    function toggleMilli() {
+      milliAuto = !milliAuto;
+      document.getElementById("btn-milli").innerText = milliAuto ? "🤖 Milli Portal AI: ACTIVE" : "🕹️ Human Runner: ENGAGED";
+      document.getElementById("btn-milli").className = milliAuto ? "btn btn-orange" : "btn btn-blue";
+      logFeed(milliAuto ? "Milli non-Euclidean momentum solver active." : "Manual runner controls active.");
+    }
+
+    function flipGravity() {
+      gravityDir *= -1;
+      document.getElementById("hud-grav").innerText = gravityDir === 1 ? "+Y (NORMAL)" : "-Y (INVERTED)";
+      logFeed(`Gravity flipped: ${gravityDir === 1 ? "Downwards" : "Upwards"}!`);
+    }
+
+    function slingshotBoost() {
+      runner.vx *= 1.4;
+      runner.vy *= 1.4;
+      logFeed("⚡ Hypersonic momentum slingshot boost applied!");
+    }
+
+    function resetPortal() {
+      runner = { x: 100, y: 300, vx: 6.0, vy: 0, r: 10, trail: [], airTime: 0 };
+      crystals.forEach(c => c.collected = false);
+      warps = 0;
+      crystalsCount = 0;
+      document.getElementById("hud-chain").innerText = "0 WARPS";
+      document.getElementById("hud-crystals").innerText = "0 / 8";
+      logFeed("Runner respawned on launch platform.");
+    }
+
+    // MILLI PORTAL TRAJECTORY AI
+    function updateMilliAI() {
+      // Find nearest uncollected crystal
+      let target = null;
+      let minDist = Infinity;
+      crystals.forEach(c => {
+        if (!c.collected) {
+          const d = Math.hypot(c.x - runner.x, c.y - runner.y);
+          if (d < minDist) {
+            minDist = d;
+            target = c;
+          }
+        }
+      });
+
+      if (!target) {
+        // Default loop into Blue portal
+        target = portalA;
+      }
+
+      // Air steering toward target
+      const dx = target.x - runner.x;
+      if (dx > 20) runner.vx = Math.min(10, runner.vx + 0.25);
+      else if (dx < -20) runner.vx = Math.max(-10, runner.vx - 0.25);
+    }
+
+    function updateHumanControls() {
+      if (keys["ArrowLeft"] || keys["a"]) runner.vx = Math.max(-8, runner.vx - 0.4);
+      if (keys["ArrowRight"] || keys["d"]) runner.vx = Math.min(8, runner.vx + 0.4);
+      if ((keys["ArrowUp"] || keys["w"] || keys[" "]) && Math.abs(runner.vy) < 0.5) {
+        runner.vy = -8.5 * gravityDir;
+      }
+    }
+
+    function update() {
+      if (milliAuto) {
+        updateMilliAI();
+      } else {
+        updateHumanControls();
+      }
+
+      // Gravity
+      runner.vy += gravity * gravityDir;
+      runner.x += runner.vx;
+      runner.y += runner.vy;
+
+      runner.trail.push({ x: runner.x, y: runner.y });
+      if (runner.trail.length > 25) runner.trail.shift();
+
+      // Platform collisions
+      platforms.forEach(p => {
+        if (runner.x >= p.x && runner.x <= p.x + p.w) {
+          if (runner.y + runner.r >= p.y && runner.y - runner.r <= p.y + p.h) {
+            runner.y = p.y - runner.r;
+            runner.vy = 0;
+          }
+        }
+      });
+
+      // Portal A Entry (Blue -> Orange)
+      if (Math.hypot(runner.x - portalA.x, runner.y - portalA.y) < 35) {
+        runner.x = portalB.x + portalB.normal.x * 25;
+        runner.y = portalB.y;
+        // Transform momentum vector
+        const spd = Math.hypot(runner.vx, runner.vy) * 1.15; // +15% slingshot
+        runner.vx = portalB.normal.x * spd;
+        runner.vy = -spd * 0.6;
+        warps++;
+        document.getElementById("hud-chain").innerText = `${warps} WARPS`;
+        logFeed(`🌀 [Portal Warp #${warps}] Preserved momentum: ${(spd).toFixed(1)} m/s!`);
+      }
+
+      // Portal B Entry (Orange -> Blue)
+      else if (Math.hypot(runner.x - portalB.x, runner.y - portalB.y) < 35) {
+        runner.x = portalA.x + portalA.normal.x * 25;
+        runner.y = portalA.y;
+        const spd = Math.hypot(runner.vx, runner.vy) * 1.15;
+        runner.vx = portalA.normal.x * spd;
+        runner.vy = -spd * 0.8;
+        warps++;
+        document.getElementById("hud-chain").innerText = `${warps} WARPS`;
+        logFeed(`🌀 [Portal Warp #${warps}] Preserved momentum: ${(spd).toFixed(1)} m/s!`);
+      }
+
+      // Crystals
+      crystals.forEach(c => {
+        if (!c.collected && Math.hypot(runner.x - c.x, runner.y - c.y) < runner.r + 14) {
+          c.collected = true;
+          crystalsCount++;
+          document.getElementById("hud-crystals").innerText = `${crystalsCount} / 5`;
+          logFeed(`✨ Quantum crystal collected! Speed boosted.`);
+        }
+      });
+
+      // Bounds wrapping
+      if (runner.x < 0) runner.x = W;
+      if (runner.x > W) runner.x = 0;
+      if (runner.y > H + 50 || runner.y < -50) {
+        // Void respawn
+        runner.y = 200;
+        runner.vy = 0;
+      }
+
+      const totalSpeed = Math.hypot(runner.vx, runner.vy);
+      document.getElementById("hud-vel").innerText = `${totalSpeed.toFixed(1)} M/S`;
+    }
+
+    function draw() {
+      ctx.fillStyle = "#020308";
+      ctx.fillRect(0, 0, W, H);
+
+      // Render Platforms
+      ctx.fillStyle = "#1e293b";
+      ctx.strokeStyle = "#334155";
+      ctx.lineWidth = 2;
+      platforms.forEach(p => {
+        ctx.fillRect(p.x, p.y, p.w, p.h);
+        ctx.strokeRect(p.x, p.y, p.w, p.h);
+      });
+
+      // Render Blue Portal
+      ctx.save();
+      ctx.fillStyle = portalA.color;
+      ctx.shadowColor = portalA.color;
+      ctx.shadowBlur = 20;
+      ctx.beginPath();
+      ctx.ellipse(portalA.x, portalA.y, portalA.w, portalA.h / 2, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // Render Orange Portal
+      ctx.save();
+      ctx.fillStyle = portalB.color;
+      ctx.shadowColor = portalB.color;
+      ctx.shadowBlur = 20;
+      ctx.beginPath();
+      ctx.ellipse(portalB.x, portalB.y, portalB.w, portalB.h / 2, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // Render Crystals
+      crystals.forEach(c => {
+        if (!c.collected) {
+          ctx.save();
+          ctx.fillStyle = "#ffd700";
+          ctx.shadowColor = "#ffd700";
+          ctx.shadowBlur = 15;
+          ctx.beginPath();
+          ctx.arc(c.x, c.y, 8, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      });
+
+      // Render Runner Trail
+      if (runner.trail.length > 1) {
+        ctx.save();
+        ctx.strokeStyle = "rgba(0, 255, 136, 0.45)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        runner.trail.forEach((t, idx) => {
+          if (idx === 0) ctx.moveTo(t.x, t.y);
+          else ctx.lineTo(t.x, t.y);
+        });
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Render Runner
+      ctx.save();
+      ctx.fillStyle = milliAuto ? "#00ff88" : "#00f0ff";
+      ctx.shadowColor = milliAuto ? "#00ff88" : "#00f0ff";
+      ctx.shadowBlur = 18;
+      ctx.beginPath();
+      ctx.arc(runner.x, runner.y, runner.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      requestAnimationFrame(() => {
+        update();
+        draw();
+      });
+    }
+
+    draw();
+  </script>
+</body>
+</html>

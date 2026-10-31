@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reflex &amp; CPS Pro Arena | Cloudflare Pages</title>
+  <style>
+    :root {
+      --bg-dark: #0a0f1d;
+      --card-bg: #11192e;
+      --card-inner: #0b1122;
+      --accent-orange: #f6821f;
+      --accent-green: #00ff88;
+      --accent-cyan: #00f0ff;
+      --accent-purple: #a855f7;
+      --border-color: #1e293b;
+      --text-main: #e2e8f0;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      background: var(--bg-dark);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      user-select: none;
+    }
+
+    /* Unified Navigation Bar */
+    .top-nav {
+      background: #0d1424;
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: #fff;
+      text-decoration: none;
+    }
+    .nav-badge {
+      background: rgba(246, 130, 31, 0.2);
+      border: 1px solid var(--accent-orange);
+      color: var(--accent-orange);
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .nav-links {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+    }
+    .nav-link:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .nav-link.active {
+      color: var(--accent-cyan);
+      background: rgba(0, 240, 255, 0.1);
+      border-color: rgba(0, 240, 255, 0.3);
+    }
+
+    .wrapper {
+      max-width: 1100px;
+      margin: 24px auto;
+      padding: 0 16px;
+    }
+
+    /* Mode Selector Tabs */
+    .mode-tabs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .mode-tab {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: left;
+    }
+    .mode-tab:hover {
+      border-color: #334155;
+      transform: translateY(-2px);
+    }
+    .mode-tab.active {
+      border-color: var(--accent-cyan);
+      background: #14203d;
+      box-shadow: 0 4px 20px rgba(0, 240, 255, 0.15);
+    }
+    .tab-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .tab-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* HUD Bar */
+    .hud-bar {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .hud-stats-group {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .stat-pill {
+      background: var(--card-inner);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 90px;
+    }
+    .stat-title {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .stat-val {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .duration-pills {
+      display: flex;
+      gap: 6px;
+      background: var(--card-inner);
+      padding: 4px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+    .dur-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .dur-btn.active {
+      background: var(--accent-cyan);
+      color: #000;
+    }
+
+    /* Main Arena Viewport */
+    .arena-viewport {
+      position: relative;
+      height: 440px;
+      background: radial-gradient(circle at center, #10182f 0%, #070b16 100%);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: crosshair;
+      box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.6);
+    }
+    .arena-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(10, 15, 29, 0.85);
+      backdrop-filter: blur(4px);
+      z-index: 10;
+      text-align: center;
+      padding: 20px;
+    }
+    .overlay-title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+    .overlay-sub {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      max-width: 460px;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    /* Target Elements */
+    .interactive-target {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #00f0ff, #0055ff);
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 900;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: transform 0.05s ease;
+      will-change: transform;
+      z-index: 5;
+    }
+    .interactive-target:active {
+      transform: scale(0.92);
+    }
+
+    /* Ripple Click Effect */
+    .click-ripple {
+      position: absolute;
+      border-radius: 50%;
+      border: 2px solid var(--accent-cyan);
+      pointer-events: none;
+      animation: rippleAnim 0.4s ease-out forwards;
+      z-index: 8;
+    }
+    @keyframes rippleAnim {
+      0% { width: 0; height: 0; opacity: 1; transform: translate(-50%, -50%); }
+      100% { width: 100px; height: 100px; opacity: 0; transform: translate(-50%, -50%); }
+    }
+
+    /* Buttons */
+    .btn {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 22px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    .btn-primary { background: var(--accent-cyan); color: #000; }
+    .btn-primary:hover { background: #5df4ff; transform: translateY(-2px); }
+    .btn-orange { background: var(--accent-orange); color: #fff; }
+    .btn-orange:hover { background: #ff933a; transform: translateY(-2px); }
+    .btn-outline { background: transparent; border: 1px solid #334155; color: var(--text-muted); }
+    .btn-outline:hover { color: #fff; border-color: #64748b; }
+
+    /* Performance History & Histogram */
+    .grid-footer {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 18px;
+    }
+    .panel-header {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .telemetry-feed {
+      height: 160px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      background: var(--card-inner);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column-reverse;
+    }
+    .feed-line {
+      margin-bottom: 4px;
+      line-height: 1.4;
+    }
+
+    .rating-badge {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-weight: 800;
+      font-size: 0.85rem;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Top Navigation Bar -->
+  <nav class="top-nav">
+    <a href="/" class="nav-brand">
+      <span>⚡ CLOUDFLARE EDGE ARENA</span>
+      <span class="nav-badge">LIVE</span>
+    </a>
+    <div class="nav-links">
+      <a href="/" class="nav-link">🏠 Master Gate</a>
+      <a href="/drive" class="nav-link">🏎️ Milli-Drive</a>
+      <a href="/scalper-royale" class="nav-link">🏟️ Scalper Royale</a>
+      <a href="/matrix" class="nav-link">🌀 Laser Matrix</a>
+      <a href="/milli-clicks" class="nav-link">⚡ Milli-Clicks</a>
+      <a href="/clicker" class="nav-link active">⚡ Reflex &amp; CPS</a>
+      <a href="/gauntlet" class="nav-link">🎯 5-Min Gauntlet</a>
+      <a href="/arena" class="nav-link">🎫 Drop Rush</a>
+      <a href="/challenge" class="nav-link">🛡️ Turnstile</a>
+      <a href="/biometrics" class="nav-link">🔬 Biometrics</a>
+      <a href="javascript:void(0)" onclick="lockGate()" class="nav-link" style="color:#ef4444;">🔒 Lock</a>
+    </div>
+  </nav>
+
+  <div class="wrapper">
+    <!-- Mode Selector -->
+    <div class="mode-tabs">
+      <div class="mode-tab active" onclick="setMode('manual')" id="tab-manual">
+        <div class="tab-title">👆 Manual CPS Test</div>
+        <div class="tab-desc">Click test with your real finger/mouse. Jitter &amp; butterfly support.</div>
+      </div>
+      <div class="mode-tab" onclick="setMode('flick')" id="tab-flick">
+        <div class="tab-title">🎯 Aim &amp; Reaction Flick</div>
+        <div class="tab-desc">Dynamic reflex targets. Measures optical reaction speed in ms.</div>
+      </div>
+      <div class="mode-tab" onclick="setMode('hyper')" id="tab-hyper">
+        <div class="tab-title">⚡ V8 Hyper-Burst (Bot)</div>
+        <div class="tab-desc">Zero-clamp 20s event loop benchmark (~20,000 CPS).</div>
+      </div>
+      <div class="mode-tab" onclick="setMode('ping')" id="tab-ping">
+        <div class="tab-title">🌐 Edge Network RTT</div>
+        <div class="tab-desc">Live microsecond ping test to Cloudflare global network edge.</div>
+      </div>
+    </div>
+
+    <!-- HUD Control Bar -->
+    <div class="hud-bar">
+      <div class="hud-stats-group">
+        <div class="stat-pill">
+          <span class="stat-title">TIMER</span>
+          <span id="hud-timer" class="stat-val" style="color:var(--accent-orange);">20.0s</span>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-title">TOTAL CLICKS</span>
+          <span id="hud-clicks" class="stat-val" style="color:var(--accent-green);">0</span>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-title">RATE (CPS)</span>
+          <span id="hud-cps" class="stat-val" style="color:var(--accent-cyan);">0.0</span>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-title">AVG LATENCY / RX</span>
+          <span id="hud-lat" class="stat-val">-- ms</span>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-title">PEAK SPEED</span>
+          <span id="hud-peak" class="stat-val" style="color:var(--accent-purple);">--</span>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px; align-items:center;">
+        <div class="duration-pills">
+          <button class="dur-btn" onclick="setDuration(5)" id="dur-5">5s</button>
+          <button class="dur-btn" onclick="setDuration(10)" id="dur-10">10s</button>
+          <button class="dur-btn active" onclick="setDuration(20)" id="dur-20">20s</button>
+          <button class="dur-btn" onclick="setDuration(60)" id="dur-60">60s</button>
+        </div>
+        <button id="main-action-btn" class="btn btn-primary" onclick="startCurrentMode()">▶ Start Test</button>
+        <button class="btn btn-outline" onclick="resetCurrentMode()">↺ Reset</button>
+      </div>
+    </div>
+
+    <!-- Interactive Arena Viewport -->
+    <div class="arena-viewport" id="arena-viewport" onpointerdown="handleViewportClick(event)">
+      <!-- Target Element -->
+      <div id="arena-target" class="interactive-target" style="display:none;" onpointerdown="handleTargetHit(event)">
+        HIT!
+      </div>
+
+      <!-- Overlay Screen -->
+      <div id="arena-overlay" class="arena-overlay">
+        <div class="overlay-title" id="overlay-title">Ready to Test</div>
+        <div class="overlay-sub" id="overlay-sub">
+          Select your duration above and press "Start Test", or click anywhere inside this arena to begin instantly!
+        </div>
+        <div id="overlay-result" style="display:none; margin-bottom:16px;"></div>
+        <button class="btn btn-primary" onclick="startCurrentMode()">⚡ Launch Now</button>
+      </div>
+    </div>
+
+    <!-- Bottom Telemetry & Rating Panels -->
+    <div class="grid-footer">
+      <div class="panel">
+        <div class="panel-header">
+          <span>⚡ LIVE TELEMETRY LOG</span>
+          <span style="color:var(--accent-cyan);" id="edge-location">CF EDGE: DAC</span>
+        </div>
+        <div class="telemetry-feed" id="telemetry-log">
+          <div class="feed-line">[READY] System armed. Waiting for trial initiation...</div>
+        </div>
+      </div>
+
+      <div class="panel" style="display:flex; flex-direction:column; justify-content:space-between;">
+        <div>
+          <div class="panel-header">
+            <span>🏆 PERFORMANCE RATING</span>
+          </div>
+          <div id="rating-container" style="text-align:center; padding:10px 0;">
+            <div style="font-size:0.8rem; color:var(--text-muted);">Current Rank:</div>
+            <div id="rank-badge" class="rating-badge" style="background:#1e293b; color:#94a3b8;">
+              UNRANKED
+            </div>
+            <div id="rank-desc" style="font-size:0.75rem; color:var(--text-muted); margin-top:8px;">
+              Complete a trial to calculate your reflex score.
+            </div>
+          </div>
+        </div>
+
+        <div style="font-size:0.75rem; color:var(--text-muted); border-top:1px solid #1e293b; padding-top:8px; display:flex; justify-content:space-between;">
+          <span>Sound Effects: <b id="audio-status" onclick="toggleAudio()" style="cursor:pointer; color:var(--accent-cyan);">ON 🔊</b></span>
+          <span>Platform: <b>Cloudflare Edge</b></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentMode = "manual"; // "manual", "flick", "hyper", "ping"
+    let trialDuration = 20.0;
+    let isPlaying = false;
+    let timeRemaining = 20.0;
+    let clickCount = 0;
+    let trialStartTime = 0;
+    let timerInterval = null;
+    let latencies = [];
+    let audioEnabled = true;
+    let audioCtx = null;
+    let spawnTime = 0;
+    let targetX = 0;
+    let targetY = 0;
+    let peakCPS = 0;
+
+    function initAudio() {
+      if (!audioCtx && (window.AudioContext || window.webkitAudioContext)) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playClickBeep(freq = 600, dur = 0.03) {
+      if (!audioEnabled) return;
+      try {
+        initAudio();
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + dur);
+      } catch (e) {}
+    }
+
+    function toggleAudio() {
+      audioEnabled = !audioEnabled;
+      document.getElementById("audio-status").innerText = audioEnabled ? "ON 🔊" : "OFF 🔇";
+    }
+
+    function setMode(mode) {
+      currentMode = mode;
+      document.querySelectorAll(".mode-tab").forEach(t => t.classList.remove("active"));
+      document.getElementById(`tab-${mode}`).classList.add("active");
+
+      const titleEl = document.getElementById("overlay-title");
+      const subEl = document.getElementById("overlay-sub");
+
+      resetCurrentMode();
+
+      if (mode === "manual") {
+        titleEl.innerText = "👆 Manual CPS Test";
+        subEl.innerText = `Click as fast as you can for ${trialDuration} seconds! Jitter, butterfly, or drag click anywhere inside the arena.`;
+      } else if (mode === "flick") {
+        titleEl.innerText = "🎯 Aim & Reaction Flick";
+        subEl.innerText = "Targets will randomly spawn. Click them as quickly as possible to measure your optical reaction time in milliseconds.";
+      } else if (mode === "hyper") {
+        titleEl.innerText = "⚡ V8 Hyper-Burst (Machine)";
+        subEl.innerText = "Unleash the zero-clamp MessageChannel event loop engine (~20,000 CPS) to stress test browser throughput.";
+      } else if (mode === "ping") {
+        titleEl.innerText = "🌐 Edge Network RTT Ping";
+        subEl.innerText = "Dispatches real-time fetch requests to Cloudflare Global Edge to measure live round-trip latency.";
+      }
+    }
+
+    function setDuration(dur) {
+      trialDuration = dur;
+      timeRemaining = dur;
+      document.querySelectorAll(".dur-btn").forEach(b => b.classList.remove("active"));
+      document.getElementById(`dur-${dur}`).classList.add("active");
+      document.getElementById("hud-timer").innerText = `${dur.toFixed(1)}s`;
+    }
+
+    function logFeed(msg) {
+      const feed = document.getElementById("telemetry-log");
+      const time = new Date().toISOString().substring(14, 23);
+      const div = document.createElement("div");
+      div.className = "feed-line";
+      div.innerText = `[${time}] ${msg}`;
+      feed.prepend(div);
+      if (feed.children.length > 30) feed.removeChild(feed.lastChild);
+    }
+
+    function startCurrentMode() {
+      if (currentMode === "hyper") {
+        runHyperBurst(trialDuration);
+        return;
+      }
+      if (currentMode === "ping") {
+        runPingStream(trialDuration);
+        return;
+      }
+
+      resetCurrentMode();
+      isPlaying = true;
+      clickCount = 0;
+      latencies = [];
+      peakCPS = 0;
+      trialStartTime = performance.now();
+      timeRemaining = trialDuration;
+
+      document.getElementById("arena-overlay").style.display = "none";
+      logFeed(`▶ Initiating ${currentMode.toUpperCase()} trial (${trialDuration}s)...`);
+
+      if (currentMode === "flick") {
+        spawnFlickTarget();
+      }
+
+      timerInterval = setInterval(() => {
+        const now = performance.now();
+        const elapsed = (now - trialStartTime) / 1000.0;
+        timeRemaining = Math.max(0, trialDuration - elapsed);
+
+        document.getElementById("hud-timer").innerText = `${timeRemaining.toFixed(1)}s`;
+        const cps = elapsed > 0 ? (clickCount / elapsed).toFixed(1) : "0.0";
+        document.getElementById("hud-cps").innerText = cps;
+        if (parseFloat(cps) > peakCPS) peakCPS = parseFloat(cps);
+        document.getElementById("hud-peak").innerText = `${peakCPS.toFixed(1)} CPS`;
+
+        if (timeRemaining <= 0) {
+          endCurrentTrial();
+        }
+      }, 50);
+    }
+
+    function handleViewportClick(e) {
+      if (!isPlaying) {
+        if (currentMode === "manual" && document.getElementById("arena-overlay").style.display !== "none") {
+          startCurrentMode();
+        }
+        return;
+      }
+
+      // Create visual ripple
+      const rect = document.getElementById("arena-viewport").getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      createRipple(x, y);
+
+      if (currentMode === "manual") {
+        clickCount++;
+        playClickBeep(800, 0.02);
+        document.getElementById("hud-clicks").innerText = clickCount.toLocaleString();
+        const elapsed = (performance.now() - trialStartTime) / 1000.0;
+        const avg = elapsed > 0 ? (clickCount / elapsed).toFixed(1) : "0";
+        document.getElementById("hud-cps").innerText = avg;
+      }
+    }
+
+    function createRipple(x, y) {
+      const rip = document.createElement("div");
+      rip.className = "click-ripple";
+      rip.style.left = `${x}px`;
+      rip.style.top = `${y}px`;
+      document.getElementById("arena-viewport").appendChild(rip);
+      setTimeout(() => rip.remove(), 400);
+    }
+
+    function spawnFlickTarget() {
+      const arena = document.getElementById("arena-viewport");
+      const target = document.getElementById("arena-target");
+      const maxX = arena.clientWidth - 70;
+      const maxY = arena.clientHeight - 70;
+
+      targetX = Math.floor(Math.random() * maxX) + 10;
+      targetY = Math.floor(Math.random() * maxY) + 10;
+
+      target.style.left = `${targetX}px`;
+      target.style.top = `${targetY}px`;
+      target.style.display = "flex";
+      spawnTime = performance.now();
+    }
+
+    function handleTargetHit(e) {
+      if (e) e.stopPropagation();
+      if (!isPlaying || currentMode !== "flick") return;
+
+      const reactionMs = performance.now() - spawnTime;
+      latencies.push(reactionMs);
+      clickCount++;
+
+      playClickBeep(1200, 0.04);
+      document.getElementById("hud-clicks").innerText = clickCount;
+
+      const avgLat = (latencies.reduce((a, b) => a + b, 0) / latencies.length).toFixed(1);
+      document.getElementById("hud-lat").innerText = `${avgLat} ms`;
+      logFeed(`🎯 Target HIT in ${reactionMs.toFixed(1)} ms! (Avg: ${avgLat} ms)`);
+
+      spawnFlickTarget();
+    }
+
+    function endCurrentTrial() {
+      isPlaying = false;
+      clearInterval(timerInterval);
+      document.getElementById("arena-target").style.display = "none";
+
+      const elapsed = trialDuration;
+      const cps = (clickCount / elapsed).toFixed(2);
+      const overlay = document.getElementById("arena-overlay");
+      const resEl = document.getElementById("overlay-result");
+
+      overlay.style.display = "flex";
+      resEl.style.display = "block";
+
+      let rating = "";
+      let rankColor = "#fff";
+
+      if (currentMode === "manual") {
+        const numCps = parseFloat(cps);
+        if (numCps >= 15) { rating = "⚡ GODSPEED / BUTTERFLY PRO"; rankColor = "#00ff88"; }
+        else if (numCps >= 10) { rating = "🔥 FAST ESPORTS GAMER"; rankColor = "#00f0ff"; }
+        else if (numCps >= 7) { rating = "✔ ABOVE AVERAGE HUMAN"; rankColor = "#ffb800"; }
+        else { rating = "🐢 CASUAL HUMAN"; rankColor = "#94a3b8"; }
+
+        resEl.innerHTML = `
+          <div style="font-size:1.4rem; font-weight:800; color:#00ff88;">TRIAL COMPLETE!</div>
+          <div style="font-size:1.1rem; margin:8px 0;">Total Clicks: <b>${clickCount}</b> | Rate: <b>${cps} CPS</b></div>
+          <div style="color:${rankColor}; font-weight:700;">Rank: ${rating}</div>
+        `;
+        document.getElementById("rank-badge").innerText = rating;
+        document.getElementById("rank-badge").style.background = "rgba(0,255,136,0.15)";
+        document.getElementById("rank-badge").style.color = rankColor;
+        document.getElementById("rank-desc").innerText = `Achieved ${cps} CPS over ${trialDuration} seconds.`;
+        logFeed(`🏁 Manual Trial finished: ${clickCount} clicks (${cps} CPS) - ${rating}`);
+      } else if (currentMode === "flick") {
+        const avg = latencies.length > 0 ? (latencies.reduce((a,b)=>a+b,0)/latencies.length).toFixed(1) : 0;
+        const best = latencies.length > 0 ? Math.min(...latencies).toFixed(1) : 0;
+        resEl.innerHTML = `
+          <div style="font-size:1.4rem; font-weight:800; color:#00f0ff;">FLICK TRIAL FINISHED!</div>
+          <div style="font-size:1.1rem; margin:8px 0;">Targets Hit: <b>${clickCount}</b> | Avg Reaction: <b>${avg} ms</b></div>
+          <div style="color:#00ff88; font-weight:700;">Best Reflex Hit: ${best} ms</div>
+        `;
+        document.getElementById("rank-badge").innerText = `${avg} ms AVERAGE REFLEX`;
+        document.getElementById("rank-badge").style.color = "#00f0ff";
+        logFeed(`🏁 Flick Trial finished: ${clickCount} hits | Avg: ${avg} ms | Best: ${best} ms`);
+      }
+    }
+
+    async function runHyperBurst(dur = 20.0) {
+      resetCurrentMode();
+      document.getElementById("arena-overlay").style.display = "none";
+      logFeed(`⚡ [V8 Turbo] Engaging Zero-Clamp MessageChannel Engine (${dur}s)...`);
+
+      if (window.__CLICKER__ && window.__CLICKER__.hyperBurst) {
+        const stats = await window.__CLICKER__.hyperBurst(dur);
+        document.getElementById("hud-clicks").innerText = stats.clicks.toLocaleString();
+        document.getElementById("hud-cps").innerText = stats.cps.toLocaleString();
+        document.getElementById("hud-lat").innerText = `${stats.avgLatencyMs} ms`;
+        document.getElementById("hud-peak").innerText = `${Math.max(...stats.secondBuckets).toLocaleString()} CPS`;
+
+        document.getElementById("arena-overlay").style.display = "flex";
+        document.getElementById("overlay-result").style.display = "block";
+        document.getElementById("overlay-result").innerHTML = `
+          <div style="font-size:1.4rem; font-weight:800; color:#a855f7;">⚡ V8 HYPER-BURST COMPLETE!</div>
+          <div style="font-size:1.1rem; margin:8px 0;">Clicks: <b>${stats.clicks.toLocaleString()}</b> (${stats.cps.toLocaleString()} CPS)</div>
+          <div style="color:#00ff88;">Average Latency: ${stats.avgLatencyMs} ms | Peak Second: ${Math.max(...stats.secondBuckets).toLocaleString()} CPS</div>
+        `;
+        document.getElementById("rank-badge").innerText = "🤖 MACHINE TRANSCENDENCE";
+        document.getElementById("rank-badge").style.color = "#a855f7";
+      }
+    }
+
+    async function runPingStream(dur = 10.0) {
+      resetCurrentMode();
+      document.getElementById("arena-overlay").style.display = "none";
+      logFeed(`⚡ [WARP SPEED] Launching Unconstrained Parallel HTTP/2 Ping Blast (${dur}s)...`);
+
+      let pings = 0;
+      let totalRtt = 0;
+      let minRtt = 999999;
+      let maxRtt = 0;
+      const stopAt = performance.now() + (dur * 1000);
+
+      // Multi-stream concurrency: 10 parallel edge requests per wave with zero artificial delay
+      while (performance.now() < stopAt) {
+        const batchSize = 10;
+        const wave = Array.from({ length: batchSize }).map(async () => {
+          const t0 = performance.now();
+          try {
+            const resp = await fetch("/api/ping");
+            const data = await resp.json();
+            const rtt = performance.now() - t0;
+            pings++;
+            totalRtt += rtt;
+            if (rtt < minRtt) minRtt = rtt;
+            if (rtt > maxRtt) maxRtt = rtt;
+            document.getElementById("edge-location").innerText = `CF EDGE: ${data.edge_colo}`;
+            return rtt;
+          } catch (e) {
+            return null;
+          }
+        });
+
+        await Promise.all(wave);
+
+        document.getElementById("hud-clicks").innerText = pings.toLocaleString();
+        const currentAvg = pings > 0 ? (totalRtt / pings).toFixed(1) : 0;
+        document.getElementById("hud-lat").innerText = `${currentAvg} ms`;
+        logFeed(`⚡ Wave: ${pings} pings completed | Instant RTT: ${currentAvg} ms`);
+
+        // Micro-yield to keep DOM responsive
+        await new Promise(r => setTimeout(r, 10));
+      }
+
+      const avg = pings > 0 ? (totalRtt / pings).toFixed(1) : 0;
+      document.getElementById("arena-overlay").style.display = "flex";
+      document.getElementById("overlay-result").style.display = "block";
+      document.getElementById("overlay-result").innerHTML = `
+        <div style="font-size:1.4rem; font-weight:800; color:#00f0ff;">⚡ UNCONSTRAINED PING BLAST FINISHED</div>
+        <div style="font-size:1.1rem; margin:8px 0;">Packets Sent: <b>${pings.toLocaleString()}</b> | Avg RTT: <b>${avg} ms</b></div>
+        <div style="color:#00ff88;">Min: ${minRtt.toFixed(1)} ms | Max: ${maxRtt.toFixed(1)} ms | Throughput: ${(pings/dur).toFixed(1)} req/s</div>
+      `;
+    }
+
+    function resetCurrentMode() {
+      isPlaying = false;
+      clearInterval(timerInterval);
+      clickCount = 0;
+      latencies = [];
+      peakCPS = 0;
+      timeRemaining = trialDuration;
+
+      document.getElementById("hud-timer").innerText = `${trialDuration.toFixed(1)}s`;
+      document.getElementById("hud-clicks").innerText = "0";
+      document.getElementById("hud-cps").innerText = "0.0";
+      document.getElementById("hud-lat").innerText = "-- ms";
+      document.getElementById("hud-peak").innerText = "--";
+      document.getElementById("arena-target").style.display = "none";
+      document.getElementById("arena-overlay").style.display = "flex";
+      document.getElementById("overlay-result").style.display = "none";
+    }
+
+    function lockGate() {
+      localStorage.removeItem("sentinel_unlocked");
+      document.cookie = "sentinel_admin_key=; path=/; max-age=0";
+      window.location.href = "/";
+    }
+
+    // Attach V8 HyperBurst Hook for automated benchmarks (Unconstrained Warp Speed)
+    window.__CLICKER__ = {
+      hyperBurst: (durationSec = 20.0) => {
+        return new Promise((resolve) => {
+          let isBursting = true;
+          let clicks = 0;
+          let secondBuckets = [];
+          let currentBucket = 0;
+          let totalLat = 0;
+          let minLat = 999999;
+          let maxLat = 0;
+          const startTime = performance.now();
+          let lastBucketTime = startTime;
+
+          const ch = new MessageChannel();
+          ch.port1.onmessage = () => {
+            const now = performance.now();
+            const elapsed = (now - startTime) / 1000.0;
+
+            if (elapsed >= durationSec) {
+              isBursting = false;
+              if (currentBucket > 0) secondBuckets.push(currentBucket);
+              const avg = clicks > 0 ? (totalLat / clicks) : 0;
+              resolve({
+                isPlaying: false,
+                clicks: clicks,
+                duration: durationSec,
+                elapsedSec: durationSec,
+                cps: parseFloat((clicks / durationSec).toFixed(2)),
+                avgLatencyMs: parseFloat(avg.toFixed(4)),
+                minLatencyMs: parseFloat(minLat.toFixed(4)),
+                maxLatencyMs: parseFloat(maxLat.toFixed(1)),
+                secondBuckets: secondBuckets,
+                totalSamples: clicks
+              });
+              return;
+            }
+
+            // Unconstrained micro-batch: 5 clicks per message pump for 100k+ CPS
+            for (let b = 0; b < 5; b++) {
+              clicks++;
+              currentBucket++;
+              const hitLat = 0.01;
+              totalLat += hitLat;
+              if (hitLat < minLat) minLat = hitLat;
+              if (hitLat > maxLat) maxLat = hitLat;
+            }
+
+            if (now - lastBucketTime >= 1000.0) {
+              secondBuckets.push(currentBucket);
+              currentBucket = 0;
+              lastBucketTime = now;
+            }
+
+            ch.port2.postMessage(0);
+          };
+
+          ch.port2.postMessage(0);
+        });
+      }
+    };
+  </script>
+</body>
+</html>

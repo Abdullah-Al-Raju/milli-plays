@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Milli Cyber-Pong | Mach 5 Multi-Ball Hex-Arena</title>
+  <style>
+    :root {
+      --bg-dark: #04060d;
+      --card-bg: #090e1a;
+      --accent-cyan: #00f0ff;
+      --accent-green: #00ff88;
+      --accent-gold: #ffd700;
+      --accent-orange: #f6821f;
+      --accent-red: #ef4444;
+      --border-color: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg-dark);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "JetBrains Mono", sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+      user-select: none;
+    }
+    .top-nav {
+      background: #0d1424;
+      border-bottom: 1px solid var(--border-color);
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900;
+      font-size: 1.1rem;
+      color: #fff;
+      text-decoration: none;
+    }
+    .nav-badge {
+      background: linear-gradient(135deg, #00f0ff, #00ff88);
+      color: #000;
+      font-size: 0.7rem;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 900;
+    }
+    .nav-links {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .nav-link:hover { color: #fff; background: rgba(255, 255, 255, 0.05); }
+    .nav-link.active {
+      color: var(--accent-cyan);
+      background: rgba(0, 240, 255, 0.12);
+      border: 1px solid rgba(0, 240, 255, 0.4);
+    }
+
+    .wrapper {
+      max-width: 1360px;
+      margin: 14px auto;
+      padding: 0 16px;
+    }
+    .status-bar {
+      background: linear-gradient(90deg, #091a29 0%, #171b38 100%);
+      border: 1px solid var(--accent-cyan);
+      border-radius: 12px;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 12px;
+      box-shadow: 0 4px 25px rgba(0, 240, 255, 0.2);
+    }
+    .hud-stats {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .hud-box {
+      flex: 1;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px 14px;
+      text-align: center;
+      min-width: 120px;
+    }
+    .hud-label { font-size: 0.65rem; color: var(--text-muted); font-weight: 800; letter-spacing: 0.5px; }
+    .hud-val { font-size: 1.25rem; font-weight: 900; font-family: monospace; color: #fff; margin-top: 2px; }
+
+    .arena-grid {
+      display: grid;
+      grid-template-columns: 2.7fr 1fr;
+      gap: 16px;
+    }
+    .canvas-container {
+      position: relative;
+      background: #020308;
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      overflow: hidden;
+      height: 640px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    canvas { display: block; background: #020308; }
+
+    .side-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .btn {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-weight: 800;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+      width: 100%;
+    }
+    .btn-cyan { background: var(--accent-cyan); color: #000; box-shadow: 0 0 16px rgba(0, 240, 255, 0.4); }
+    .btn-cyan:hover { background: #55f3ff; }
+    .btn-green { background: var(--accent-green); color: #000; }
+    .btn-green:hover { background: #55ffb0; }
+    .btn-gold { background: linear-gradient(135deg, #ffd700, #f6821f); color: #000; }
+
+    .feed-box {
+      height: 180px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.72rem;
+      background: #03060f;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px;
+      color: #94a3b8;
+      display: flex;
+      flex-direction: column-reverse;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="/" class="nav-brand">
+      <span>🏓 MILLI CYBER-PONG</span>
+      <span class="nav-badge">MACH 5 HEX-ARENA</span>
+    </a>
+    <div class="nav-links">
+      <a href="/" class="nav-link">🏠 Master Gate</a>
+      <a href="/drive" class="nav-link">🏎️ Drive</a>
+      <a href="/maze" class="nav-link">🌀 Maze</a>
+      <a href="/danmaku" class="nav-link">🌸 Danmaku</a>
+      <a href="/orbit" class="nav-link">🌌 Orbit</a>
+      <a href="/pong" class="nav-link active">🏓 Pong</a>
+      <a href="/rhythm" class="nav-link">🎵 Rhythm</a>
+      <a href="/snake" class="nav-link">🐍 Snake</a>
+      <a href="/swarm" class="nav-link">⚔️ Swarm</a>
+      <a href="/stealth" class="nav-link">🕶️ Stealth</a>
+      <a href="/trader" class="nav-link">📈 Trader</a>
+      <a href="/sweeper" class="nav-link">💣 Sweeper</a>
+      <a href="/defense" class="nav-link">🛸 Defense</a>
+      <a href="/portal" class="nav-link">🌀 Portal</a>
+      <a href="/circuit" class="nav-link">⚡ Circuit</a>
+    </div>
+  </nav>
+
+  <div class="wrapper">
+    <div class="status-bar">
+      <div>
+        <b style="color:var(--accent-cyan); font-size:1rem;">⚡ MACH 5 HEXAGONAL RELATIVISTIC PONG ARENA</b>
+        <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">
+          6 simultaneous balls compounding +4% speed on every ricochet into hypersonic speeds. Milli coordinates multi-paddle specular intercepts!
+        </div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-cyan" onclick="toggleMilli()" id="btn-milli" style="width:auto; padding:8px 18px;">
+          🤖 Milli Multi-Paddle AI: ACTIVE
+        </button>
+        <button class="btn btn-green" onclick="resetPong()" style="width:auto; padding:8px 16px;">
+          🔄 Reset Arena
+        </button>
+      </div>
+    </div>
+
+    <div class="hud-stats">
+      <div class="hud-box">
+        <div class="hud-label">PEAK BALL VELOCITY</div>
+        <div id="hud-mach" class="hud-val" style="color:var(--accent-cyan);">Mach 1.15</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">TOTAL PADDLE DEFLECTIONS</div>
+        <div id="hud-deflects" class="hud-val" style="color:var(--accent-green);">0</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">BALLS ACTIVE</div>
+        <div id="hud-balls" class="hud-val" style="color:var(--accent-gold);">6 BALLS</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">SPEED COMPOUND</div>
+        <div class="hud-val" style="color:var(--accent-orange);">+4.0% / HIT</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">PADDLE STATUS</div>
+        <div id="hud-status" class="hud-val" style="color:var(--accent-green);">DEFENSE LOCKED</div>
+      </div>
+    </div>
+
+    <div class="arena-grid">
+      <div class="canvas-container" id="container">
+        <canvas id="pong-canvas"></canvas>
+      </div>
+
+      <div class="side-panel">
+        <div>
+          <div style="font-size:0.85rem; font-weight:800; color:#fff; margin-bottom:8px;">⚙️ ARENA ACTIONS</div>
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <button class="btn btn-gold" onclick="spawnExtraBall()">⚡ Add Hypersonic Ball</button>
+            <button class="btn btn-cyan" onclick="warpBallSpeed()">🚀 Relativistic Warp x1.5</button>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:0.85rem; font-weight:800; color:#fff; margin-bottom:8px;">🕹️ HUMAN DEFENSE ATTEMPT</div>
+          <div style="font-size:0.75rem; color:var(--text-muted); line-height:1.5;">
+            Toggle Auto-Pilot OFF to manually steer the bottom paddle using <b>Mouse / Arrow Keys</b>. As ball velocities compound past Mach 2, human reflex limits shatter.
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:0.8rem; font-weight:700; color:#fff; margin-bottom:6px;">⚡ MILLI COGNITIVE LOGS</div>
+          <div class="feed-box" id="feed-box">
+            <div>[READY] Hex-Pong Engine armed. Specular reflection matrices online.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("pong-canvas");
+    const ctx = canvas.getContext("2d");
+
+    let W = 880;
+    let H = 640;
+    canvas.width = W;
+    canvas.height = H;
+
+    let milliAuto = true;
+    let hexRadius = 260;
+    let hexCenter = { x: W / 2, y: H / 2 };
+
+    // Hexagon vertices
+    let hexVertices = [];
+    for (let i = 0; i < 6; i++) {
+      const a = (i * Math.PI) / 3;
+      hexVertices.push({
+        x: hexCenter.x + Math.cos(a) * hexRadius,
+        y: hexCenter.y + Math.sin(a) * hexRadius
+      });
+    }
+
+    // Paddles on Hex edges (Bottom, Top-Left, Top-Right)
+    let paddles = [
+      { edge: 1, pos: 0.5, len: 0.35, color: "#00ff88" }, // Bottom right
+      { edge: 2, pos: 0.5, len: 0.35, color: "#00f0ff" }, // Bottom
+      { edge: 4, pos: 0.5, len: 0.35, color: "#ffd700" }  // Top
+    ];
+
+    // Balls in play
+    let balls = [];
+    let deflectCount = 0;
+    let peakSpeed = 5.0;
+
+    function logFeed(msg) {
+      const feed = document.getElementById("feed-box");
+      const time = new Date().toISOString().substring(14, 23);
+      const div = document.createElement("div");
+      div.innerText = `[${time}] ${msg}`;
+      feed.prepend(div);
+      if (feed.children.length > 25) feed.removeChild(feed.lastChild);
+    }
+
+    function toggleMilli() {
+      milliAuto = !milliAuto;
+      document.getElementById("btn-milli").innerText = milliAuto ? "🤖 Milli Multi-Paddle AI: ACTIVE" : "🕹️ Human Paddle: ENGAGED";
+      document.getElementById("btn-milli").className = milliAuto ? "btn btn-cyan" : "btn btn-green";
+      logFeed(milliAuto ? "Milli multi-paddle solver engaged." : "Human manual paddle unlocked.");
+    }
+
+    function spawnBall() {
+      const a = Math.random() * Math.PI * 2;
+      const spd = 4.2 + Math.random() * 2;
+      balls.push({
+        x: hexCenter.x,
+        y: hexCenter.y,
+        vx: Math.cos(a) * spd,
+        vy: Math.sin(a) * spd,
+        r: 6,
+        color: balls.length % 2 === 0 ? "#00f0ff" : "#ff007f",
+        trail: []
+      });
+    }
+
+    for (let i = 0; i < 6; i++) spawnBall();
+
+    function spawnExtraBall() {
+      spawnBall();
+      document.getElementById("hud-balls").innerText = `${balls.length} BALLS`;
+      logFeed(`Added extra ball into Hex-Arena. Total in play: ${balls.length}`);
+    }
+
+    function warpBallSpeed() {
+      balls.forEach(b => {
+        b.vx *= 1.5;
+        b.vy *= 1.5;
+      });
+      logFeed("⚡ Hypersonic speed warp executed! Ball velocities multiplied x1.5.");
+    }
+
+    function resetPong() {
+      balls = [];
+      for (let i = 0; i < 6; i++) spawnBall();
+      deflectCount = 0;
+      peakSpeed = 5.0;
+      document.getElementById("hud-deflects").innerText = "0";
+      logFeed("Arena reset. 6 fresh balls spawned at center.");
+    }
+
+    // SPECULAR REFLECTION ACROSS LINE SEGMENT
+    function reflectBallOnSegment(ball, p1, p2) {
+      const edgeDx = p2.x - p1.x;
+      const edgeDy = p2.y - p1.y;
+      const edgeLen = Math.hypot(edgeDx, edgeDy);
+      const nx = -edgeDy / edgeLen;
+      const ny = edgeDx / edgeLen;
+
+      // Project ball position onto segment
+      const ballDx = ball.x - p1.x;
+      const ballDy = ball.y - p1.y;
+      const t = (ballDx * edgeDx + ballDy * edgeDy) / (edgeLen * edgeLen);
+
+      if (t >= 0 && t <= 1) {
+        const closestX = p1.x + t * edgeDx;
+        const closestY = p1.y + t * edgeDy;
+        const dist = Math.hypot(ball.x - closestX, ball.y - closestY);
+
+        if (dist <= ball.r + 3) {
+          // Dot product with normal
+          const dot = ball.vx * nx + ball.vy * ny;
+          if (dot < 0) {
+            // +4% compounding velocity per hit!
+            ball.vx = (ball.vx - 2 * dot * nx) * 1.04;
+            ball.vy = (ball.vy - 2 * dot * ny) * 1.04;
+
+            // Push slightly away from edge
+            ball.x = closestX + nx * (ball.r + 4);
+            ball.y = closestY + ny * (ball.r + 4);
+
+            deflectCount++;
+            document.getElementById("hud-deflects").innerText = deflectCount;
+
+            const currentSpd = Math.hypot(ball.vx, ball.vy);
+            if (currentSpd > peakSpeed) peakSpeed = currentSpd;
+          }
+        }
+      }
+    }
+
+    // MILLI AUTONOMOUS PADDLE SOLVER
+    function updateMilliAI() {
+      // For each paddle, find the ball heading closest to its segment and center the paddle on the intercept point
+      paddles.forEach((pad, idx) => {
+        const p1 = hexVertices[pad.edge];
+        const p2 = hexVertices[(pad.edge + 1) % 6];
+        const edgeDx = p2.x - p1.x;
+        const edgeDy = p2.y - p1.y;
+        const edgeLen = Math.hypot(edgeDx, edgeDy);
+
+        let bestT = 0.5;
+        let minArrival = Infinity;
+
+        balls.forEach(b => {
+          // Check if ball is moving toward edge
+          const midX = (p1.x + p2.x) / 2;
+          const midY = (p1.y + p2.y) / 2;
+          const toEdgeX = midX - b.x;
+          const toEdgeY = midY - b.y;
+          const velDot = b.vx * toEdgeX + b.vy * toEdgeY;
+
+          if (velDot > 0) {
+            // Projected impact t
+            const ballDx = b.x - p1.x;
+            const ballDy = b.y - p1.y;
+            const projT = (ballDx * edgeDx + ballDy * edgeDy) / (edgeLen * edgeLen);
+            const dist = Math.hypot(b.x - midX, b.y - midY);
+            const arrival = dist / Math.hypot(b.vx, b.vy);
+
+            if (arrival < minArrival && projT >= -0.2 && projT <= 1.2) {
+              minArrival = arrival;
+              bestT = Math.max(0.15, Math.min(0.85, projT));
+            }
+          }
+        });
+
+        // Smooth high-speed tracking
+        pad.pos += (bestT - pad.pos) * 0.45;
+      });
+    }
+
+    // Mouse control for bottom paddle in manual mode
+    canvas.addEventListener("mousemove", e => {
+      if (!milliAuto) {
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        paddles[1].pos = Math.max(0.15, Math.min(0.85, mx / W));
+      }
+    });
+
+    function update() {
+      if (milliAuto) {
+        updateMilliAI();
+      }
+
+      // Update balls
+      balls.forEach(b => {
+        b.x += b.vx;
+        b.y += b.vy;
+
+        b.trail.push({ x: b.x, y: b.y });
+        if (b.trail.length > 12) b.trail.shift();
+
+        // Check reflection against all 6 hex edges
+        for (let i = 0; i < 6; i++) {
+          const p1 = hexVertices[i];
+          const p2 = hexVertices[(i + 1) % 6];
+          reflectBallOnSegment(b, p1, p2);
+        }
+
+        // If ball escapes bounds (safety net), respawn at center
+        const distFromCenter = Math.hypot(b.x - hexCenter.x, b.y - hexCenter.y);
+        if (distFromCenter > hexRadius * 1.3) {
+          b.x = hexCenter.x;
+          b.y = hexCenter.y;
+          const a = Math.random() * Math.PI * 2;
+          b.vx = Math.cos(a) * 4.5;
+          b.vy = Math.sin(a) * 4.5;
+        }
+      });
+
+      // Update HUD Mach
+      const mach = (peakSpeed * 0.25 + 0.8).toFixed(2);
+      document.getElementById("hud-mach").innerText = `Mach ${mach}`;
+    }
+
+    function draw() {
+      ctx.fillStyle = "#020308";
+      ctx.fillRect(0, 0, W, H);
+
+      // Render Hex Arena Perimeter
+      ctx.save();
+      ctx.strokeStyle = "#1e293b";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      hexVertices.forEach((v, idx) => {
+        if (idx === 0) ctx.moveTo(v.x, v.y);
+        else ctx.lineTo(v.x, v.y);
+      });
+      ctx.closePath();
+      ctx.stroke();
+
+      // Outer neon glow ring
+      ctx.strokeStyle = "rgba(0, 240, 255, 0.2)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(hexCenter.x, hexCenter.y, hexRadius, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+
+      // Render Paddles on Hex Edges
+      paddles.forEach(pad => {
+        const p1 = hexVertices[pad.edge];
+        const p2 = hexVertices[(pad.edge + 1) % 6];
+        const edgeDx = p2.x - p1.x;
+        const edgeDy = p2.y - p1.y;
+
+        const halfLen = pad.len / 2;
+        const t1 = Math.max(0, pad.pos - halfLen);
+        const t2 = Math.min(1, pad.pos + halfLen);
+
+        const padX1 = p1.x + t1 * edgeDx;
+        const padY1 = p1.y + t1 * edgeDy;
+        const padX2 = p1.x + t2 * edgeDx;
+        const padY2 = p1.y + t2 * edgeDy;
+
+        ctx.save();
+        ctx.strokeStyle = pad.color;
+        ctx.lineWidth = 7;
+        ctx.shadowColor = pad.color;
+        ctx.shadowBlur = 16;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(padX1, padY1);
+        ctx.lineTo(padX2, padY2);
+        ctx.stroke();
+        ctx.restore();
+      });
+
+      // Render Balls
+      balls.forEach(b => {
+        // Trail
+        if (b.trail.length > 1) {
+          ctx.save();
+          ctx.strokeStyle = b.color;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          b.trail.forEach((t, idx) => {
+            if (idx === 0) ctx.moveTo(t.x, t.y);
+            else ctx.lineTo(t.x, t.y);
+          });
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        // Ball Core
+        ctx.save();
+        ctx.fillStyle = b.color;
+        ctx.shadowColor = b.color;
+        ctx.shadowBlur = 18;
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+        ctx.fill();
+
+        // White hot center
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.r * 0.45, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+
+      requestAnimationFrame(() => {
+        update();
+        draw();
+      });
+    }
+
+    draw();
+  </script>
+</body>
+</html>

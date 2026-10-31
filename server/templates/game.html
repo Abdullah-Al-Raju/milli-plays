@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Milli-Reflex: 30-Second Real-World Visual Reaction Game</title>
+  <link rel="stylesheet" href="/static/game.css">
+</head>
+<body>
+  <div class="game-wrapper">
+    <header class="hud-header">
+      <div class="hud-brand">
+        <span class="hud-badge">⚡ MILLI-REFLEX</span>
+        <h2>30-Second Visual Reaction Arena</h2>
+      </div>
+      <div class="hud-stats">
+        <div class="hud-stat-box">
+          <span class="hud-label">TIME REMAINING</span>
+          <span id="timer-display" class="hud-value text-amber">30.0s</span>
+        </div>
+        <div class="hud-stat-box">
+          <span class="hud-label">HITS</span>
+          <span id="score-display" class="hud-value text-green">0</span>
+        </div>
+        <div class="hud-stat-box">
+          <span class="hud-label">LAST REACTION</span>
+          <span id="last-latency-display" class="hud-value font-mono">-- ms</span>
+        </div>
+        <div class="hud-stat-box">
+          <span class="hud-label">AVG REACTION</span>
+          <span id="avg-latency-display" class="hud-value font-mono text-cyan">-- ms</span>
+        </div>
+      </div>
+      <div class="hud-actions">
+        <button id="start-btn" class="btn btn-primary">▶ Start 30s Game</button>
+        <button id="reset-btn" class="btn btn-outline">↺ Reset</button>
+        <a href="/" class="btn btn-outline" style="text-decoration:none;">🎫 Back to Arena</a>
+      </div>
+    </header>
+
+    <!-- The Playable Reaction Arena (900x550) -->
+    <main class="arena-container">
+      <div id="play-area" class="play-area">
+        <div id="overlay-msg" class="overlay-msg">
+          <h3>Click "Start 30s Game" to Begin</h3>
+          <p>A green target ball will randomly spawn across the screen.<br>Click it the millisecond it appears!</p>
+        </div>
+
+        <!-- The Target Ball -->
+        <div id="target-ball" class="reaction-ball" style="display: none;">
+          <div class="ball-inner"></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Live Telemetry Stream -->
+    <footer class="telemetry-footer">
+      <div class="footer-title">⚡ REAL-TIME REACTION STREAM</div>
+      <div id="game-log" class="game-log-feed">
+        <div class="log-line system">Ready. Awaiting round start...</div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Final Scorecard Modal -->
+  <div id="scorecard-modal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-badge">ROUND COMPLETE</div>
+      <h2 id="final-title">30-Second Reflex Scorecard</h2>
+      
+      <div class="scorecard-grid">
+        <div class="score-card-item">
+          <span class="score-label">TOTAL HITS</span>
+          <strong id="final-hits" class="score-val text-green">0</strong>
+        </div>
+        <div class="score-card-item">
+          <span class="score-label">HITS PER SEC</span>
+          <strong id="final-hps" class="score-val text-amber">0.0</strong>
+        </div>
+        <div class="score-card-item">
+          <span class="score-label">AVG LATENCY</span>
+          <strong id="final-avg-ms" class="score-val text-cyan">0 ms</strong>
+        </div>
+        <div class="score-card-item">
+          <span class="score-label">FASTEST REACTION</span>
+          <strong id="final-best-ms" class="score-val text-green">0 ms</strong>
+        </div>
+      </div>
+
+      <div class="modal-benchmark-note">
+        <strong>Human Benchmark:</strong> Typical humans score ~40–65 hits (~280–350ms average reaction).<br>
+        <strong>Milli Reflex Bot:</strong> Dispatches sub-50ms CDP hardware clicks.
+      </div>
+
+      <div class="modal-actions">
+        <button id="modal-restart-btn" class="btn btn-primary">Play Again</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/game.js"></script>
+</body>
+</html>

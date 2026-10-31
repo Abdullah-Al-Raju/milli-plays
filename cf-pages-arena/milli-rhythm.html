@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Milli Hyper-Rhythm | 3,000 BPM Synaptic Beat Breaker</title>
+  <style>
+    :root {
+      --bg-dark: #04060d;
+      --card-bg: #090e1a;
+      --accent-cyan: #00f0ff;
+      --accent-green: #00ff88;
+      --accent-magenta: #ff007f;
+      --accent-gold: #ffd700;
+      --accent-purple: #b5179e;
+      --border-color: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg-dark);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "JetBrains Mono", sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+      user-select: none;
+    }
+    .top-nav {
+      background: #0d1424;
+      border-bottom: 1px solid var(--border-color);
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900;
+      font-size: 1.1rem;
+      color: #fff;
+      text-decoration: none;
+    }
+    .nav-badge {
+      background: linear-gradient(135deg, var(--accent-magenta), var(--accent-cyan));
+      color: #000;
+      font-size: 0.7rem;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 900;
+    }
+    .nav-links {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .nav-link:hover { color: #fff; background: rgba(255, 255, 255, 0.05); }
+    .nav-link.active {
+      color: var(--accent-cyan);
+      background: rgba(0, 240, 255, 0.12);
+      border: 1px solid rgba(0, 240, 255, 0.4);
+    }
+
+    .wrapper {
+      max-width: 1360px;
+      margin: 14px auto;
+      padding: 0 16px;
+    }
+    .status-bar {
+      background: linear-gradient(90deg, #1c0827 0%, #0d1e38 100%);
+      border: 1px solid var(--accent-magenta);
+      border-radius: 12px;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 12px;
+      box-shadow: 0 4px 25px rgba(255, 0, 127, 0.2);
+    }
+    .hud-stats {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .hud-box {
+      flex: 1;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px 14px;
+      text-align: center;
+      min-width: 120px;
+    }
+    .hud-label { font-size: 0.65rem; color: var(--text-muted); font-weight: 800; letter-spacing: 0.5px; }
+    .hud-val { font-size: 1.25rem; font-weight: 900; font-family: monospace; color: #fff; margin-top: 2px; }
+
+    .arena-grid {
+      display: grid;
+      grid-template-columns: 2.7fr 1fr;
+      gap: 16px;
+    }
+    .canvas-container {
+      position: relative;
+      background: #020308;
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      overflow: hidden;
+      height: 640px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    canvas { display: block; background: #020308; }
+
+    .side-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .btn {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-weight: 800;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+      width: 100%;
+    }
+    .btn-magenta { background: var(--accent-magenta); color: #fff; box-shadow: 0 0 16px rgba(255, 0, 127, 0.4); }
+    .btn-magenta:hover { background: #ff3399; }
+    .btn-cyan { background: var(--accent-cyan); color: #000; }
+    .btn-cyan:hover { background: #55f3ff; }
+
+    .feed-box {
+      height: 180px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.72rem;
+      background: #03060f;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px;
+      color: #94a3b8;
+      display: flex;
+      flex-direction: column-reverse;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="/" class="nav-brand">
+      <span>🎵 MILLI HYPER-RHYTHM</span>
+      <span class="nav-badge">3,000 BPM SYNAPTIC PARRY</span>
+    </a>
+    <div class="nav-links">
+      <a href="/" class="nav-link">🏠 Master Gate</a>
+      <a href="/drive" class="nav-link">🏎️ Drive</a>
+      <a href="/maze" class="nav-link">🌀 Maze</a>
+      <a href="/danmaku" class="nav-link">🌸 Danmaku</a>
+      <a href="/orbit" class="nav-link">🌌 Orbit</a>
+      <a href="/pong" class="nav-link">🏓 Pong</a>
+      <a href="/rhythm" class="nav-link active">🎵 Rhythm</a>
+      <a href="/snake" class="nav-link">🐍 Snake</a>
+      <a href="/swarm" class="nav-link">⚔️ Swarm</a>
+      <a href="/stealth" class="nav-link">🕶️ Stealth</a>
+      <a href="/trader" class="nav-link">📈 Trader</a>
+      <a href="/sweeper" class="nav-link">💣 Sweeper</a>
+      <a href="/defense" class="nav-link">🛸 Defense</a>
+      <a href="/portal" class="nav-link">🌀 Portal</a>
+      <a href="/circuit" class="nav-link">⚡ Circuit</a>
+    </div>
+  </nav>
+
+  <div class="wrapper">
+    <div class="status-bar">
+      <div>
+        <b style="color:var(--accent-magenta); font-size:1rem;">⚡ 360° CIRCULAR SYNAPTIC BEAT BREAKER</b>
+        <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">
+          Collapsing laser notes accelerating to 3,000 BPM. Milli snaps a rotational PID shield with sub-millisecond precision!
+        </div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-magenta" onclick="toggleMilli()" id="btn-milli" style="width:auto; padding:8px 18px;">
+          🤖 Milli Beat Autopilot: ACTIVE
+        </button>
+        <button class="btn btn-cyan" onclick="resetRhythm()" style="width:auto; padding:8px 16px;">
+          🔄 Reset Track
+        </button>
+      </div>
+    </div>
+
+    <div class="hud-stats">
+      <div class="hud-box">
+        <div class="hud-label">CURRENT TEMPO</div>
+        <div id="hud-bpm" class="hud-val" style="color:var(--accent-magenta);">240 BPM</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">PERFECT COMBO</div>
+        <div id="hud-combo" class="hud-val" style="color:var(--accent-gold);">0x</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">PARRY ACCURACY</div>
+        <div id="hud-acc" class="hud-val" style="color:var(--accent-green);">100.0%</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">PARRIES EXECUTED</div>
+        <div id="hud-parries" class="hud-val" style="color:var(--accent-cyan);">0</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">TIMING JITTER</div>
+        <div class="hud-val" style="color:var(--accent-green);">&lt; 0.2 ms</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">STATUS</div>
+        <div id="hud-status" class="hud-val" style="color:var(--accent-green);">SYNAPSE LOCKED</div>
+      </div>
+    </div>
+
+    <div class="arena-grid">
+      <div class="canvas-container" id="container">
+        <canvas id="rhythm-canvas"></canvas>
+      </div>
+
+      <div class="side-panel">
+        <div>
+          <div style="font-size:0.85rem; font-weight:800; color:#fff; margin-bottom:8px;">⚡ TEMPO OVERRIDE</div>
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <button class="btn btn-cyan" onclick="setTempo(600)">🚀 600 BPM (Speedcore)</button>
+            <button class="btn btn-cyan" onclick="setTempo(1200)">⚡ 1,200 BPM (Extratone)</button>
+            <button class="btn btn-magenta" onclick="setTempo(3000)">🔥 3,000 BPM (Hypersonic Singularity)</button>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:0.85rem; font-weight:800; color:#fff; margin-bottom:8px;">🕹️ HUMAN PARRY CONTROLS</div>
+          <div style="font-size:0.75rem; color:var(--text-muted); line-height:1.5;">
+            Toggle Auto-Pilot OFF to manually steer the shield arc with your <b>Mouse Cursor</b>. Try parrying beyond 500 BPM!
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:0.8rem; font-weight:700; color:#fff; margin-bottom:6px;">⚡ MILLI COGNITIVE LOGS</div>
+          <div class="feed-box" id="feed-box">
+            <div>[READY] Synaptic Beat Breaker armed. Circular PID controller active.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("rhythm-canvas");
+    const ctx = canvas.getContext("2d");
+
+    let W = 880;
+    let H = 640;
+    canvas.width = W;
+    canvas.height = H;
+
+    let milliAuto = true;
+    let cx = W / 2;
+    let cy = H / 2;
+    let shieldRadius = 75;
+    let shieldAngle = 0;
+    let shieldArc = Math.PI * 0.38; // ~68 degrees
+
+    let bpm = 240;
+    let combo = 0;
+    let parries = 0;
+    let misses = 0;
+    let notes = [];
+    let shockwaves = [];
+    let lastSpawn = 0;
+
+    function logFeed(msg) {
+      const feed = document.getElementById("feed-box");
+      const time = new Date().toISOString().substring(14, 23);
+      const div = document.createElement("div");
+      div.innerText = `[${time}] ${msg}`;
+      feed.prepend(div);
+      if (feed.children.length > 25) feed.removeChild(feed.lastChild);
+    }
+
+    function toggleMilli() {
+      milliAuto = !milliAuto;
+      document.getElementById("btn-milli").innerText = milliAuto ? "🤖 Milli Beat Autopilot: ACTIVE" : "🕹️ Human Parry: ENGAGED";
+      document.getElementById("btn-milli").className = milliAuto ? "btn btn-magenta" : "btn btn-cyan";
+      logFeed(milliAuto ? "Milli rotational PID engaged." : "Human mouse tracking active.");
+    }
+
+    function setTempo(newBpm) {
+      bpm = newBpm;
+      document.getElementById("hud-bpm").innerText = `${bpm} BPM`;
+      logFeed(`Tempo adjusted to ${bpm} BPM.`);
+    }
+
+    function resetRhythm() {
+      notes = [];
+      shockwaves = [];
+      combo = 0;
+      parries = 0;
+      misses = 0;
+      bpm = 240;
+      document.getElementById("hud-bpm").innerText = "240 BPM";
+      document.getElementById("hud-combo").innerText = "0x";
+      document.getElementById("hud-parries").innerText = "0";
+      document.getElementById("hud-acc").innerText = "100.0%";
+      document.getElementById("hud-status").innerText = "SYNAPSE LOCKED";
+      document.getElementById("hud-status").style.color = "var(--accent-green)";
+      logFeed("Rhythm core reset.");
+    }
+
+    function spawnNote() {
+      const a = Math.random() * Math.PI * 2;
+      const speed = (bpm / 60) * 1.8 + 2.5;
+      notes.push({
+        x: cx + Math.cos(a) * 380,
+        y: cy + Math.sin(a) * 380,
+        angle: a,
+        dist: 380,
+        speed: speed,
+        color: Math.random() < 0.5 ? "#00f0ff" : "#ff007f",
+        parried: false
+      });
+    }
+
+    // MILLI'S ROTATIONAL PID CONTROLLER
+    function updateMilliAI() {
+      // Find note closest to impact with shield
+      let urgentNote = null;
+      let minArrival = Infinity;
+
+      for (let i = 0; i < notes.length; i++) {
+        const n = notes[i];
+        if (!n.parried && n.dist > shieldRadius) {
+          const timeToImpact = (n.dist - shieldRadius) / n.speed;
+          if (timeToImpact < minArrival) {
+            minArrival = timeToImpact;
+            urgentNote = n;
+          }
+        }
+      }
+
+      if (urgentNote) {
+        // Target angle is note's angle opposite (inward heading)
+        const targetA = (urgentNote.angle + Math.PI) % (Math.PI * 2);
+        let diff = targetA - shieldAngle;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+
+        // Snappy PID angular snap
+        shieldAngle += diff * 0.45;
+      }
+    }
+
+    canvas.addEventListener("mousemove", e => {
+      if (!milliAuto) {
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left - cx;
+        const my = e.clientY - rect.top - cy;
+        shieldAngle = Math.atan2(my, mx);
+      }
+    });
+
+    function update() {
+      const now = Date.now();
+      const interval = 60000 / bpm;
+      if (now - lastSpawn > interval) {
+        spawnNote();
+        lastSpawn = now;
+        // Natural BPM scaling (+2 BPM per note)
+        if (bpm < 2800) bpm += 1;
+        document.getElementById("hud-bpm").innerText = `${bpm} BPM`;
+      }
+
+      if (milliAuto) {
+        updateMilliAI();
+      }
+
+      // Update notes
+      for (let i = notes.length - 1; i >= 0; i--) {
+        const n = notes[i];
+        n.dist -= n.speed;
+        n.x = cx + Math.cos(n.angle) * n.dist;
+        n.y = cy + Math.sin(n.angle) * n.dist;
+
+        // Check parry radius
+        if (n.dist <= shieldRadius + 6 && n.dist >= shieldRadius - 10 && !n.parried) {
+          const noteInwardA = (n.angle + Math.PI) % (Math.PI * 2);
+          let angleDiff = Math.abs(noteInwardA - shieldAngle);
+          while (angleDiff > Math.PI) angleDiff = Math.abs(angleDiff - Math.PI * 2);
+
+          if (angleDiff <= shieldArc / 2) {
+            // SUCCESSFUL PARRY!
+            n.parried = true;
+            parries++;
+            combo++;
+            shockwaves.push({ r: shieldRadius, maxR: shieldRadius + 50, color: n.color, alpha: 1 });
+            notes.splice(i, 1);
+            continue;
+          }
+        }
+
+        // Miss (reached center)
+        if (n.dist <= 18) {
+          misses++;
+          combo = 0;
+          notes.splice(i, 1);
+          document.getElementById("hud-status").innerText = "TEMPO BREACH";
+          document.getElementById("hud-status").style.color = "var(--accent-magenta)";
+        }
+      }
+
+      // Update shockwaves
+      for (let i = shockwaves.length - 1; i >= 0; i--) {
+        const s = shockwaves[i];
+        s.r += 3.5;
+        s.alpha -= 0.05;
+        if (s.alpha <= 0) shockwaves.splice(i, 1);
+      }
+
+      // Update HUD
+      document.getElementById("hud-combo").innerText = `${combo}x`;
+      document.getElementById("hud-parries").innerText = parries.toLocaleString();
+      const total = parries + misses;
+      const acc = total > 0 ? ((parries / total) * 100).toFixed(1) : "100.0";
+      document.getElementById("hud-acc").innerText = `${acc}%`;
+    }
+
+    function draw() {
+      ctx.fillStyle = "#020308";
+      ctx.fillRect(0, 0, W, H);
+
+      // Radar rings
+      ctx.strokeStyle = "rgba(30, 41, 59, 0.45)";
+      ctx.lineWidth = 1;
+      [120, 200, 280, 360].forEach(r => {
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.stroke();
+      });
+
+      // Crosshairs
+      ctx.beginPath();
+      ctx.moveTo(cx - 380, cy); ctx.lineTo(cx + 380, cy);
+      ctx.moveTo(cx, cy - 380); ctx.lineTo(cx, cy + 380);
+      ctx.stroke();
+
+      // Shockwaves
+      shockwaves.forEach(s => {
+        ctx.save();
+        ctx.strokeStyle = s.color;
+        ctx.globalAlpha = s.alpha;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(cx, cy, s.r, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      });
+
+      // Center core
+      ctx.save();
+      ctx.fillStyle = "#ffffff";
+      ctx.shadowColor = "#00f0ff";
+      ctx.shadowBlur = 18;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 14, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // Shield Arc
+      ctx.save();
+      ctx.strokeStyle = milliAuto ? "#00ff88" : "#00f0ff";
+      ctx.lineWidth = 8;
+      ctx.shadowColor = milliAuto ? "#00ff88" : "#00f0ff";
+      ctx.shadowBlur = 20;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.arc(cx, cy, shieldRadius, shieldAngle - shieldArc / 2, shieldAngle + shieldArc / 2);
+      ctx.stroke();
+      ctx.restore();
+
+      // Notes
+      notes.forEach(n => {
+        ctx.save();
+        ctx.fillStyle = n.color;
+        ctx.shadowColor = n.color;
+        ctx.shadowBlur = 14;
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, 6.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // White hot center
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+
+      requestAnimationFrame(() => {
+        update();
+        draw();
+      });
+    }
+
+    draw();
+  </script>
+</body>
+</html>

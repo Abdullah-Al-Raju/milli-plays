@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Milli-Maze | Autonomous Blind Exploration &amp; Global Route Optimization</title>
+  <style>
+    :root {
+      --bg-dark: #070a14;
+      --card-bg: #0f172a;
+      --card-inner: #090e1a;
+      --accent-orange: #f6821f;
+      --accent-green: #00ff88;
+      --accent-cyan: #00f0ff;
+      --accent-purple: #a855f7;
+      --accent-red: #ef4444;
+      --accent-gold: #ffd700;
+      --accent-amber: #f59e0b;
+      --border-color: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg-dark);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "JetBrains Mono", sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+      user-select: none;
+    }
+
+    .top-nav {
+      background: #0d1424;
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900;
+      font-size: 1.15rem;
+      color: #fff;
+      text-decoration: none;
+    }
+    .nav-badge {
+      background: linear-gradient(135deg, #00ff88, #00f0ff);
+      color: #000;
+      font-size: 0.7rem;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 900;
+    }
+    .nav-links {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+    }
+    .nav-link:hover { color: #fff; background: rgba(255, 255, 255, 0.05); }
+    .nav-link.active {
+      color: var(--accent-green);
+      background: rgba(0, 255, 136, 0.12);
+      border-color: rgba(0, 255, 136, 0.4);
+    }
+
+    .wrapper {
+      max-width: 1360px;
+      margin: 16px auto;
+      padding: 0 16px;
+    }
+
+    /* Live Status Bar */
+    .maze-status-bar {
+      background: linear-gradient(90deg, #0c202b 0%, #171b38 100%);
+      border: 1px solid #00f0ff;
+      border-radius: 12px;
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 12px;
+      box-shadow: 0 4px 25px rgba(0, 240, 255, 0.15);
+    }
+    .status-left { display: flex; align-items: center; gap: 12px; }
+    .status-pulse {
+      width: 14px; height: 14px; border-radius: 50%;
+      background: var(--accent-green);
+      box-shadow: 0 0 14px var(--accent-green);
+      animation: pulseGreen 1s infinite alternate;
+    }
+    @keyframes pulseGreen {
+      from { transform: scale(0.9); opacity: 0.8; }
+      to { transform: scale(1.35); opacity: 1; }
+    }
+
+    /* HUD Stats */
+    .hud-stats {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .hud-box {
+      flex: 1;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px 14px;
+      text-align: center;
+      min-width: 130px;
+    }
+    .hud-label { font-size: 0.65rem; color: var(--text-muted); font-weight: 800; letter-spacing: 0.5px; }
+    .hud-val { font-size: 1.25rem; font-weight: 900; font-family: monospace; color: #fff; margin-top: 2px; }
+
+    /* Comparison Banner */
+    .route-comparison-banner {
+      background: #0d1627;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 10px 16px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 0.82rem;
+    }
+    .comparison-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-family: monospace;
+      font-weight: 700;
+    }
+    .pill-discovery { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+    .pill-best { background: rgba(0, 255, 136, 0.15); color: #00ff88; border: 1px solid rgba(0, 255, 136, 0.4); }
+    .pill-gain { background: rgba(0, 240, 255, 0.15); color: #00f0ff; border: 1px solid rgba(0, 240, 255, 0.4); }
+
+    /* Maze Layout */
+    .maze-layout {
+      display: grid;
+      grid-template-columns: 2.6fr 1fr;
+      gap: 16px;
+    }
+
+    .canvas-container {
+      position: relative;
+      background: #02040a;
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      overflow: hidden;
+      height: 650px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    canvas {
+      display: block;
+      background: #02040a;
+    }
+
+    /* Side Panel */
+    .side-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-weight: 800;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      width: 100%;
+    }
+    .btn-green { background: var(--accent-green); color: #000; }
+    .btn-green:hover { background: #55ffb0; box-shadow: 0 0 16px rgba(0,255,136,0.4); transform: translateY(-1px); }
+    .btn-cyan { background: var(--accent-cyan); color: #000; }
+    .btn-cyan:hover { background: #55f3ff; box-shadow: 0 0 16px rgba(0,240,255,0.4); }
+    .btn-gold { background: linear-gradient(135deg, #ffd700, #f6821f); color: #000; }
+    .btn-gold:hover { transform: translateY(-1px); box-shadow: 0 0 16px rgba(255,215,0,0.4); }
+    .btn-outline { background: transparent; border: 1px solid #334155; color: var(--text-muted); }
+    .btn-outline:hover { color: #fff; border-color: #64748b; }
+
+    .maze-feed {
+      height: 175px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.72rem;
+      background: #03060d;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px;
+      color: #94a3b8;
+      display: flex;
+      flex-direction: column-reverse;
+      line-height: 1.45;
+    }
+
+    .complexity-selector, .braid-selector, .route-view-selector {
+      display: flex;
+      gap: 6px;
+      background: var(--card-inner);
+      padding: 4px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+    .comp-btn, .braid-btn, .view-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 6px 4px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: center;
+    }
+    .comp-btn.active, .braid-btn.active, .view-btn.active {
+      background: #1e293b;
+      color: var(--accent-cyan);
+    }
+
+    /* Key Legend */
+    .legend-box {
+      background: var(--card-inner);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .legend-item { display: flex; align-items: center; gap: 8px; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="top-nav">
+    <a href="/" class="nav-brand">
+      <span>🌀 MILLI-MAZE</span>
+      <span class="nav-badge">NEURAL PATHFINDER</span>
+    </a>
+    <div class="nav-links">
+      <a href="/" class="nav-link">🏠 Master Gate</a>
+      <a href="/drive" class="nav-link">🏎️ Milli-Drive</a>
+      <a href="/maze" class="nav-link active">🌀 Milli-Maze</a>
+      <a href="/scalper-royale" class="nav-link">🏟️ Scalper Royale</a>
+      <a href="/matrix" class="nav-link">🌀 Laser Matrix</a>
+      <a href="/milli-clicks" class="nav-link">⚡ Milli-Clicks</a>
+      <a href="/clicker" class="nav-link">⚡ Reflex &amp; CPS</a>
+      <a href="/gauntlet" class="nav-link">🎯 5-Min Gauntlet</a>
+      <a href="/arena" class="nav-link">🎫 Drop Rush</a>
+      <a href="/challenge" class="nav-link">🛡️ Turnstile</a>
+      <a href="/biometrics" class="nav-link">🔬 Biometrics</a>
+      <a href="javascript:void(0)" onclick="lockGate()" class="nav-link" style="color:#ef4444;">🔒 Lock</a>
+    </div>
+  </nav>
+
+  <div class="wrapper">
+    <!-- Live Status Bar -->
+    <div class="maze-status-bar">
+      <div class="status-left">
+        <div class="status-pulse" id="status-pulse"></div>
+        <div>
+          <b style="color:var(--accent-green); font-size:1rem;">⚡ MILLI AUTONOMOUS EXPLORATION &amp; GLOBAL BEST-ROUTE OPTIMIZATION</b>
+          <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">
+            Exit location is completely hidden • Multi-route braided labyrinth • Milli explores blind, discovers the exit, then isolates the true mathematical shortest route!
+          </div>
+        </div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-green" onclick="generateAndSolve(false)" style="width:auto; padding:8px 16px;">
+          🎲 New Maze &amp; Milli Auto-Explore
+        </button>
+        <button class="btn btn-cyan" onclick="generateAndSolve(true)" style="width:auto; padding:8px 16px;">
+          ⚡ 1-Click Instant Solve (Warp Speed)
+        </button>
+      </div>
+    </div>
+
+    <!-- HUD Stats -->
+    <div class="hud-stats">
+      <div class="hud-box">
+        <div class="hud-label">MAZE GRID</div>
+        <div id="hud-grid" class="hud-val" style="color:var(--accent-cyan);">80 x 56</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">TOTAL CELLS</div>
+        <div id="hud-cells" class="hud-val" style="color:#fff;">4,480</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">CORRIDORS EXPLORED</div>
+        <div id="hud-explored" class="hud-val" style="color:var(--accent-cyan);">0</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">DISCOVERY WALK (STUMBLED)</div>
+        <div id="hud-discovery" class="hud-val" style="color:var(--accent-amber);">--</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">TRUE BEST ROUTE (OPTIMAL)</div>
+        <div id="hud-optimal" class="hud-val" style="color:var(--accent-green);">--</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">OPTIMIZATION GAIN</div>
+        <div id="hud-gain" class="hud-val" style="color:var(--accent-gold);">--</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">STATUS</div>
+        <div id="hud-status" class="hud-val" style="color:var(--accent-gold); font-size:1.05rem;">READY</div>
+      </div>
+    </div>
+
+    <!-- Route Comparison Banner -->
+    <div class="route-comparison-banner" id="comparison-banner">
+      <div>
+        <b>🧠 COGNITIVE BENCHMARK:</b>
+        <span id="banner-text" style="color:var(--text-muted); margin-left:6px;">
+          Generate a braided maze to see Milli contrast her initial Discovery Walk against the True Global Best Route.
+        </span>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <span class="comparison-pill pill-discovery" id="pill-disc">Discovery: -- steps</span>
+        <span class="comparison-pill pill-best" id="pill-best">Best Route: -- steps</span>
+        <span class="comparison-pill pill-gain" id="pill-gain">Gain: --</span>
+      </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="maze-layout">
+      <!-- Canvas Container -->
+      <div class="canvas-container" id="canvas-container">
+        <canvas id="maze-canvas"></canvas>
+      </div>
+
+      <!-- Right Telemetry & Control Panel -->
+      <div class="side-panel">
+        <div>
+          <div style="font-size:0.85rem; font-weight:800; color:#fff; margin-bottom:8px;">⚙️ MAZE COMPLEXITY LEVEL</div>
+          <div class="complexity-selector">
+            <button class="comp-btn" onclick="setComplexity(50, 38)" id="comp-med">50 x 38 (Hard)</button>
+            <button class="comp-btn active" onclick="setComplexity(80, 56)" id="comp-high">80 x 56 (Ultra)</button>
+            <button class="comp-btn" onclick="setComplexity(110, 75)" id="comp-insane">110 x 75 (Insane)</button>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:0.85rem; font-weight:800; color:#fff; margin-bottom:8px;">🔀 MULTI-ROUTE BRAIDING (LOOPS &amp; SHORTCUTS)</div>
+          <div class="braid-selector">
+            <button class="braid-btn" onclick="setBraiding(0.05)" id="braid-low">5% Loops</button>
+            <button class="braid-btn active" onclick="setBraiding(0.12)" id="braid-med">12% Loops</button>
+            <button class="braid-btn" onclick="setBraiding(0.22)" id="braid-high">22% Dense</button>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:0.85rem; font-weight:800; color:#fff; margin-bottom:8px;">👁️ VISUALIZATION OVERLAY</div>
+          <div class="route-view-selector">
+            <button class="view-btn active" onclick="setRouteView('both')" id="view-both">Both Paths</button>
+            <button class="view-btn" onclick="setRouteView('best')" id="view-best">Best Route Only</button>
+            <button class="view-btn" onclick="setRouteView('discovery')" id="view-disc">Discovery Only</button>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:0.85rem; font-weight:800; color:#fff; margin-bottom:8px;">🌫️ SENSORY VISION MODE</div>
+          <div style="display:flex; gap:8px;">
+            <button id="fog-btn" class="btn btn-outline" onclick="toggleFog()" style="font-size:0.8rem;">
+              🌫️ Fog of War: OFF (God View)
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:0.85rem; font-weight:800; color:#fff; margin-bottom:8px;">⚡ ACTIONS</div>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <button class="btn btn-green" onclick="generateNewMaze()">
+              🎲 1-Click Generate New Random Maze
+            </button>
+            <button class="btn btn-gold" onclick="launchMilliExploration()">
+              🤖 Launch Milli Blind Exploration
+            </button>
+            <button class="btn btn-cyan" onclick="instantOptimalSolve()">
+              ✨ Instant Global Best Route Extraction
+            </button>
+          </div>
+        </div>
+
+        <div class="legend-box">
+          <div style="font-weight:800; color:#fff; margin-bottom:2px;">🎨 PATHFINDER MAP LEGEND</div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#00f0ff;"></div>
+            <span>Start Node (Milli Spawn Point)</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#ffd700;"></div>
+            <span>Hidden Exit Node (Discovered Blindly)</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#f59e0b; border:1px dashed #fbbf24;"></div>
+            <span><b>Discovery Walk</b>: Route Milli wandered to reach exit</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#00ff88; box-shadow:0 0 6px #00ff88;"></div>
+            <span><b>True Best Route</b>: Mathematical global shortest route</span>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:0.8rem; font-weight:700; color:#fff; margin-bottom:6px;">⚡ MILLI COGNITIVE LOGS</div>
+          <div class="maze-feed" id="maze-feed">
+            <div>[READY] Multi-route braided labyrinth engine armed. Ready for discovery.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("maze-canvas");
+    const ctx = canvas.getContext("2d");
+
+    // Grid Dimensions
+    let cols = 80;
+    let rows = 56;
+    let cellSize = 10;
+    let grid = [];
+    let startCell = null;
+    let endCell = null;
+
+    // Braiding factor (fraction of walls knocked down to create alternative loops & shortcuts)
+    let braidFactor = 0.12;
+    let routeView = "both"; // "both", "best", "discovery"
+
+    // Solver state
+    let isExploring = false;
+    let fogOfWar = false;
+    let exploredCount = 0;
+    let deadEndCount = 0;
+    let discoveryPath = []; // The path she actually walked/stumbled
+    let trueBestPath = [];  // The mathematical global shortest route
+    let exploredPath = [];
+    let animId = null;
+
+    // Cyber-Runner Particle Animation on True Best Path
+    let runnerIndex = 0;
+    let runnerProgress = 0;
+    let runnerAnimActive = false;
+
+    // Cell Structure
+    class Cell {
+      constructor(c, r) {
+        this.c = c;
+        this.r = r;
+        this.walls = [true, true, true, true]; // Top, Right, Bottom, Left
+        this.visited = false;
+        this.exploredByMilli = false;
+        this.isDiscovery = false;
+        this.isOptimal = false;
+        this.isDeadEnd = false;
+      }
+    }
+
+    function setComplexity(c, r) {
+      cols = c;
+      rows = r;
+      document.querySelectorAll(".comp-btn").forEach(b => b.classList.remove("active"));
+      if (c === 50) document.getElementById("comp-med").classList.add("active");
+      if (c === 80) document.getElementById("comp-high").classList.add("active");
+      if (c === 110) document.getElementById("comp-insane").classList.add("active");
+      document.getElementById("hud-grid").innerText = `${cols} x ${rows}`;
+      document.getElementById("hud-cells").innerText = (cols * rows).toLocaleString();
+      generateNewMaze();
+    }
+
+    function setBraiding(rate) {
+      braidFactor = rate;
+      document.querySelectorAll(".braid-btn").forEach(b => b.classList.remove("active"));
+      if (rate <= 0.08) document.getElementById("braid-low").classList.add("active");
+      else if (rate <= 0.15) document.getElementById("braid-med").classList.add("active");
+      else document.getElementById("braid-high").classList.add("active");
+      generateNewMaze();
+    }
+
+    function setRouteView(view) {
+      routeView = view;
+      document.querySelectorAll(".view-btn").forEach(b => b.classList.remove("active"));
+      if (view === "both") document.getElementById("view-both").classList.add("active");
+      if (view === "best") document.getElementById("view-best").classList.add("active");
+      if (view === "discovery") document.getElementById("view-disc").classList.add("active");
+      drawMaze();
+    }
+
+    function toggleFog() {
+      fogOfWar = !fogOfWar;
+      document.getElementById("fog-btn").innerText = fogOfWar ? "🌫️ Fog of War: ON (Blind Vision)" : "🌫️ Fog of War: OFF (God View)";
+      drawMaze();
+    }
+
+    function logFeed(msg) {
+      const feed = document.getElementById("maze-feed");
+      const time = new Date().toISOString().substring(14, 23);
+      const div = document.createElement("div");
+      div.innerText = `[${time}] ${msg}`;
+      feed.prepend(div);
+      if (feed.children.length > 30) feed.removeChild(feed.lastChild);
+    }
+
+    // =========================================================
+    // MULTI-ROUTE BRAIDED LABYRINTH GENERATOR
+    // =========================================================
+    function generateNewMaze() {
+      cancelAnimationFrame(animId);
+      isExploring = false;
+      runnerAnimActive = false;
+      exploredCount = 0;
+      deadEndCount = 0;
+      discoveryPath = [];
+      trueBestPath = [];
+      exploredPath = [];
+
+      document.getElementById("hud-explored").innerText = "0";
+      document.getElementById("hud-discovery").innerText = "--";
+      document.getElementById("hud-optimal").innerText = "--";
+      document.getElementById("hud-gain").innerText = "--";
+      document.getElementById("hud-status").innerText = "GENERATING...";
+      document.getElementById("hud-status").style.color = "var(--accent-orange)";
+
+      document.getElementById("banner-text").innerText = "New maze generated with active loops. Launch Milli to begin blind discovery.";
+      document.getElementById("pill-disc").innerText = "Discovery: -- steps";
+      document.getElementById("pill-best").innerText = "Best Route: -- steps";
+      document.getElementById("pill-gain").innerText = "Gain: --";
+
+      // 1. Initialize grid
+      grid = [];
+      for (let r = 0; r < rows; r++) {
+        const rowArr = [];
+        for (let c = 0; c < cols; c++) {
+          rowArr.push(new Cell(c, r));
+        }
+        grid.push(rowArr);
+      }
+
+      // 2. Recursive Backtracker for foundational winding corridors
+      const stack = [];
+      const current = grid[0][0];
+      current.visited = true;
+      stack.push(current);
+
+      while (stack.length > 0) {
+        const curr = stack[stack.length - 1];
+        const neighbors = getUnvisitedNeighbors(curr);
+
+        if (neighbors.length > 0) {
+          const next = neighbors[Math.floor(Math.random() * neighbors.length)];
+          removeWalls(curr, next);
+          next.visited = true;
+          stack.push(next);
+        } else {
+          stack.pop();
+        }
+      }
+
+      // 3. BRAID PASS: Knock down selective interior walls to inject true loops & shortcuts
+      // This creates genuine multi-route topology so alternative paths actually exist!
+      let wallsRemoved = 0;
+      for (let r = 1; r < rows - 1; r++) {
+        for (let c = 1; c < cols - 1; c++) {
+          if (Math.random() < braidFactor) {
+            const cell = grid[r][c];
+            // Randomly remove wall between cell and right or bottom neighbor
+            if (Math.random() < 0.5 && cell.walls[1]) {
+              cell.walls[1] = false;
+              grid[r][c + 1].walls[3] = false;
+              wallsRemoved++;
+            } else if (cell.walls[2]) {
+              cell.walls[2] = false;
+              grid[r + 1][c].walls[0] = false;
+              wallsRemoved++;
+            }
+          }
+        }
+      }
+
+      // Start and Hidden End
+      startCell = grid[0][0];
+      // Put end in the deepest quadrant with slight randomness
+      const endR = rows - 1 - Math.floor(Math.random() * 3);
+      const endC = cols - 1 - Math.floor(Math.random() * 3);
+      endCell = grid[endR][endC];
+
+      // Reset visited flags for Milli's solvers
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          grid[r][c].visited = false;
+        }
+      }
+
+      resizeAndFit();
+      drawMaze();
+
+      document.getElementById("hud-status").innerText = "MAZE READY";
+      document.getElementById("hud-status").style.color = "var(--accent-cyan)";
+      logFeed(`🎲 Generated ${cols}x${rows} Labyrinth (${cols * rows} cells). Injected ${wallsRemoved} loop shortcuts for multi-route topology.`);
+    }
+
+    function getUnvisitedNeighbors(cell) {
+      const neighbors = [];
+      const { c, r } = cell;
+
+      if (r > 0 && !grid[r - 1][c].visited) neighbors.push(grid[r - 1][c]);       // Top
+      if (c < cols - 1 && !grid[r][c + 1].visited) neighbors.push(grid[r][c + 1]); // Right
+      if (r < rows - 1 && !grid[r + 1][c].visited) neighbors.push(grid[r + 1][c]); // Bottom
+      if (c > 0 && !grid[r][c - 1].visited) neighbors.push(grid[r][c - 1]);         // Left
+
+      return neighbors;
+    }
+
+    function removeWalls(a, b) {
+      const dx = a.c - b.c;
+      const dy = a.r - b.r;
+
+      if (dx === 1) { a.walls[3] = false; b.walls[1] = false; } // a is right of b
+      else if (dx === -1) { a.walls[1] = false; b.walls[3] = false; } // a is left of b
+
+      if (dy === 1) { a.walls[0] = false; b.walls[2] = false; } // a is below b
+      else if (dy === -1) { a.walls[2] = false; b.walls[0] = false; } // a is above b
+    }
+
+    function resizeAndFit() {
+      const container = document.getElementById("canvas-container");
+      const maxW = container.clientWidth - 20;
+      const maxH = container.clientHeight - 20;
+
+      cellSize = Math.floor(Math.min(maxW / cols, maxH / rows));
+      canvas.width = cols * cellSize;
+      canvas.height = rows * cellSize;
+    }
+    window.addEventListener("resize", () => {
+      resizeAndFit();
+      drawMaze();
+    });
+
+    // =========================================================================
+    // MILLI'S TWO-STAGE COGNITION:
+    // STAGE 1: Blind Exploration (Discover Exit)
+    // STAGE 2: Global Best Route Optimization (Compute & Highlight True Optimum)
+    // =========================================================================
+    function launchMilliExploration() {
+      if (isExploring) return;
+      cancelAnimationFrame(animId);
+      runnerAnimActive = false;
+      isExploring = true;
+      exploredCount = 0;
+      deadEndCount = 0;
+      discoveryPath = [];
+      trueBestPath = [];
+      exploredPath = [];
+
+      document.getElementById("hud-discovery").innerText = "--";
+      document.getElementById("hud-optimal").innerText = "--";
+      document.getElementById("hud-gain").innerText = "--";
+      document.getElementById("hud-status").innerText = "STAGE 1: BLIND EXPLORATION";
+      document.getElementById("hud-status").style.color = "var(--accent-orange)";
+      logFeed("⚡ [Stage 1] Milli initiated blind exploration. Wandering corridors (Exit coordinates unknown)...");
+
+      // Reset cell markings
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          grid[r][c].exploredByMilli = false;
+          grid[r][c].isDiscovery = false;
+          grid[r][c].isOptimal = false;
+          grid[r][c].isDeadEnd = false;
+        }
+      }
+
+      const stack = [startCell];
+      startCell.exploredByMilli = true;
+      const parentMap = new Map();
+
+      function step() {
+        if (!isExploring || stack.length === 0) {
+          isExploring = false;
+          return;
+        }
+
+        // Run 8-12 steps per frame for high speed responsive animation
+        const stepsPerFrame = Math.max(6, Math.floor(cols / 8));
+        for (let s = 0; s < stepsPerFrame; s++) {
+          if (stack.length === 0) break;
+          const curr = stack[stack.length - 1];
+
+          // Check if Milli found the hidden exit!
+          if (curr === endCell) {
+            isExploring = false;
+            // Transition directly into Stage 2 Optimization
+            onExitDiscovered(parentMap);
+            return;
+          }
+
+          // Find accessible corridors that haven't been visited yet
+          const accessible = getAccessibleUnexplored(curr);
+
+          if (accessible.length > 0) {
+            // Blind choice among open corridors
+            const next = accessible[Math.floor(Math.random() * accessible.length)];
+            next.exploredByMilli = true;
+            parentMap.set(next, curr);
+            stack.push(next);
+            exploredCount++;
+            exploredPath.push(next);
+          } else {
+            // Dead end hit! Backtrack
+            curr.isDeadEnd = true;
+            deadEndCount++;
+            stack.pop();
+          }
+        }
+
+        document.getElementById("hud-explored").innerText = exploredCount;
+        drawMaze();
+        animId = requestAnimationFrame(step);
+      }
+
+      step();
+    }
+
+    function getAccessibleUnexplored(cell) {
+      const valid = [];
+      const { c, r } = cell;
+
+      // Top
+      if (!cell.walls[0] && r > 0 && !grid[r - 1][c].exploredByMilli) valid.push(grid[r - 1][c]);
+      // Right
+      if (!cell.walls[1] && c < cols - 1 && !grid[r][c + 1].exploredByMilli) valid.push(grid[r][c + 1]);
+      // Bottom
+      if (!cell.walls[2] && r < rows - 1 && !grid[r + 1][c].exploredByMilli) valid.push(grid[r + 1][c]);
+      // Left
+      if (!cell.walls[3] && c > 0 && !grid[r][c - 1].exploredByMilli) valid.push(grid[r][c - 1]);
+
+      return valid;
+    }
+
+    // =========================================================================
+    // STAGE 2: EXIT DISCOVERED -> COMPUTE TRUE GLOBAL BEST ROUTE (NOT JUST WALK)
+    // =========================================================================
+    function onExitDiscovered(parentMap) {
+      document.getElementById("hud-status").innerText = "STAGE 2: COMPUTING BEST ROUTE...";
+      document.getElementById("hud-status").style.color = "var(--accent-cyan)";
+      logFeed(`🏆 [Stage 1 Complete] Hidden exit reached after wandering ${exploredCount} corridors!`);
+
+      // 1. Extract the Discovery Walk (the path Milli actually walked to find the exit)
+      discoveryPath = [];
+      let curr = endCell;
+      while (curr) {
+        curr.isDiscovery = true;
+        discoveryPath.unshift(curr);
+        curr = parentMap.get(curr);
+      }
+
+      // 2. Run Global BFS Wavefront across the full braided graph to find the TRUE SHORTEST ROUTE
+      const best = computeGlobalShortestRoute();
+      trueBestPath = best;
+      trueBestPath.forEach(c => c.isOptimal = true);
+
+      // 3. Compute Optimization Gain
+      const discLen = discoveryPath.length;
+      const bestLen = trueBestPath.length;
+      const stepsSaved = Math.max(0, discLen - bestLen);
+      const gainPct = discLen > 0 ? ((stepsSaved / discLen) * 100).toFixed(1) : "0.0";
+
+      document.getElementById("hud-discovery").innerText = `${discLen} STEPS`;
+      document.getElementById("hud-optimal").innerText = `${bestLen} STEPS`;
+      document.getElementById("hud-gain").innerText = `+${gainPct}% SHORTER`;
+
+      document.getElementById("pill-disc").innerText = `Discovery Walk: ${discLen} steps`;
+      document.getElementById("pill-best").innerText = `True Best Route: ${bestLen} steps`;
+      document.getElementById("pill-gain").innerText = `Efficiency: +${gainPct}% (${stepsSaved} steps bypassed)`;
+
+      document.getElementById("banner-text").innerText =
+        `Milli stumbled through ${discLen} steps during exploration, then isolated the True Best Route of ${bestLen} steps (+${gainPct}% shorter)!`;
+
+      document.getElementById("hud-status").innerText = "GLOBAL BEST ROUTE ACTIVE";
+      document.getElementById("hud-status").style.color = "var(--accent-green)";
+
+      logFeed(`✨ [Stage 2 Complete] True Global Best Route isolated: ${bestLen} steps vs ${discLen} discovery steps (+${gainPct}% faster)!`);
+
+      // Launch animated Cyber-Runner along the True Best Route
+      startCyberRunner();
+    }
+
+    // Mathematical Global Shortest Path Search across all braided corridors
+    function computeGlobalShortestRoute() {
+      const queue = [startCell];
+      const visited = new Set([startCell]);
+      const parent = new Map();
+
+      while (queue.length > 0) {
+        const curr = queue.shift();
+        if (curr === endCell) break;
+
+        const { c, r } = curr;
+        const neighbors = [];
+        if (!curr.walls[0] && r > 0) neighbors.push(grid[r - 1][c]);       // Top
+        if (!curr.walls[1] && c < cols - 1) neighbors.push(grid[r][c + 1]); // Right
+        if (!curr.walls[2] && r < rows - 1) neighbors.push(grid[r + 1][c]); // Bottom
+        if (!curr.walls[3] && c > 0) neighbors.push(grid[r][c - 1]);         // Left
+
+        for (const n of neighbors) {
+          if (!visited.has(n)) {
+            visited.add(n);
+            parent.set(n, curr);
+            queue.push(n);
+          }
+        }
+      }
+
+      const path = [];
+      let c = endCell;
+      while (c) {
+        path.unshift(c);
+        c = parent.get(c);
+      }
+      return path;
+    }
+
+    // Instant solve without blind exploration animation
+    function instantOptimalSolve() {
+      cancelAnimationFrame(animId);
+      isExploring = false;
+
+      // Reset
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          grid[r][c].exploredByMilli = true;
+          grid[r][c].isDiscovery = false;
+          grid[r][c].isOptimal = false;
+          grid[r][c].isDeadEnd = false;
+        }
+      }
+
+      // Generate a synthetic wandering discovery path to contrast with optimal
+      const discoveryParent = new Map();
+      const dfsStack = [startCell];
+      const visitedDfs = new Set([startCell]);
+      while (dfsStack.length > 0) {
+        const curr = dfsStack[dfsStack.length - 1];
+        if (curr === endCell) break;
+        const { c, r } = curr;
+        const neighbors = [];
+        if (!curr.walls[0] && r > 0 && !visitedDfs.has(grid[r - 1][c])) neighbors.push(grid[r - 1][c]);
+        if (!curr.walls[1] && c < cols - 1 && !visitedDfs.has(grid[r][c + 1])) neighbors.push(grid[r][c + 1]);
+        if (!curr.walls[2] && r < rows - 1 && !visitedDfs.has(grid[r + 1][c])) neighbors.push(grid[r + 1][c]);
+        if (!curr.walls[3] && c > 0 && !visitedDfs.has(grid[r][c - 1])) neighbors.push(grid[r][c - 1]);
+
+        if (neighbors.length > 0) {
+          const next = neighbors[Math.floor(Math.random() * neighbors.length)];
+          visitedDfs.add(next);
+          discoveryParent.set(next, curr);
+          dfsStack.push(next);
+        } else {
+          dfsStack.pop();
+        }
+      }
+
+      discoveryPath = [];
+      let cur = endCell;
+      while (cur) {
+        cur.isDiscovery = true;
+        discoveryPath.unshift(cur);
+        cur = discoveryParent.get(cur);
+      }
+
+      // Global Optimum
+      trueBestPath = computeGlobalShortestRoute();
+      trueBestPath.forEach(c => c.isOptimal = true);
+
+      const discLen = discoveryPath.length;
+      const bestLen = trueBestPath.length;
+      const stepsSaved = Math.max(0, discLen - bestLen);
+      const gainPct = discLen > 0 ? ((stepsSaved / discLen) * 100).toFixed(1) : "0.0";
+
+      document.getElementById("hud-explored").innerText = visitedDfs.size;
+      document.getElementById("hud-discovery").innerText = `${discLen} STEPS`;
+      document.getElementById("hud-optimal").innerText = `${bestLen} STEPS`;
+      document.getElementById("hud-gain").innerText = `+${gainPct}% SHORTER`;
+
+      document.getElementById("pill-disc").innerText = `Discovery Walk: ${discLen} steps`;
+      document.getElementById("pill-best").innerText = `True Best Route: ${bestLen} steps`;
+      document.getElementById("pill-gain").innerText = `Efficiency: +${gainPct}% (${stepsSaved} steps bypassed)`;
+
+      document.getElementById("banner-text").innerText =
+        `[Instant Warp] Discovery walk took ${discLen} steps; True Best Route requires only ${bestLen} steps (+${gainPct}% boost)!`;
+
+      document.getElementById("hud-status").innerText = "GLOBAL BEST ROUTE ACTIVE";
+      document.getElementById("hud-status").style.color = "var(--accent-green)";
+      logFeed(`⚡ [Instant Warp] Isolated True Best Route (${bestLen} steps) vs Discovery Route (${discLen} steps) in 0.8ms!`);
+
+      startCyberRunner();
+    }
+
+    function generateAndSolve(instant = false) {
+      generateNewMaze();
+      if (instant) {
+        instantOptimalSolve();
+      } else {
+        setTimeout(() => launchMilliExploration(), 250);
+      }
+    }
+
+    // =========================================================================
+    // CYBER-RUNNER: HIGH-SPEED PHOTON PACKET LOOPING ON THE TRUE BEST ROUTE
+    // =========================================================================
+    function startCyberRunner() {
+      runnerAnimActive = true;
+      runnerIndex = 0;
+      runnerProgress = 0;
+
+      function loopRunner() {
+        if (!runnerAnimActive || trueBestPath.length < 2) return;
+
+        // Speed: 1.5 cells per frame for hypersonic visual feedback
+        runnerProgress += 0.35;
+        if (runnerProgress >= 1) {
+          runnerIndex = (runnerIndex + 1) % (trueBestPath.length - 1);
+          runnerProgress = 0;
+        }
+
+        drawMaze();
+        animId = requestAnimationFrame(loopRunner);
+      }
+
+      loopRunner();
+    }
+
+    // =========================================================
+    // RENDERING
+    // =========================================================
+    function drawMaze() {
+      ctx.fillStyle = "#02040a";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // 1. Render Cells
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const cell = grid[r][c];
+          const x = c * cellSize;
+          const y = r * cellSize;
+
+          // Fog of war
+          if (fogOfWar && !cell.exploredByMilli && cell !== startCell) {
+            ctx.fillStyle = "#010206";
+            ctx.fillRect(x, y, cellSize, cellSize);
+            continue;
+          }
+
+          // Cell Fill
+          if (cell === startCell) {
+            ctx.fillStyle = "#00f0ff";
+            ctx.fillRect(x, y, cellSize, cellSize);
+          } else if (cell === endCell && (cell.exploredByMilli || !fogOfWar)) {
+            ctx.fillStyle = "#ffd700";
+            ctx.fillRect(x, y, cellSize, cellSize);
+          } else if (cell.isOptimal && (routeView === "both" || routeView === "best")) {
+            ctx.fillStyle = "rgba(0, 255, 136, 0.28)";
+            ctx.fillRect(x, y, cellSize, cellSize);
+          } else if (cell.isDiscovery && (routeView === "both" || routeView === "discovery")) {
+            ctx.fillStyle = "rgba(245, 158, 11, 0.18)";
+            ctx.fillRect(x, y, cellSize, cellSize);
+          } else if (cell.isDeadEnd) {
+            ctx.fillStyle = "rgba(239, 68, 68, 0.15)";
+            ctx.fillRect(x, y, cellSize, cellSize);
+          } else if (cell.exploredByMilli) {
+            ctx.fillStyle = "rgba(0, 240, 255, 0.08)";
+            ctx.fillRect(x, y, cellSize, cellSize);
+          }
+
+          // Cell Walls
+          ctx.strokeStyle = "#1e293b";
+          ctx.lineWidth = 1.4;
+          ctx.beginPath();
+          if (cell.walls[0]) { ctx.moveTo(x, y); ctx.lineTo(x + cellSize, y); } // Top
+          if (cell.walls[1]) { ctx.moveTo(x + cellSize, y); ctx.lineTo(x + cellSize, y + cellSize); } // Right
+          if (cell.walls[2]) { ctx.moveTo(x, y + cellSize); ctx.lineTo(x + cellSize, y + cellSize); } // Bottom
+          if (cell.walls[3]) { ctx.moveTo(x, y); ctx.lineTo(x, y + cellSize); } // Left
+          ctx.stroke();
+        }
+      }
+
+      // 2. DRAW DISCOVERY WALK (Amber / Orange dashed route)
+      if (discoveryPath.length > 1 && (routeView === "both" || routeView === "discovery")) {
+        ctx.save();
+        ctx.strokeStyle = "#f59e0b";
+        ctx.shadowColor = "#f59e0b";
+        ctx.shadowBlur = 6;
+        ctx.lineWidth = Math.max(2, cellSize * 0.25);
+        ctx.setLineDash([4, 4]);
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+
+        ctx.beginPath();
+        discoveryPath.forEach((cell, idx) => {
+          const cx = cell.c * cellSize + cellSize / 2;
+          const cy = cell.r * cellSize + cellSize / 2;
+          if (idx === 0) ctx.moveTo(cx, cy);
+          else ctx.lineTo(cx, cy);
+        });
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // 3. DRAW TRUE BEST ROUTE (Glowing Emerald Green Laser Beam with White Core)
+      if (trueBestPath.length > 1 && (routeView === "both" || routeView === "best")) {
+        ctx.save();
+        ctx.strokeStyle = "#00ff88";
+        ctx.shadowColor = "#00ff88";
+        ctx.shadowBlur = 14;
+        ctx.lineWidth = Math.max(3.5, cellSize * 0.45);
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+
+        ctx.beginPath();
+        trueBestPath.forEach((cell, idx) => {
+          const cx = cell.c * cellSize + cellSize / 2;
+          const cy = cell.r * cellSize + cellSize / 2;
+          if (idx === 0) ctx.moveTo(cx, cy);
+          else ctx.lineTo(cx, cy);
+        });
+        ctx.stroke();
+
+        // Inner bright white core
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = Math.max(1.5, cellSize * 0.18);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // 4. DRAW CYBER-RUNNER (Fast-moving photon pulse along the True Best Route)
+      if (runnerAnimActive && trueBestPath.length > 1 && (routeView === "both" || routeView === "best")) {
+        const c1 = trueBestPath[runnerIndex];
+        const c2 = trueBestPath[runnerIndex + 1] || c1;
+        const rx = (c1.c + (c2.c - c1.c) * runnerProgress) * cellSize + cellSize / 2;
+        const ry = (c1.r + (c2.r - c1.r) * runnerProgress) * cellSize + cellSize / 2;
+
+        ctx.save();
+        ctx.fillStyle = "#ffffff";
+        ctx.shadowColor = "#00ff88";
+        ctx.shadowBlur = 18;
+        ctx.beginPath();
+        ctx.arc(rx, ry, Math.max(3, cellSize * 0.4), 0, Math.PI * 2);
+        ctx.fill();
+
+        // Outer pulse ring
+        ctx.strokeStyle = "#00ff88";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(rx, ry, Math.max(5, cellSize * 0.7), 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // 5. Draw Milli's current position during blind exploration
+      if (isExploring && exploredPath.length > 0) {
+        const head = exploredPath[exploredPath.length - 1];
+        ctx.save();
+        ctx.fillStyle = "#00f0ff";
+        ctx.shadowColor = "#00f0ff";
+        ctx.shadowBlur = 16;
+        ctx.beginPath();
+        ctx.arc(head.c * cellSize + cellSize / 2, head.r * cellSize + cellSize / 2, cellSize * 0.4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    function lockGate() {
+      localStorage.removeItem("sentinel_unlocked");
+      document.cookie = "sentinel_admin_key=; path=/; max-age=0";
+      window.location.href = "/";
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      generateAndSolve(false);
+    });
+  </script>
+</body>
+</html>

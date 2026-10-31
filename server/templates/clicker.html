@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Milli Ultra-Fast Response Clicker: 20-Second Endurance Arena</title>
+  <link rel="stylesheet" href="/static/gauntlet.css">
+  <style>
+    .clicker-arena {
+      position: relative;
+      width: 100%;
+      height: 420px;
+      background: radial-gradient(circle at center, #10192e 0%, #070b14 100%);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .ultra-target {
+      position: absolute;
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #00ff88 20%, #00b862 80%);
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 20px #00ff88, inset 0 0 10px #ffffff;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      will-change: transform;
+      top: 0;
+      left: 0;
+    }
+    .ultra-target::after {
+      content: "";
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #ffffff;
+    }
+    .stat-badge-huge {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: var(--accent-green);
+    }
+  </style>
+</head>
+<body>
+  <div class="gauntlet-wrapper">
+    <header class="hud-header">
+      <div class="hud-brand">
+        <span class="hud-badge">⚡ ULTRA-FAST RESPONSE CLICKER</span>
+        <h2>20-Second High-Frequency Response Endurance Arena</h2>
+      </div>
+      <div class="hud-stats">
+        <div class="hud-stat-box">
+          <span class="hud-label">TIME REMAINING</span>
+          <span id="timer-display" class="hud-value text-amber">20.0s</span>
+        </div>
+        <div class="hud-stat-box">
+          <span class="hud-label">CLICKS REGISTERED</span>
+          <span id="clicks-display" class="hud-value stat-badge-huge">0</span>
+        </div>
+        <div class="hud-stat-box">
+          <span class="hud-label">CURRENT CPS</span>
+          <span id="cps-display" class="hud-value font-mono text-cyan">0.0 CPS</span>
+        </div>
+        <div class="hud-stat-box">
+          <span class="hud-label">AVG LATENCY</span>
+          <span id="avg-latency-display" class="hud-value font-mono">-- ms</span>
+        </div>
+        <div class="hud-stat-box">
+          <span class="hud-label">PEAK BEST</span>
+          <span id="best-latency-display" class="hud-value font-mono text-green">-- ms</span>
+        </div>
+      </div>
+      <div class="hud-actions">
+        <button id="start-btn" class="btn btn-primary">▶ Start 20s Trial</button>
+        <button id="hyper-btn" class="btn btn-warning" style="background:#ff9900; color:#000; font-weight:bold; border-color:#ffaa00;">⚡ V8 Hyper-Burst</button>
+        <button id="reset-btn" class="btn btn-outline">↺ Reset</button>
+        <a href="/" class="btn btn-outline" style="text-decoration:none;">🎫 Back to Arena</a>
+      </div>
+    </header>
+
+    <main class="gauntlet-workspace">
+      <div class="clicker-arena" id="arena-box">
+        <div id="arena-overlay" class="stage-overlay">
+          Click "Start 20s Trial" to initiate maximum-frequency clicker
+        </div>
+        <div id="ultra-target" class="ultra-target"></div>
+      </div>
+    </main>
+
+    <footer class="telemetry-footer">
+      <div class="footer-title">⚡ REAL-TIME ENDURANCE TELEMETRY FEED</div>
+      <div id="clicker-log" class="game-log-feed">
+        <div class="log-line system">Ready. Awaiting 20-second trial start...</div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static/clicker.js"></script>
+</body>
+</html>

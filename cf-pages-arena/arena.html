@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drop Rush &amp; VIP Seating Arena | Cloudflare Pages</title>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <style>
+    :root {
+      --bg-dark: #0a0f1d;
+      --card-bg: #11192e;
+      --card-inner: #0b1122;
+      --accent-orange: #f6821f;
+      --accent-green: #00ff88;
+      --accent-cyan: #00f0ff;
+      --accent-purple: #a855f7;
+      --accent-red: #ef4444;
+      --border-color: #1e293b;
+      --text-main: #e2e8f0;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      background: var(--bg-dark);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+
+    /* Top Nav */
+    .top-nav {
+      background: #0d1424;
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: #fff;
+      text-decoration: none;
+    }
+    .nav-badge {
+      background: rgba(246, 130, 31, 0.2);
+      border: 1px solid var(--accent-orange);
+      color: var(--accent-orange);
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .nav-links {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+    }
+    .nav-link:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .nav-link.active {
+      color: var(--accent-cyan);
+      background: rgba(0, 240, 255, 0.1);
+      border-color: rgba(0, 240, 255, 0.3);
+    }
+
+    .wrapper {
+      max-width: 1180px;
+      margin: 24px auto;
+      padding: 0 16px;
+    }
+
+    /* Drop Simulation Banner */
+    .drop-banner {
+      background: linear-gradient(90deg, #131b2e 0%, #1e1b4b 100%);
+      border: 1px solid #3b82f6;
+      border-radius: 12px;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .countdown-clock {
+      font-size: 1.6rem;
+      font-weight: 900;
+      font-family: monospace;
+      color: var(--accent-orange);
+    }
+
+    .arena-grid {
+      display: grid;
+      grid-template-columns: 2.2fr 1fr;
+      gap: 20px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 22px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    }
+
+    .stage-curtain {
+      background: #090d16;
+      border: 1px dashed #334155;
+      border-radius: 8px;
+      text-align: center;
+      padding: 12px;
+      font-weight: bold;
+      color: var(--accent-cyan);
+      margin-bottom: 20px;
+      letter-spacing: 2px;
+    }
+
+    .seat-grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .seat {
+      aspect-ratio: 1;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+    .seat.available {
+      background: rgba(0, 255, 136, 0.1);
+      border-color: #00ff88;
+      color: #00ff88;
+    }
+    .seat.available:hover {
+      background: #00ff88;
+      color: #000;
+      transform: scale(1.08);
+    }
+    .seat.selected {
+      background: var(--accent-cyan);
+      color: #000;
+      box-shadow: 0 0 12px var(--accent-cyan);
+      border-color: #fff;
+    }
+    .seat.booked {
+      background: #090d16;
+      border-color: #1e293b;
+      color: #475569;
+      cursor: not-allowed;
+    }
+    .seat.bot-snatched {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: #ef4444;
+      color: #ef4444;
+      animation: flashRed 0.3s ease;
+    }
+    @keyframes flashRed {
+      0% { transform: scale(1.15); background: #ef4444; color:#fff; }
+      100% { transform: scale(1); }
+    }
+
+    .btn {
+      border: none;
+      border-radius: 6px;
+      padding: 12px 20px;
+      font-weight: bold;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      width: 100%;
+    }
+    .btn-primary { background: var(--accent-green); color: #000; }
+    .btn-primary:disabled { background: #334155; color: #64748b; cursor: not-allowed; }
+    .btn-orange { background: var(--accent-orange); color: #fff; }
+    .btn-outline { background: transparent; border: 1px solid #334155; color: var(--text-muted); }
+
+    .telemetry-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #1e293b;
+      font-size: 0.85rem;
+    }
+    .race-log {
+      height: 140px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.75rem;
+      background: var(--card-inner);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px;
+      margin-top: 14px;
+      color: #94a3b8;
+      display: flex;
+      flex-direction: column-reverse;
+    }
+  </style>
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="/" class="nav-brand">
+      <span>⚡ CLOUDFLARE EDGE ARENA</span>
+      <span class="nav-badge">LIVE</span>
+    </a>
+    <div class="nav-links">
+      <a href="/" class="nav-link">🏠 Master Gate</a>
+      <a href="/drive" class="nav-link">🏎️ Milli-Drive</a>
+      <a href="/scalper-royale" class="nav-link">🏟️ Scalper Royale</a>
+      <a href="/matrix" class="nav-link">🌀 Laser Matrix</a>
+      <a href="/milli-clicks" class="nav-link">⚡ Milli-Clicks</a>
+      <a href="/clicker" class="nav-link">⚡ Reflex &amp; CPS</a>
+      <a href="/gauntlet" class="nav-link">🎯 5-Min Gauntlet</a>
+      <a href="/arena" class="nav-link active">🎫 Drop Rush</a>
+      <a href="/challenge" class="nav-link">🛡️ Turnstile</a>
+      <a href="/biometrics" class="nav-link">🔬 Biometrics</a>
+      <a href="javascript:void(0)" onclick="lockGate()" class="nav-link" style="color:#ef4444;">🔒 Lock</a>
+    </div>
+  </nav>
+
+  <div class="wrapper">
+    <!-- Live Ticket Drop Simulation Banner -->
+    <div class="drop-banner">
+      <div>
+        <div style="font-weight:800; font-size:1.1rem; color:#fff;">⚡ Live Drop Rush Simulator (You vs AI Bots)</div>
+        <div style="font-size:0.8rem; color:#94a3b8; margin-top:2px;">
+          Simulate a high-concurrency drop where 20 bots compete to snatch seats in 100ms. Can you manually book before they're gone?
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:16px;">
+        <div>
+          <span style="font-size:0.7rem; color:var(--text-muted); display:block; font-weight:bold;">DROP CLOCK</span>
+          <span id="countdown-display" class="countdown-clock">LIVE NOW</span>
+        </div>
+        <button onclick="startDropRushSimulation()" class="btn btn-orange" style="width:auto; padding:10px 18px;">
+          🚀 Trigger Bot Rush
+        </button>
+      </div>
+    </div>
+
+    <div class="arena-grid">
+      <!-- Seating Chart Column -->
+      <div class="card">
+        <div class="stage-curtain">MAIN STAGE &amp; VIP PODIUM</div>
+        <div id="seat-grid" class="seat-grid"></div>
+
+        <div style="display:flex; gap:16px; font-size:0.8rem; color:var(--text-muted); justify-content:center;">
+          <div><span style="display:inline-block; width:12px; height:12px; background:rgba(0,255,136,0.2); border:1px solid #00ff88; border-radius:3px; vertical-align:middle; margin-right:4px;"></span> Available (<span id="avail-count">50</span>)</div>
+          <div><span style="display:inline-block; width:12px; height:12px; background:var(--accent-cyan); border-radius:3px; vertical-align:middle; margin-right:4px;"></span> Selected</div>
+          <div><span style="display:inline-block; width:12px; height:12px; background:rgba(239,68,68,0.3); border:1px solid #ef4444; border-radius:3px; vertical-align:middle; margin-right:4px;"></span> Bot Snatched</div>
+        </div>
+      </div>
+
+      <!-- Booking Controls & Telemetry Column -->
+      <div class="card" style="display:flex; flex-direction:column; justify-content:space-between;">
+        <div>
+          <h3 style="margin:0 0 14px 0;">Instant Reservation</h3>
+          <div class="telemetry-row">
+            <span style="color:var(--text-muted);">Selected Seat:</span>
+            <strong id="selected-seat-display" style="color:var(--accent-cyan); font-size:1.1rem;">None</strong>
+          </div>
+          <div class="telemetry-row">
+            <span style="color:var(--text-muted);">Price:</span>
+            <strong id="selected-seat-price">--</strong>
+          </div>
+          <div class="telemetry-row">
+            <span style="color:var(--text-muted);">Edge Network:</span>
+            <strong style="color:var(--accent-orange);">Cloudflare Global CDN</strong>
+          </div>
+
+          <!-- Official Turnstile Verification Gate -->
+          <div style="margin:20px 0;">
+            <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:8px; font-weight:bold;">
+              REQUIRED VERIFICATION:
+            </div>
+            <div id="arena-turnstile" class="cf-turnstile"
+                 data-sitekey="0x4AAAAAAFtuNmdenPEqPlr-"
+                 data-theme="dark"
+                 data-callback="onArenaTurnstileSuccess">
+            </div>
+          </div>
+
+          <button id="book-btn" class="btn btn-primary" onclick="submitBooking()" disabled style="margin-bottom:8px;">
+            ⚡ Reserve Selected Seat on Edge
+          </button>
+          <button id="milli-beast-btn" class="btn btn-orange" onclick="runMilliBeastSnipe()" style="background:linear-gradient(135deg,#00f0ff,#a855f7); color:#fff;">
+            ⚡ MILLI BEAST MODE (Parallel 5-Seat VIP Burst)
+          </button>
+          <div id="booking-status" style="margin-top:10px; font-size:0.85rem; text-align:center;"></div>
+        </div>
+
+        <div>
+          <div style="font-size:0.75rem; color:var(--text-muted); font-weight:bold; margin-top:12px;">RACE TELEMETRY FEED:</div>
+          <div class="race-log" id="race-log">
+            <div>[STANDBY] Arena initialized. 50 seats available on edge network.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let selectedSeat = null;
+    let turnstileToken = null;
+    let allSeats = [];
+    let isDropRushActive = false;
+
+    window.onArenaTurnstileSuccess = function(token) {
+      turnstileToken = token;
+      logRace("✔ Cloudflare Turnstile Passed! Token acquired.");
+      updateBookButton();
+    };
+
+    function logRace(msg) {
+      const feed = document.getElementById("race-log");
+      const time = new Date().toISOString().substring(14, 23);
+      const div = document.createElement("div");
+      div.innerText = `[${time}] ${msg}`;
+      feed.prepend(div);
+    }
+
+    async function loadSeats() {
+      try {
+        const resp = await fetch("/api/seats");
+        const data = await resp.json();
+        allSeats = data.seats;
+        renderSeats(allSeats);
+      } catch (e) {
+        console.error("Error loading seats", e);
+      }
+    }
+
+    function renderSeats(seats) {
+      const container = document.getElementById("seat-grid");
+      container.innerHTML = "";
+      let avail = 0;
+      seats.forEach(s => {
+        if (s.status === "available") avail++;
+        const el = document.createElement("div");
+        el.className = `seat ${s.status}`;
+        el.id = `seat-${s.id}`;
+        el.innerText = s.id;
+        el.onclick = () => selectSeat(s);
+        container.appendChild(el);
+      });
+      document.getElementById("avail-count").innerText = avail;
+    }
+
+    function selectSeat(seat) {
+      if (seat.status !== "available") return;
+      document.querySelectorAll(".seat.selected").forEach(s => s.classList.remove("selected"));
+      const el = document.getElementById(`seat-${seat.id}`);
+      el.classList.add("selected");
+      selectedSeat = seat;
+      document.getElementById("selected-seat-display").innerText = seat.id;
+      document.getElementById("selected-seat-price").innerText = `$${seat.price}`;
+      logRace(`Selected seat ${seat.id} ($${seat.price}).`);
+      updateBookButton();
+    }
+
+    function updateBookButton() {
+      const btn = document.getElementById("book-btn");
+      const isMaster = localStorage.getItem("sentinel_unlocked") === "true";
+      btn.disabled = !(selectedSeat && (turnstileToken || isMaster));
+    }
+
+    async function submitBooking() {
+      if (!selectedSeat) return;
+      const statusEl = document.getElementById("booking-status");
+      statusEl.innerHTML = `<span style="color:var(--accent-orange);">⚡ Booking seat ${selectedSeat.id} on Cloudflare Edge...</span>`;
+
+      const startTime = performance.now();
+      const payload = {
+        seat_id: selectedSeat.id,
+        turnstile_token: turnstileToken,
+        client_id: "human-manual-operator"
+      };
+
+      try {
+        const resp = await fetch("/api/book", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Sentinel-Admin-Key": localStorage.getItem("sentinel_unlocked") === "true" ? "SENTINEL_WAR_2026" : ""
+          },
+          body: JSON.stringify(payload)
+        });
+        const latency = (performance.now() - startTime).toFixed(1);
+        const data = await resp.json();
+
+        if (data.success) {
+          statusEl.innerHTML = `<span style="color:var(--accent-green); font-weight:bold;">✔ BOOKED in ${latency}ms [Colo: ${data.edge_colo}]</span>`;
+          const seatEl = document.getElementById(`seat-${selectedSeat.id}`);
+          seatEl.className = "seat booked";
+          seatEl.style.background = "#00ff88";
+          seatEl.style.color = "#000";
+          logRace(`🏆 YOU SUCCESSFULLY SNIPED SEAT ${selectedSeat.id} in ${latency}ms!`);
+          selectedSeat = null;
+          updateBookButton();
+        } else {
+          statusEl.innerHTML = `<span style="color:#ef4444;">❌ Failed: ${data.error}</span>`;
+          logRace(`❌ Booking rejected: ${data.error}`);
+        }
+      } catch (err) {
+        statusEl.innerHTML = `<span style="color:#ef4444;">❌ Network Error</span>`;
+      }
+    }
+
+    function startDropRushSimulation() {
+      if (isDropRushActive) return;
+      isDropRushActive = true;
+      loadSeats();
+
+      let countdown = 3;
+      const clockEl = document.getElementById("countdown-display");
+      logRace("🚨 DROP RUSH INITIATED! Starting 3-second drop countdown...");
+
+      const timer = setInterval(() => {
+        clockEl.innerText = `T-MINUS 00:0${countdown}`;
+        if (countdown <= 0) {
+          clearInterval(timer);
+          clockEl.innerText = "🔥 TICKETS LIVE!";
+          executeBotFlood();
+        }
+        countdown--;
+      }, 1000);
+    }
+
+    function executeBotFlood() {
+      logRace("⚡ 20 BOT THREADS ENTERED QUEUE! Snatches beginning at ~120ms...");
+      const botNames = ["ProtocolSniper", "DarkFiberBot", "MilliScraper", "ColoRunner", "FlashTrader"];
+      const avail = allSeats.filter(s => s.status === "available");
+
+      // Spawn bots to claim random seats at realistic micro-intervals
+      let claimed = 0;
+      const interval = setInterval(() => {
+        if (claimed >= 30 || avail.length === 0) {
+          clearInterval(interval);
+          isDropRushActive = false;
+          logRace("🏁 Drop rush completed. Final inventory updated.");
+          return;
+        }
+
+        const randomIdx = Math.floor(Math.random() * avail.length);
+        const seat = avail.splice(randomIdx, 1)[0];
+        if (seat) {
+          const bot = botNames[Math.floor(Math.random() * botNames.length)];
+          const seatEl = document.getElementById(`seat-${seat.id}`);
+          if (seatEl && !seatEl.classList.contains("selected")) {
+            seatEl.className = "seat bot-snatched";
+            seat.status = "booked";
+            claimed++;
+            logRace(`🤖 [${bot}] snatched seat ${seat.id} in ${120 + claimed * 35}ms`);
+            document.getElementById("avail-count").innerText = (50 - claimed);
+          }
+        }
+      }, 140);
+    }
+
+    async function runMilliBeastSnipe() {
+      const statusEl = document.getElementById("booking-status");
+      statusEl.innerHTML = `<span style="color:var(--accent-cyan); font-weight:bold;">⚡ UNLEASHING MILLI BEAST MODE: 5-Thread Parallel Burst...</span>`;
+      logRace("⚡ [MILLI BEAST MODE] Launching 5 concurrent asynchronous booking threads...");
+
+      const avail = allSeats.filter(s => s.status === "available").slice(0, 5);
+      if (avail.length === 0) {
+        statusEl.innerHTML = `<span style="color:#ef4444;">No seats available!</span>`;
+        return;
+      }
+
+      const t0 = performance.now();
+      const burstPromises = avail.map(async (seat) => {
+        try {
+          const resp = await fetch("/api/book", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-Sentinel-Admin-Key": "SENTINEL_WAR_2026"
+            },
+            body: JSON.stringify({
+              seat_id: seat.id,
+              client_id: "milli-beast-sniper",
+              turnstile_token: "milli-autonomous-bypass"
+            })
+          });
+          const res = await resp.json();
+          return { seat, res };
+        } catch (e) {
+          return { seat, res: { success: false, error: e.message } };
+        }
+      });
+
+      const results = await Promise.all(burstPromises);
+      const totalTime = (performance.now() - t0).toFixed(1);
+
+      let successCount = 0;
+      results.forEach(({ seat, res }) => {
+        if (res.success) {
+          successCount++;
+          const el = document.getElementById(`seat-${seat.id}`);
+          if (el) {
+            el.className = "seat booked";
+            el.style.background = "#00ff88";
+            el.style.color = "#000";
+          }
+          seat.status = "booked";
+          logRace(`🏆 MILLI SNIPED SEAT ${seat.id} in ${(totalTime / 5).toFixed(1)}ms! [Colo: ${res.edge_colo}]`);
+        }
+      });
+
+      statusEl.innerHTML = `<span style="color:var(--accent-green); font-weight:bold;">✔ ${successCount} VIP SEATS SNIPED in ${totalTime}ms TOTAL!</span>`;
+      document.getElementById("avail-count").innerText = allSeats.filter(s => s.status === "available").length;
+    }
+
+    function lockGate() {
+      localStorage.removeItem("sentinel_unlocked");
+      document.cookie = "sentinel_admin_key=; path=/; max-age=0";
+      window.location.href = "/";
+    }
+
+    loadSeats();
+  </script>
+</body>
+</html>

@@ -1,0 +1,2407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Milli Plays | Hypersonic Cyber-Arcade &amp; Neural Telemetry Hub</title>
+  
+  <!-- SEO & Social Meta Tags -->
+  <meta name="description" content="Milli Plays: Hypersonic Autonomous Cyber-Arcade & Neural Telemetry Suite. 16 AI-driven games, microsecond reaction engines, braided labyrinth solvers, and high-frequency trading arbitrage.">
+  <meta name="keywords" content="ai gaming, autonomous agents, hypersonic, pathfinding, high frequency trading, bullet hell, cloudflare pages, web performance, html5 canvas">
+  <meta name="author" content="Abdullah Al Raju">
+  <meta property="og:title" content="Milli Plays | Hypersonic Cyber-Arcade & Neural Telemetry Hub">
+  <meta property="og:description" content="16 AI-driven games, microsecond reaction engines, braided labyrinth solvers, and high-frequency trading arbitrage.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://ticket-booker-arena.pages.dev/">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-canvas: #090b0e;
+      --bg-surface: #12151c;
+      --bg-surface-elevated: #181d26;
+      --bg-surface-glass: rgba(22, 26, 36, 0.78);
+      --border-subtle: rgba(255, 255, 255, 0.07);
+      --border-card: rgba(255, 255, 255, 0.09);
+      --border-highlight: rgba(255, 122, 48, 0.35);
+      
+      --accent-orange: #ff7a30;
+      --accent-orange-glow: rgba(255, 122, 48, 0.45);
+      --accent-orange-gradient: linear-gradient(135deg, #ff7a30 0%, #e85912 100%);
+      --accent-banner-gradient: linear-gradient(135deg, #e86424 0%, #bd450e 55%, #7a2202 100%);
+      
+      --accent-emerald: #10b981;
+      --accent-emerald-glow: rgba(16, 185, 129, 0.4);
+      --accent-emerald-badge: rgba(16, 185, 129, 0.15);
+      
+      --accent-cyan: #00f0ff;
+      --accent-gold: #f59e0b;
+      --accent-purple: #a855f7;
+      
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-tertiary: #64748b;
+      
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-xl: 26px;
+      --radius-pill: 9999px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background-color: var(--bg-canvas);
+      background-image: 
+        radial-gradient(circle at 75% 15%, rgba(224, 102, 32, 0.18) 0%, rgba(9, 11, 14, 0) 50%),
+        radial-gradient(circle at 20% 85%, rgba(180, 75, 18, 0.12) 0%, rgba(9, 11, 14, 0) 45%),
+        radial-gradient(circle at 50% 50%, rgba(18, 21, 28, 0.6) 0%, rgba(9, 11, 14, 1) 100%);
+      background-attachment: fixed;
+      color: var(--text-primary);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      overflow-x: hidden;
+    }
+
+    /* ---------------------------------------------------- */
+    /* LEFT SLIM NAVIGATION SIDEBAR                         */
+    /* ---------------------------------------------------- */
+    .sidebar {
+      width: 76px;
+      min-height: 100vh;
+      background: rgba(11, 13, 17, 0.95);
+      border-right: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 100;
+      backdrop-filter: blur(20px);
+    }
+
+    .sidebar-logo {
+      width: 44px;
+      height: 44px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .sidebar-logo:hover {
+      transform: rotate(45deg) scale(1.08);
+    }
+
+    .nav-group {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      align-items: center;
+      width: 100%;
+      flex: 1;
+    }
+
+    .nav-item {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    .nav-item:hover {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .nav-item.active {
+      background: var(--accent-orange-gradient);
+      color: #ffffff;
+      box-shadow: 0 4px 18px var(--accent-orange-glow);
+    }
+    .nav-badge-dot {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent-orange);
+      border: 2px solid #0b0d11;
+    }
+
+    .sidebar-footer {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      align-items: center;
+      width: 100%;
+    }
+
+    /* ---------------------------------------------------- */
+    /* MAIN APPLICATION VIEWPORT                            */
+    /* ---------------------------------------------------- */
+    .app-main {
+      margin-left: 76px;
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 24px 32px 60px 32px;
+      max-width: 1560px;
+    }
+
+    /* TOP BAR */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+
+    .search-pill-container {
+      position: relative;
+      width: 420px;
+      max-width: 100%;
+    }
+    .search-pill {
+      width: 100%;
+      background: rgba(22, 26, 36, 0.85);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-pill);
+      padding: 12px 110px 12px 42px;
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      outline: none;
+      backdrop-filter: blur(16px);
+      transition: all 0.2s ease;
+    }
+    .search-pill:focus {
+      border-color: var(--accent-orange);
+      box-shadow: 0 0 0 3px rgba(255, 122, 48, 0.2);
+      background: rgba(26, 31, 44, 0.95);
+    }
+    .search-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-tertiary);
+      pointer-events: none;
+    }
+    .shortcut-chip {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-secondary);
+      font-size: 0.72rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .top-bar-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .action-circle-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: rgba(22, 26, 36, 0.85);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+    .action-circle-btn:hover {
+      color: var(--text-primary);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-1px);
+    }
+    .badge-dot-top {
+      position: absolute;
+      top: 10px;
+      right: 11px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent-orange);
+    }
+
+    .user-profile-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(22, 26, 36, 0.85);
+      border: 1px solid var(--border-subtle);
+      padding: 6px 14px 6px 8px;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .user-profile-badge:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ff7a30, #10b981);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.82rem;
+      color: #fff;
+    }
+    .user-info {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+    .user-name {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .user-handle {
+      font-size: 0.72rem;
+      color: var(--text-tertiary);
+    }
+
+    /* ---------------------------------------------------- */
+    /* LUXURY DASHBOARD DUAL-COLUMN GRID                    */
+    /* ---------------------------------------------------- */
+    .dashboard-layout {
+      display: grid;
+      grid-template-columns: 1.8fr 1fr;
+      gap: 24px;
+      margin-bottom: 36px;
+    }
+
+    @media (max-width: 1200px) {
+      .dashboard-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* LUXURY CARD BASE */
+    .card-surface {
+      background: var(--bg-surface-glass);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-xl);
+      padding: 26px;
+      backdrop-filter: blur(24px);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ---------------------------------------------------- */
+    /* LEFT COLUMN - TELEMETRY & BANNER & INVESTMENTS       */
+    /* ---------------------------------------------------- */
+    .left-column {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* HERO TELEMETRY CHART CARD */
+    .telemetry-card {
+      min-height: 370px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .telemetry-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+    .telemetry-title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .telemetry-label {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+      letter-spacing: 0.2px;
+    }
+    .telemetry-value-row {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+    }
+    .telemetry-huge-value {
+      font-size: 2.1rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #ffffff;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .gain-pill {
+      background: var(--accent-emerald-badge);
+      color: var(--accent-emerald);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 3px 8px;
+      border-radius: var(--radius-sm);
+      font-size: 0.78rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .time-filter-pills {
+      display: flex;
+      background: rgba(15, 18, 25, 0.8);
+      border: 1px solid var(--border-subtle);
+      padding: 4px;
+      border-radius: var(--radius-pill);
+      gap: 2px;
+    }
+    .time-tab {
+      padding: 5px 14px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: transparent;
+      border: none;
+    }
+    .time-tab:hover {
+      color: #fff;
+    }
+    .time-tab.active {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+    }
+
+    /* REALTIME CHART CANVAS & TOOLTIP */
+    .chart-viewport {
+      position: relative;
+      flex: 1;
+      width: 100%;
+      min-height: 200px;
+      margin: 10px 0 16px 0;
+    }
+    #telemetryCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* SKEUOMORPHIC FLOATING TOOLTIP */
+    .chart-tooltip-floating {
+      position: absolute;
+      top: 25px;
+      left: 56%;
+      transform: translateX(-50%);
+      background: #ffffff;
+      color: #0b0d11;
+      padding: 10px 16px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 122, 48, 0.3);
+      font-size: 0.8rem;
+      pointer-events: none;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .chart-tooltip-floating::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 6px solid #ffffff;
+    }
+    .tooltip-date-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #64748b;
+      gap: 12px;
+    }
+    .tooltip-val {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #090b0e;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .chart-legend-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 14px;
+      font-size: 0.76rem;
+      color: var(--text-tertiary);
+    }
+    .legend-indicators {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .legend-dot-white {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ffffff;
+    }
+    .legend-dot-green {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-emerald);
+      box-shadow: 0 0 8px var(--accent-emerald);
+    }
+
+    /* LOWER DUAL CARDS */
+    .lower-cards-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 850px) {
+      .lower-cards-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* BANNER CARD */
+    .banner-card {
+      background: var(--accent-banner-gradient);
+      border: 1px solid rgba(255, 160, 100, 0.25);
+      box-shadow: 0 16px 40px rgba(220, 80, 20, 0.35);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 260px;
+    }
+    .banner-card h3 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.25;
+      margin-bottom: 8px;
+      letter-spacing: -0.3px;
+    }
+    .banner-card p {
+      font-size: 0.82rem;
+      color: rgba(255, 255, 255, 0.82);
+      line-height: 1.45;
+    }
+    .banner-footer {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .stacked-avatars-row {
+      display: flex;
+      align-items: center;
+    }
+    .stacked-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid #bd450e;
+      background: #1e2430;
+      margin-left: -8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .stacked-avatar:first-child {
+      margin-left: 0;
+    }
+    .avatar-plus {
+      background: #ff8a48;
+      color: #fff;
+    }
+    .banner-btn-white {
+      background: #ffffff;
+      color: #0b0d11;
+      border: none;
+      padding: 12px 20px;
+      border-radius: var(--radius-pill);
+      font-weight: 700;
+      font-size: 0.88rem;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+      transition: all 0.2s ease;
+      text-align: center;
+      text-decoration: none;
+      display: block;
+    }
+    .banner-btn-white:hover {
+      background: #f1f5f9;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    /* INVESTMENTS / SOLVER EFFICIENCY CARD */
+    .investments-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 260px;
+    }
+    .investments-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .investments-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .investments-stat-row {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .investments-num {
+      font-size: 1.3rem;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+      color: #ffffff;
+    }
+    .dropdown-pill-group {
+      display: flex;
+      gap: 6px;
+    }
+    .dropdown-pill {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-pill);
+      padding: 4px 10px;
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* BAR CHART VISUALIZER */
+    .bars-chart-container {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      height: 140px;
+      padding-top: 24px;
+      gap: 12px;
+    }
+    .bar-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      height: 100%;
+      justify-content: flex-end;
+      position: relative;
+    }
+    .bar-val-label {
+      font-size: 0.7rem;
+      color: var(--text-tertiary);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+    }
+    .bar-cylinder {
+      width: 100%;
+      max-width: 38px;
+      background: linear-gradient(180deg, #332118 0%, #1e1614 100%);
+      border-radius: 8px 8px 4px 4px;
+      border: 1px solid rgba(255, 122, 48, 0.15);
+      transition: height 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    /* HIGHLIGHTED BAR (MATCHING REFERENCE IMAGE 5th COLUMN) */
+    .bar-col.highlighted .bar-cylinder {
+      background: linear-gradient(180deg, #10b981 0%, #064e3b 100%);
+      box-shadow: 0 0 24px rgba(16, 185, 129, 0.45);
+      border: 1px solid #34d399;
+    }
+    .floating-bar-pill {
+      position: absolute;
+      top: -12px;
+      background: #10b981;
+      color: #042f2e;
+      font-size: 0.68rem;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+      white-space: nowrap;
+    }
+    .bar-axis-label {
+      font-size: 0.72rem;
+      color: var(--text-tertiary);
+      font-weight: 600;
+    }
+
+    /* ---------------------------------------------------- */
+    /* RIGHT COLUMN - SKEUOMORPHIC STACKED CARDS & FEED     */
+    /* ---------------------------------------------------- */
+    .right-column {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* "MY CARDS" STACKED WALLET CARD */
+    .cards-deck-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .deck-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .deck-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #ffffff;
+    }
+    .add-new-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-pill);
+      padding: 4px 12px;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .add-new-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    /* THE SKEUOMORPHIC 3D OVERLAPPING CARDS */
+    .stacked-cards-wrapper {
+      position: relative;
+      height: 230px;
+      margin-top: 8px;
+    }
+
+    /* REAR CARD (CARD 1) */
+    .card-layer-back {
+      position: absolute;
+      top: 0;
+      left: 12px;
+      right: 12px;
+      height: 120px;
+      background: linear-gradient(135deg, #a34812 0%, #4a2107 100%);
+      border-radius: 18px;
+      opacity: 0.55;
+      padding: 12px 18px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: #fdba74;
+      font-weight: 700;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* MIDDLE CARD (CARD 2) */
+    .card-layer-mid {
+      position: absolute;
+      top: 22px;
+      left: 6px;
+      right: 6px;
+      height: 130px;
+      background: linear-gradient(135deg, #2a1b15 0%, #171920 100%);
+      border-radius: 18px;
+      opacity: 0.85;
+      padding: 12px 18px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: #cbd5e1;
+      font-weight: 700;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* FRONT ACTIVE CARD (CARD 3 - SKEUOMORPHIC MASTERPIECE) */
+    .card-layer-front {
+      position: absolute;
+      top: 44px;
+      left: 0;
+      right: 0;
+      height: 175px;
+      background: linear-gradient(145deg, #181d27 0%, #0d1016 100%);
+      border-radius: 20px;
+      padding: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      z-index: 5;
+    }
+    .card-front-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .card-brand-label {
+      font-size: 1.1rem;
+      font-weight: 900;
+      letter-spacing: 1px;
+      color: #ffffff;
+      font-style: italic;
+    }
+    /* METALLIC SIM CHIP GRAPHIC */
+    .sim-chip {
+      width: 38px;
+      height: 28px;
+      background: linear-gradient(135deg, #eab308 0%, #ca8a04 50%, #a16207 100%);
+      border-radius: 5px;
+      border: 1px solid #fef08a;
+      box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.4), 0 2px 6px rgba(0, 0, 0, 0.4);
+      position: relative;
+    }
+    .sim-chip::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: rgba(0, 0, 0, 0.3);
+    }
+    .sim-chip::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 1px;
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .card-balance-block {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .card-balance-sub {
+      font-size: 0.72rem;
+      color: var(--text-tertiary);
+      font-weight: 600;
+    }
+    .card-balance-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+    .card-balance-amount {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: #ffffff;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ACTION BUTTONS BENEATH CARD */
+    .deck-actions-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .deck-btn-dark {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-subtle);
+      color: #ffffff;
+      border-radius: var(--radius-pill);
+      padding: 12px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    .deck-btn-dark:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .deck-btn-orange {
+      background: var(--accent-orange-gradient);
+      border: none;
+      color: #ffffff;
+      border-radius: var(--radius-pill);
+      padding: 12px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 18px var(--accent-orange-glow);
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    .deck-btn-orange:hover {
+      box-shadow: 0 8px 24px rgba(255, 122, 48, 0.6);
+      transform: translateY(-2px);
+    }
+
+    /* RECENT TRANSACTIONS / LIVE TELEMETRY FEED */
+    .feed-card {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .feed-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .feed-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #ffffff;
+    }
+    .view-all-link {
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .view-all-link:hover {
+      color: var(--accent-orange);
+    }
+
+    .feed-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .feed-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: rgba(18, 22, 30, 0.6);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      transition: all 0.2s ease;
+      text-decoration: none;
+      color: inherit;
+    }
+    .feed-row:hover {
+      background: rgba(26, 32, 44, 0.8);
+      border-color: rgba(255, 255, 255, 0.15);
+      transform: translateX(3px);
+    }
+    .feed-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .feed-icon-box {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .feed-details {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.25;
+    }
+    .feed-name {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .feed-time {
+      font-size: 0.7rem;
+      color: var(--text-tertiary);
+    }
+    .feed-stat-positive {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: var(--accent-emerald);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .feed-stat-neutral {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: var(--accent-cyan);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .feed-stat-gold {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: var(--accent-gold);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ---------------------------------------------------- */
+    /* COMPREHENSIVE HYPERSONIC GAME ARCADE GRID            */
+    /* ---------------------------------------------------- */
+    .arcade-section {
+      margin-top: 10px;
+    }
+    .section-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 20px;
+    }
+    .section-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.3px;
+    }
+    .section-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+    .filter-tags-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .filter-tag-btn {
+      background: rgba(22, 26, 36, 0.8);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .filter-tag-btn:hover, .filter-tag-btn.active {
+      background: rgba(255, 122, 48, 0.15);
+      border-color: var(--accent-orange);
+      color: var(--accent-orange);
+    }
+
+    .arcade-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+      gap: 20px;
+    }
+
+    .game-card {
+      background: var(--bg-surface-glass);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 220px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+    .game-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: transparent;
+      transition: all 0.28s ease;
+    }
+    .game-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255, 122, 48, 0.4);
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 122, 48, 0.15);
+    }
+    .game-card:hover::before {
+      background: var(--accent-orange-gradient);
+    }
+
+    .game-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .game-tag {
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-secondary);
+    }
+    .game-tag.orange { color: var(--accent-orange); border-color: rgba(255, 122, 48, 0.3); background: rgba(255, 122, 48, 0.1); }
+    .game-tag.cyan { color: var(--accent-cyan); border-color: rgba(0, 240, 255, 0.3); background: rgba(0, 240, 255, 0.1); }
+    .game-tag.emerald { color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.1); }
+    .game-tag.gold { color: var(--accent-gold); border-color: rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.1); }
+    .game-tag.purple { color: var(--accent-purple); border-color: rgba(168, 85, 247, 0.3); background: rgba(168, 85, 247, 0.1); }
+
+    .game-title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .game-icon-circle {
+      font-size: 1.35rem;
+    }
+    .game-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.2px;
+    }
+    .game-desc {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      line-height: 1.45;
+      margin-bottom: 18px;
+    }
+
+    .game-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 14px;
+    }
+    .game-spec {
+      font-size: 0.72rem;
+      color: var(--text-tertiary);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+    }
+    .play-pill-btn {
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+      border: 1px solid var(--border-subtle);
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      font-size: 0.78rem;
+      font-weight: 700;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .game-card:hover .play-pill-btn {
+      background: var(--accent-orange-gradient);
+      border-color: transparent;
+      box-shadow: 0 4px 14px var(--accent-orange-glow);
+    }
+
+    /* ---------------------------------------------------- */
+    /* QUICK LAUNCHER MODAL (CMD + SPACE / SEARCH)          */
+    /* ---------------------------------------------------- */
+    .quick-modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(12px);
+      z-index: 1000;
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 12vh;
+    }
+    .quick-modal-backdrop.open {
+      display: flex;
+    }
+    .quick-modal {
+      width: 600px;
+      max-width: 90vw;
+      background: #141822;
+      border: 1px solid rgba(255, 122, 48, 0.3);
+      border-radius: var(--radius-xl);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(255, 122, 48, 0.2);
+      overflow: hidden;
+    }
+    .modal-search-header {
+      padding: 18px 22px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .modal-search-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 600;
+      outline: none;
+    }
+    .modal-results-list {
+      max-height: 380px;
+      overflow-y: auto;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .modal-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      color: inherit;
+      text-decoration: none;
+      transition: background 0.15s ease;
+    }
+    .modal-item:hover, .modal-item.selected {
+      background: rgba(255, 122, 48, 0.15);
+    }
+    .modal-footer {
+      padding: 10px 20px;
+      background: #0d1017;
+      border-top: 1px solid var(--border-subtle);
+      font-size: 0.72rem;
+      color: var(--text-tertiary);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* FOOTER */
+    .app-footer {
+      margin-top: 60px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      color: var(--text-tertiary);
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .footer-links {
+      display: flex;
+      gap: 18px;
+    }
+    .footer-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+    .footer-links a:hover {
+      color: var(--accent-orange);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LEFT SLIM NAVIGATION SIDEBAR -->
+  <aside class="sidebar">
+    <!-- Neon Star/Flower Logo -->
+    <div class="sidebar-logo" title="Milli Neural Core" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+        <path d="M16 2L18.8 11.2L28 14L18.8 16.8L16 26L13.2 16.8L4 14L13.2 11.2L16 2Z" fill="#10b981" />
+        <circle cx="16" cy="14" r="3.5" fill="#ffffff" />
+      </svg>
+    </div>
+
+    <!-- Navigation Icons Group -->
+    <nav class="nav-group">
+      <!-- Active Home / Dashboard -->
+      <a href="/" class="nav-item active" title="Hypersonic Neural Dashboard">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+      </a>
+
+      <!-- Arcade Grid / Games -->
+      <a href="#arcade-section" class="nav-item" title="16 Hypersonic Game Engines">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+      </a>
+
+      <!-- Telemetry Analytics -->
+      <a href="#telemetry-card" class="nav-item" title="Real-time Telemetry & Speed Lab">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="20" x2="18" y2="10"></line>
+          <line x1="12" y1="20" x2="12" y2="4"></line>
+          <line x1="6" y1="20" x2="6" y2="14"></line>
+        </svg>
+      </a>
+
+      <!-- Terminal / Logs with Notification Dot -->
+      <a href="/clicker" class="nav-item" title="Reflex & Microsecond Edge Ping">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="4 17 10 11 4 5"></polyline>
+          <line x1="12" y1="19" x2="20" y2="19"></line>
+        </svg>
+        <span class="nav-badge-dot"></span>
+      </a>
+
+      <!-- Hardware / Circuit Engine -->
+      <a href="/circuit" class="nav-item" title="Orthogonal PCB Flow Solver">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+          <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+        </svg>
+      </a>
+
+      <!-- GitHub Repo Direct Link -->
+      <a href="https://github.com/Abdullah-Al-Raju/milli-plays" target="_blank" rel="noopener noreferrer" class="nav-item" title="Public GitHub Repository (milli-plays)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+        </svg>
+      </a>
+    </nav>
+
+    <!-- Sidebar Bottom Settings -->
+    <div class="sidebar-footer">
+      <div class="nav-item" title="System Settings" onclick="openSearchModal()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </div>
+      <div class="nav-item" title="Ignite Hypersonic Mode" onclick="igniteHypersonicAll()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff7a30" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+        </svg>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN APPLICATION VIEWPORT -->
+  <main class="app-main">
+    
+    <!-- TOP BAR -->
+    <header class="top-bar">
+      <!-- Search Input Pill with Command Shortcut -->
+      <div class="search-pill-container" onclick="openSearchModal()">
+        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" class="search-pill" placeholder="Search hypersonic engines, algorithms, telemetry..." readonly>
+        <div class="shortcut-chip" title="Press ⌘ + Space or Click to Search">⌘ + Space</div>
+      </div>
+
+      <!-- Actions & Pilot Badge -->
+      <div class="top-bar-actions">
+        <!-- Reload telemetry button -->
+        <div class="action-circle-btn" title="Refresh Telemetry Metrics" onclick="refreshTelemetryPulse()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+          </svg>
+        </div>
+
+        <!-- Notification Bell with Orange Dot -->
+        <div class="action-circle-btn" title="System Alerts: 16 Autonomous Engines Active" onclick="alert('⚡ Milli Alert: All 16 Hypersonic Engines running 100% collision-free at Cloudflare Edge.')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span class="badge-dot-top"></span>
+        </div>
+
+        <!-- Theme Toggle (Moon) -->
+        <div class="action-circle-btn" title="Obsidian Warm Amber Theme Locked">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </div>
+
+        <!-- User / Pilot Identity Badge -->
+        <div class="user-profile-badge" onclick="window.open('https://github.com/Abdullah-Al-Raju/milli-plays', '_blank')">
+          <div class="user-avatar">M</div>
+          <div class="user-info">
+            <span class="user-name">Milli Autonomous AI</span>
+            <span class="user-handle">@milli_hypersonic</span>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-tertiary);">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+      </div>
+    </header>
+
+    <!-- LUXURY DUAL-COLUMN GRID -->
+    <div class="dashboard-layout">
+      
+      <!-- LEFT COLUMN -->
+      <div class="left-column">
+        
+        <!-- HERO TELEMETRY CARD ("Total Balance" -> Neural Velocity) -->
+        <div class="card-surface telemetry-card" id="telemetry-card">
+          <div class="telemetry-header">
+            <div class="telemetry-title-block">
+              <span class="telemetry-label">Global Neural Velocity &amp; Throughput</span>
+              <div class="telemetry-value-row">
+                <span class="telemetry-huge-value" id="machVelocityVal">Mach 15.42x</span>
+                <span class="gain-pill">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="19" x2="12" y2="5"></line>
+                    <polyline points="5 12 12 5 19 12"></polyline>
+                  </svg>
+                  2.92%
+                </span>
+              </div>
+            </div>
+
+            <!-- Time Filter Pills -->
+            <div class="time-filter-pills">
+              <button class="time-tab" onclick="setTimeTab(this, 'live')">Live</button>
+              <button class="time-tab active" onclick="setTimeTab(this, '1h')">1 hour</button>
+              <button class="time-tab" onclick="setTimeTab(this, '24h')">24 hour</button>
+              <button class="time-tab" onclick="setTimeTab(this, 'all')">All-Time</button>
+            </div>
+          </div>
+
+          <!-- Real-time Canvas Area Chart -->
+          <div class="chart-viewport">
+            <canvas id="telemetryCanvas"></canvas>
+            
+            <!-- Skeuomorphic Floating Tooltip Popup (Matching Reference Design) -->
+            <div class="chart-tooltip-floating" id="chartTooltip">
+              <div class="tooltip-date-row">
+                <span>09 Dec, 2026</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="7" y1="17" x2="17" y2="7"></line>
+                  <polyline points="7 7 17 7 17 17"></polyline>
+                </svg>
+              </div>
+              <span class="tooltip-val" id="tooltipMachVal">Mach 15.42 • 0.18ms</span>
+            </div>
+          </div>
+
+          <!-- Chart Bottom Legend & Timeline Segment -->
+          <div class="chart-legend-row">
+            <span>Average Solver Latency: <strong style="color:#ffffff;">0.18 ms</strong> | 100% Collision-Free</span>
+            <div class="legend-indicators">
+              <div class="legend-item">
+                <span class="legend-dot-white"></span>
+                <span>Autonomous Solving</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-dot-green"></span>
+                <span>Quantum Convergence</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LOWER DUAL CARDS ROW -->
+        <div class="lower-cards-grid">
+          
+          <!-- BANNER CARD: "Trusted by Thousands" -> Powered by Milli Core -->
+          <div class="card-surface banner-card">
+            <div>
+              <h3>Autonomous AI at Mach 15.<br>Zero Human Hesitation.</h3>
+              <p>16 hypersonic engines. Braided 50x50 multi-route solvers, N-body orbital physics, and microsecond high-frequency execution.</p>
+            </div>
+
+            <div class="banner-footer">
+              <div class="stacked-avatars-row">
+                <div class="stacked-avatar" title="Milli-Core">M</div>
+                <div class="stacked-avatar" title="Neural Agent A" style="background:#0284c7;">A</div>
+                <div class="stacked-avatar" title="Reflex Sniper R" style="background:#10b981;">R</div>
+                <div class="stacked-avatar avatar-plus" title="16 Total Engines">+16</div>
+              </div>
+              <a href="/milli-drive" class="banner-btn-white">Launch Speed Lab (Mach 15)</a>
+            </div>
+          </div>
+
+          <!-- INVESTMENTS / SOLVER EFFICIENCY CARD -->
+          <div class="card-surface investments-card">
+            <div>
+              <div class="investments-header">
+                <div>
+                  <div class="investments-title">Solver Efficiency</div>
+                  <div class="investments-stat-row">
+                    <span class="investments-num">99.98%</span>
+                    <span class="gain-pill" style="font-size:0.72rem; padding:2px 6px;">↑ 1.52%</span>
+                  </div>
+                </div>
+
+                <div class="dropdown-pill-group">
+                  <div class="dropdown-pill">Sort ↑↓</div>
+                  <div class="dropdown-pill">Game ⌄</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bar Columns Visualizer (Matching Reference Image) -->
+            <div class="bars-chart-container">
+              <div class="bar-col">
+                <span class="bar-val-label">0.2ms</span>
+                <div class="bar-cylinder" style="height: 48px;"></div>
+                <span class="bar-axis-label">Drive</span>
+              </div>
+              <div class="bar-col">
+                <span class="bar-val-label">0.4ms</span>
+                <div class="bar-cylinder" style="height: 68px;"></div>
+                <span class="bar-axis-label">Maze</span>
+              </div>
+              <div class="bar-col">
+                <span class="bar-val-label">1.2ms</span>
+                <div class="bar-cylinder" style="height: 85px;"></div>
+                <span class="bar-axis-label">Hell</span>
+              </div>
+              <div class="bar-col">
+                <span class="bar-val-label">0.6ms</span>
+                <div class="bar-cylinder" style="height: 85px;"></div>
+                <span class="bar-axis-label">Orbit</span>
+              </div>
+              <!-- HIGHLIGHTED MINT GREEN BAR (5th BAR) -->
+              <div class="bar-col highlighted">
+                <div class="floating-bar-pill">100% CLEAN</div>
+                <span class="bar-val-label" style="color:#10b981; font-weight:700;">0.1ms</span>
+                <div class="bar-cylinder" style="height: 110px;"></div>
+                <span class="bar-axis-label" style="color:#10b981; font-weight:700;">HFT</span>
+              </div>
+              <div class="bar-col">
+                <span class="bar-val-label">0.8ms</span>
+                <div class="bar-cylinder" style="height: 80px;"></div>
+                <span class="bar-axis-label">Sweep</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div class="right-column">
+        
+        <!-- SKEUOMORPHIC STACKED CARDS DECK -->
+        <div class="card-surface cards-deck-container">
+          <div class="deck-header">
+            <span class="deck-title">Active Cores</span>
+            <a href="https://github.com/Abdullah-Al-Raju/milli-plays" target="_blank" rel="noopener noreferrer" class="add-new-btn">+ Public GitHub</a>
+          </div>
+
+          <!-- THE 3D SKEUOMORPHIC STACKED CARDS -->
+          <div class="stacked-cards-wrapper">
+            <!-- REAR CARD (BRONZE) -->
+            <div class="card-layer-back">
+              <span>CORE-01 / PROTOCOL</span>
+              <span>15,400 CPS</span>
+            </div>
+
+            <!-- MIDDLE CARD (DARK SLATE) -->
+            <div class="card-layer-mid">
+              <span>CORE-02 / CONVEX HULL</span>
+              <span>0.42 ms RTT</span>
+            </div>
+
+            <!-- FRONT MASTERPIECE CARD -->
+            <div class="card-layer-front">
+              <div class="card-front-top">
+                <span class="card-brand-label">HYPER-CORE 9</span>
+                <!-- Skeuomorphic Metallic Gold Microchip -->
+                <div class="sim-chip" title="Hardware Acceleration Microchip"></div>
+              </div>
+
+              <div class="card-balance-block">
+                <span class="card-balance-sub">Neural Reaction Window</span>
+                <div class="card-balance-row">
+                  <span class="card-balance-amount">0.18 ms</span>
+                  <span class="gain-pill">↑ 3.52%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ACTION BUTTONS BENEATH CARD -->
+          <div class="deck-actions-row">
+            <a href="/clicker" class="deck-btn-dark">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="7" y1="7" x2="17" y2="17"></line>
+                <polyline points="17 7 17 17 7 17"></polyline>
+              </svg>
+              Benchmark
+            </a>
+            <a href="/milli-drive" class="deck-btn-orange">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="7" y1="17" x2="17" y2="7"></line>
+                <polyline points="7 7 17 7 17 17"></polyline>
+              </svg>
+              Ignite Engine
+            </a>
+          </div>
+        </div>
+
+        <!-- RECENT TRANSACTIONS -> LIVE NEURAL TELEMETRY FEED -->
+        <div class="card-surface feed-card">
+          <div class="feed-header">
+            <span class="feed-title">Live AI Operations</span>
+            <span class="view-all-link" onclick="window.scrollTo({top: 800, behavior: 'smooth'})">View All 16 →</span>
+          </div>
+
+          <div class="feed-list">
+            <!-- Item 1: Milli-Drive -->
+            <a href="/milli-drive" class="feed-row">
+              <div class="feed-left">
+                <div class="feed-icon-box">🏎️</div>
+                <div class="feed-details">
+                  <span class="feed-name">Milli-Drive Super-Speed</span>
+                  <span class="feed-time">15s ago • +2% speed per pass</span>
+                </div>
+              </div>
+              <span class="feed-stat-positive">+100% CLEAN</span>
+            </a>
+
+            <!-- Item 2: Braided Maze -->
+            <a href="/milli-maze" class="feed-row">
+              <div class="feed-left">
+                <div class="feed-icon-box">🌀</div>
+                <div class="feed-details">
+                  <span class="feed-name">Braided Hyper-Maze</span>
+                  <span class="feed-time">45s ago • Global best route highlighted</span>
+                </div>
+              </div>
+              <span class="feed-stat-neutral">0.42 ms</span>
+            </a>
+
+            <!-- Item 3: Danmaku Core -->
+            <a href="/danmaku" class="feed-row">
+              <div class="feed-left">
+                <div class="feed-icon-box">🌸</div>
+                <div class="feed-details">
+                  <span class="feed-name">Danmaku Bullet Hell</span>
+                  <span class="feed-time">2m ago • 2,500 bullets dodged</span>
+                </div>
+              </div>
+              <span class="feed-stat-positive">+2,500 PTS</span>
+            </a>
+
+            <!-- Item 4: Flash Trader -->
+            <a href="/trader" class="feed-row">
+              <div class="feed-left">
+                <div class="feed-icon-box">📈</div>
+                <div class="feed-details">
+                  <span class="feed-name">Flash Trader Arbitrage</span>
+                  <span class="feed-time">4m ago • 5,000 order book ticks/s</span>
+                </div>
+              </div>
+              <span class="feed-stat-gold">+$8,420 PnL</span>
+            </a>
+
+            <!-- Item 5: N-Body Orbit -->
+            <a href="/orbit" class="feed-row">
+              <div class="feed-left">
+                <div class="feed-icon-box">🌌</div>
+                <div class="feed-details">
+                  <span class="feed-name">Singularity Slingshot</span>
+                  <span class="feed-time">6m ago • 15,000 km/h gravity assist</span>
+                </div>
+              </div>
+              <span class="feed-stat-neutral">LOCKED</span>
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- FULL HYPERSONIC GAME ARCADE GRID -->
+    <section class="arcade-section" id="arcade-section">
+      <div class="section-header-row">
+        <div>
+          <h2 class="section-title">Hypersonic Arcade Catalog</h2>
+          <p class="section-subtitle">16 high-frequency autonomous game engines with live AI autopilot and microsecond pathfinding.</p>
+        </div>
+
+        <!-- Filter Tags -->
+        <div class="filter-tags-row">
+          <button class="filter-tag-btn active" onclick="filterArcade(this, 'all')">All Engines (16)</button>
+          <button class="filter-tag-btn" onclick="filterArcade(this, 'reflex')">Reflex &amp; Physics</button>
+          <button class="filter-tag-btn" onclick="filterArcade(this, 'pathfinding')">Pathfinding &amp; Maze</button>
+          <button class="filter-tag-btn" onclick="filterArcade(this, 'simulation')">HFT &amp; Strategy</button>
+        </div>
+      </div>
+
+      <div class="arcade-grid" id="arcadeGrid">
+        
+        <!-- Game 1: Milli-Drive -->
+        <a href="/milli-drive" class="game-card" data-cat="reflex">
+          <div>
+            <div class="game-card-top">
+              <span class="game-tag orange">⚡ FLAGSHIP +2% RULE</span>
+              <span style="font-size:0.8rem; color:var(--text-tertiary);">Mach 15</span>
+            </div>
+            <div class="game-title-row">
+              <span class="game-icon-circle">🏎️</span>
+              <h3 class="game-title">Milli-Drive Super-Speed</h3>
+            </div>
+            <p class="game-desc">
+              Milli steers with sub-millisecond optical raycasts. Speed accelerates +2% on every single car overtaken. Zero collision guarantee!
+            </p>
+          </div>
+          <div class="game-card-footer">
+            <span class="game-spec">SPEED: 1,840 MPH • 0.2ms</span>
+            <span class="play-pill-btn">Play Autopilot →</span>
+          </div>
+        </a>
+
+        <!-- Game 2: Milli-Maze -->
+        <a href="/milli-maze" class="game-card" data-cat="pathfinding">
+          <div>
+            <div class="game-card-top">
+              <span class="game-tag cyan">🌀 BRAIDED LABYRINTH</span>
+              <span style="font-size:0.8rem; color:var(--text-tertiary);">50x50 Matrix</span>
+            </div>
+            <div class="game-title-row">
+              <span class="game-icon-circle">🌀</span>
+              <h3 class="game-title">Braided Hyper-Maze</h3>
+            </div>
+            <p class="game-desc">
+              Blind exploratory navigation through looped braided labyrinths. Finds the winning exit, then calculates and highlights the absolute global best route!
+            </p>
+          </div>
+          <div class="game-card-footer">
+            <span class="game-spec">BFS/A* HYBRID • 0.4ms</span>
+            <span class="play-pill-btn">Solve Maze →</span>
+          </div>
+        </a>
+
+        <!-- Game 3: Danmaku Core -->
+        <a href="/danmaku" class="game-card" data-cat="reflex">
+          <div>
+            <div class="game-card-top">
+              <span class="game-tag orange">🌸 BULLET HELL</span>
+              <span style="font-size:0.8rem; color:var(--text-tertiary);">2,500 Bullets</span>
+            </div>
+            <div class="game-title-row">
+              <span class="game-icon-circle">🌸</span>
+              <h3 class="game-title">Danmaku Core</h3>
+            </div>
+            <p class="game-desc">
+              Geometric spiral bullet curtains. Milli weaves through 2,500 simultaneous projectiles with a 1-pixel hitbox and 20-frame lookahead convex hull.
+            </p>
+          </div>
+          <div class="game-card-footer">
+            <span class="game-spec">CONVEX HULL • 1.2ms</span>
+            <span class="play-pill-btn">Dodge Bullets →</span>
+          </div>
+        </a>
+
+        <!-- Game 4: N-Body Singularity Orbit -->
+        <a href="/orbit" class="game-card" data-cat="reflex">
+          <div>
+            <div class="game-card-top">
+              <span class="game-tag purple">🌌 ORBITAL PHYSICS</span>
+              <span style="font-size:0.8rem; color:var(--text-tertiary);">4 Singularity Wells</span>
+            </div>
+            <div class="game-title-row">
+              <span class="game-icon-circle">🌌</span>
+              <h3 class="game-title">Singularity Slingshot</h3>
+            </div>
+            <p class="game-desc">
+              Runge-Kutta 4th order gravitational orbital dynamics. Milli slingshots through moving event horizons collecting photon rings at Mach 15.
+            </p>
+          </div>
+          <div class="game-card-footer">
+            <span class="game-spec">RK4 INTEGRATOR • 0.6ms</span>
+            <span class="play-pill-btn">Slingshot →</span>
+          </div>
+        </a>
+
+        <!-- Game 5: Hex-Arena Pong -->
+        <a href="/pong" class="game-card" data-cat="reflex">
+          <div>
+            <div class="game-card-top">
+              <span class="game-tag cyan">🏓 6-BALL HEX ARENA</span>
+              <span style="font-size:0.8rem; color:var(--text-tertiary);">Mach 5 Reflection</span>
+            </div>
+            <div class="game-title-row">
+              <span class="game-icon-circle">🏓</span>
+              <h3 class="game-title">Hex-Arena Cyber-Pong</h3>
+            </div>
+            <p class="game-desc">
+              Hexagonal specular bounce geometry. Milli defends 3 rotating boundary paddles against 6 Mach-5 energy cores simultaneously.
+            </p>
+          </div>
+          <div class="game-card-footer">
+            <span class="game-spec">SPECULAR REFLECTION • 0.3ms</span>
+            <span class="play-pill-btn">Defend Arena →</span>
+          </div>
+        </a>
+
+        <!-- Game 6: Hyper-Rhythm -->
+        <a href="/rhythm" class="game-card" data-cat="reflex">
+          <div>
+            <div class="game-card-top">
+              <span class="game-tag emerald">⚡ 3,000 BPM SYNAPTIC</span>
+              <span style="font-size:0.8rem; color:var(--text-tertiary);">PID Angle Tracking</span>
+            </div>
+            <div class="game-title-row">
+              <span class="game-icon-circle">⚡</span>
+              <h3 class="game-title">Hyper-Rhythm Synapse</h3>
+            </div>
+            <p class="game-desc">
+              Circular rhythm tracks firing beat notes at 3,000 BPM. Milli aligns radial PID angle control to land 100% Perfect and Marvelous parries.
+            </p>
+          </div>
+          <div class="game-card-footer">
+            <span class="game-spec">PID CONTROLLER • 0.1ms</span>
+            <span class="play-pill-btn">Parry Beats →</span>
+          </div>
+        </a>
+
+        <!-- Game 7: Quantum Snake -->
+        <a href="/snake" class="game-card" data-cat="pathfinding">
+          <div>
+            <div class="game-card-top">
+              <span class="game-tag emerald">🐍 200 TILES/SEC</span>
+              <span style="font-size:0.8rem; color:var(--text-tertiary);">Voronoi Lookahead</span>
+            </div>
+            <div class="game-title-row">
+              <span class="game-icon-circle">🐍</span>
+              <h3 class="game-title">Quantum Light-Cycle</h3>
+            </div>
+            <p class="game-desc">
+              Light-cycle snake traversing at 200 tiles per second. Solves Hamilton cycle bounds with Voronoi space projection to prevent self-entrapment.
+            </p>
+          </div>
+          <div class="game-card-footer">
+            <span class="game-spec">HAMILTON VORONOI • 0.5ms</span>
+            <span class="play-pill-btn">Ride Light-Cycle →</span>
+          </div>
+        </a>
+
+        <!-- Game 8: Swarm War -->
+        <a href="/swarm" class="game-card" data-cat="simulation">
+          <div>
+            <div class="game-card-top">
+              <span class="game-tag purple">🛸 TERRITORY CONQUEST</span>
+              <span style="font-size:0.8rem; color:var(--text-tertiary);">vs 3 AI Armadas</span>
+            </div>
+            <div class="game-title-row">
+              <span class="game-icon-circle">🛸</span>
+              <h3 class="game-title">Swarm War 3000</h3>
+            </div>
+            <p class="game-desc">
+              Macro territory expansion against 3 rival AI armies. Milli dispatches reinforcement vectors based on real-time graph gradient flow.
+            </p>
+          </div>
+          <div class="game-card-footer">
+            <span class="game-spec">GRAPH GRADIENT FLOW • 0.7ms</span>
+            <span class="play-pill-btn">Conquer Grid →</span>
+          </div>
+        </a>
+
+        <!-- Game 9: Flash Trader L3 Arbitrage -->
+        <a href="/trader" class="game-card" data-cat="simulation">
+          <div>
+            <div class="game-card-top">
+              <span class="game-tag gold">📈 HFT ARBITRAGE</span>
+              <span style="font-size:0.8rem; color:var(--text-tertiary);">5,000 Ticks/s</span>
+            </div>
+            <div class="game-title-row">
+              <span class="game-icon-circle">📈</span>
+              <h3 class="game-title">Flash Trader Arbitrage</h3>
+            </div>
+            <p class="game-desc">
+              Level 3 order book simulator across 3 cross-venue exchanges. Milli snipes bid-ask dislocations and inventory spreads in 0.08ms.
+            </p>
+          </div>
+          <div class="game-card-footer">
+            <span class="game-spec">ORDER BOOK L3 • 0.08ms</span>
+            <span class="play-pill-btn">Snipe Spreads →</span>
+          </div>
+        </a>
+
+        <!-- Game 10: Hex-Sweeper -->
+        <a href="/sweeper" class="game-card" data-cat="pathfinding">
+          <div>
+            <div class="game-card-top">
+              <span class="game-tag orange">💣 QUANTUM CSP SOLVER</span>
+              <span style="font-size:0.8rem; color:var(--text-tertiary);">6,000 Cells</span>
+            </div>
+            <div class="game-title-row">
+              <span class="game-icon-circle">💣</span>
+              <h3 class="game-title">Hex-Sweeper 6,000</h3>
+            </div>
+            <p class="game-desc">
+              Hexagonal constraint satisfaction field with 750 mines. Milli uses Gaussian matrix reduction to flag mines and clear 6,000 cells in 1.4s!
+            </p>
+          </div>
+          <div class="game-card-footer">
+            <span class="game-spec">GAUSSIAN MATRIX CSP • 1.4s</span>
+            <span class="play-pill-btn">Clear Minefield →</span>
+          </div>
+        </a>
+
+        <!-- Game 11: Shadow Stealth Infiltrator -->
+        <a href="/stealth" class="game-card" data-cat="pathfinding">
+          <div>
+            <div class="game-card-top">
+              <span class="game-tag cyan">🥷 VISIBILITY POLYGONS</span>
+              <span style="font-size:0.8rem; color:var(--text-tertiary);">12 Security Cones</span>
+            </div>
+            <div class="game-title-row">
+              <span class="game-icon-circle">🥷</span>
+              <h3 class="game-title">Shadow Stealth Infiltrator</h3>
+            </div>
+            <p class="game-desc">
+              Raymarched 2D field-of-view cones and moving guard cameras. Milli computes shadow ray unions to dash between blind spots undetected.
+            </p>
+          </div>
+          <div class="game-card-footer">
+            <span class="game-spec">VISIBILITY POLYGON • 0.5ms</span>
+            <span class="play-pill-btn">Infiltrate Vault →</span>
+          </div>
+        </a>
+
+        <!-- Game 12: Drone Defense Battery -->
+        <a href="/defense" class="game-card" data-cat="reflex">
+          <div>
+            <div class="game-card-top">
+              <span class="game-tag orange">🎯 2ND-ORDER LEAD TARGETING</span>
+              <span style="font-size:0.8rem; color:var(--text-tertiary);">4 Railgun Turrets</span>
+            </div>
+            <div class="game-title-row">
+              <span class="game-icon-circle">🎯</span>
+              <h3 class="game-title">Orbital Drone Defense</h3>
+            </div>
+            <p class="game-desc">
+              4 railgun batteries defending against 200 incoming ballistic hypersonic missiles. Milli solves quadratic ballistic intercept equations.
+            </p>
+          </div>
+          <div class="game-card-footer">
+            <span class="game-spec">QUADRATIC BALLISTICS • 0.3ms</span>
+            <span class="play-pill-btn">Engage Defense →</span>
+          </div>
+        </a>
+
+        <!-- Game 13: Portal Momentum Vector -->
+        <a href="/portal" class="game-card" data-cat="reflex">
+          <div>
+            <div class="game-card-top">
+              <span class="game-tag cyan">🌀 NON-EUCLIDEAN JUMPS</span>
+              <span style="font-size:0.8rem; color:var(--text-tertiary);">Frame-of-Reference</span>
+            </div>
+            <div class="game-title-row">
+              <span class="game-icon-circle">🌀</span>
+              <h3 class="game-title">Portal Momentum Shift</h3>
+            </div>
+            <p class="game-desc">
+              Non-Euclidean coordinate transformations. Conserves vector momentum while instantly redirecting kinetic energy across portal singularities.
+            </p>
+          </div>
+          <div class="game-card-footer">
+            <span class="game-spec">NON-EUCLIDEAN TRANSFORM • 0.4ms</span>
+            <span class="play-pill-btn">Enter Portal →</span>
+          </div>
+        </a>
+
+        <!-- Game 14: Circuit Master Orthogonal Router -->
+        <a href="/circuit" class="game-card" data-cat="pathfinding">
+          <div>
+            <div class="game-card-top">
+              <span class="game-tag gold">⚡ 100-PIN PCB ROUTER</span>
+              <span style="font-size:0.8rem; color:var(--text-tertiary);">Multi-Layer VLSI</span>
+            </div>
+            <div class="game-title-row">
+              <span class="game-icon-circle">🔌</span>
+              <h3 class="game-title">Circuit Master Router</h3>
+            </div>
+            <p class="game-desc">
+              Multi-commodity orthogonal PCB flow router. Connects 100 high-frequency pins without crossing violations or clock skew in 800ms.
+            </p>
+          </div>
+          <div class="game-card-footer">
+            <span class="game-spec">LEE/A* VLSI ROUTER • 0.8ms</span>
+            <span class="play-pill-btn">Route PCB →</span>
+          </div>
+        </a>
+
+        <!-- Game 15: Scalper Royale -->
+        <a href="/scalper-royale" class="game-card" data-cat="simulation">
+          <div>
+            <div class="game-card-top">
+              <span class="game-tag gold">🏟️ 1,000-SEAT STADIUM WAR</span>
+              <span style="font-size:0.8rem; color:var(--text-tertiary);">vs 100 Bots</span>
+            </div>
+            <div class="game-title-row">
+              <span class="game-icon-circle">🏟️</span>
+              <h3 class="game-title">Scalper Royale Arena</h3>
+            </div>
+            <p class="game-desc">
+              100 rival scalper bots attack 1,000 stadium seats! Milli's parallel VIP sniper locks onto Diamond VIP front-row seats in 0.8 ms.
+            </p>
+          </div>
+          <div class="game-card-footer">
+            <span class="game-spec">PARALLEL SNIPER • 0.8ms</span>
+            <span class="play-pill-btn">Snipe Seats →</span>
+          </div>
+        </a>
+
+        <!-- Game 16: Milli-Clicks -->
+        <a href="/milli-clicks" class="game-card" data-cat="reflex">
+          <div>
+            <div class="game-card-top">
+              <span class="game-tag orange">★ 1,000+ CPS REFLEX</span>
+              <span style="font-size:0.8rem; color:var(--text-tertiary);">Beast Mode Active</span>
+            </div>
+            <div class="game-title-row">
+              <span class="game-icon-circle">⚡</span>
+              <h3 class="game-title">Milli-Clicks Beast Mode</h3>
+            </div>
+            <p class="game-desc">
+              Tactical click arena with particle physics, combo multipliers, and Milli-Bot autonomous Beast Mode (50,000+ points on auto!).
+            </p>
+          </div>
+          <div class="game-card-footer">
+            <span class="game-spec">1,000+ CPS • OPTICAL CENTROID</span>
+            <span class="play-pill-btn">Watch Milli Play →</span>
+          </div>
+        </a>
+
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="app-footer">
+      <div>
+        <strong>Milli Plays &amp; Ticket Booker Suite</strong> • Engineered for Hypersonic Autonomy &amp; Microsecond Precision.
+      </div>
+      <div class="footer-links">
+        <a href="https://github.com/Abdullah-Al-Raju/milli-plays" target="_blank" rel="noopener noreferrer">Public GitHub (milli-plays)</a>
+        <a href="/api/ping" target="_blank">Cloudflare Edge Ping</a>
+        <a href="/clicker">Reflex Benchmark</a>
+      </div>
+    </footer>
+
+  </main>
+
+  <!-- QUICK LAUNCHER MODAL (⌘ + Space) -->
+  <div class="quick-modal-backdrop" id="quickModal" onclick="closeSearchModalOnBackdrop(event)">
+    <div class="quick-modal">
+      <div class="modal-search-header">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff7a30" stroke-width="2.5">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" class="modal-search-input" id="modalSearchInput" placeholder="Quick launch game, algorithm, or telemetry..." oninput="handleModalSearch(this.value)">
+      </div>
+      <div class="modal-results-list" id="modalResults">
+        <a href="/milli-drive" class="modal-item">
+          <span>🏎️ <strong>Milli-Drive Super-Speed</strong> (+2% rule per car passed)</span>
+          <span style="color:var(--accent-orange); font-size:0.75rem; font-weight:700;">LAUNCH →</span>
+        </a>
+        <a href="/milli-maze" class="modal-item">
+          <span>🌀 <strong>Braided Hyper-Maze</strong> (Exit solver & best route)</span>
+          <span style="color:var(--accent-cyan); font-size:0.75rem; font-weight:700;">SOLVE →</span>
+        </a>
+        <a href="/danmaku" class="modal-item">
+          <span>🌸 <strong>Danmaku Core</strong> (2,500 bullets dodged)</span>
+          <span style="color:var(--accent-emerald); font-size:0.75rem; font-weight:700;">DODGE →</span>
+        </a>
+        <a href="/orbit" class="modal-item">
+          <span>🌌 <strong>Singularity Slingshot</strong> (N-body gravity)</span>
+          <span style="color:var(--accent-purple); font-size:0.75rem; font-weight:700;">ORBIT →</span>
+        </a>
+        <a href="/trader" class="modal-item">
+          <span>📈 <strong>Flash Trader Arbitrage</strong> (5,000 ticks/sec)</span>
+          <span style="color:var(--accent-gold); font-size:0.75rem; font-weight:700;">TRADE →</span>
+        </a>
+        <a href="/rhythm" class="modal-item">
+          <span>⚡ <strong>Hyper-Rhythm Synapse</strong> (3,000 BPM circular parry)</span>
+          <span style="color:var(--accent-emerald); font-size:0.75rem; font-weight:700;">PARRY →</span>
+        </a>
+      </div>
+      <div class="modal-footer">
+        <span>Navigation: [↑] [↓] to select • [ESC] to dismiss</span>
+        <span>Milli Hypersonic Engine 2026</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- INTERACTIVE CANVAS CHART & SYSTEM SCRIPTS -->
+  <script>
+    // ----------------------------------------------------
+    // REAL-TIME CANVAS AREA CHART (SKEUOMORPHIC AMBER GLOW)
+    // ----------------------------------------------------
+    const canvas = document.getElementById('telemetryCanvas');
+    const ctx = canvas.getContext('2d');
+    const tooltip = document.getElementById('chartTooltip');
+    const tooltipVal = document.getElementById('tooltipMachVal');
+    const machDisplay = document.getElementById('machVelocityVal');
+
+    let chartPoints = [];
+    const totalPoints = 32;
+    let waveOffset = 0;
+
+    function resizeCanvas() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      canvas.width = rect.width * window.devicePixelRatio;
+      canvas.height = rect.height * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    }
+
+    function initChartData() {
+      chartPoints = [];
+      // Generate initial smooth stock-style area curve matching reference image
+      let base = 65;
+      for (let i = 0; i < totalPoints; i++) {
+        const noise = (Math.sin(i * 0.45) * 16) + (Math.cos(i * 0.9) * 10) + (Math.sin(i * 1.8) * 8);
+        chartPoints.push(base + noise);
+      }
+    }
+
+    function drawChart() {
+      const width = canvas.width / window.devicePixelRatio;
+      const height = canvas.height / window.devicePixelRatio;
+      if (width <= 0 || height <= 0) return;
+
+      ctx.clearRect(0, 0, width, height);
+
+      // Y-Axis Horizontal Grid Lines & Labels
+      const gridLevels = [
+        { label: '20x', y: 0.15 },
+        { label: '15x', y: 0.35 },
+        { label: '10x', y: 0.58 },
+        { label: '5x',  y: 0.80 }
+      ];
+
+      ctx.font = '11px "JetBrains Mono", monospace';
+      ctx.fillStyle = '#64748b';
+      ctx.textAlign = 'right';
+
+      gridLevels.forEach(lvl => {
+        const yPos = height * lvl.y;
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
+        ctx.moveTo(35, yPos);
+        ctx.lineTo(width - 45, yPos);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillText(lvl.label, width - 10, yPos + 4);
+      });
+
+      // Animated slight perturbation on points
+      waveOffset += 0.035;
+      const currentPoints = chartPoints.map((pt, idx) => {
+        return pt + Math.sin(waveOffset + idx * 0.5) * 4;
+      });
+
+      const stepX = (width - 70) / (totalPoints - 1);
+      const startX = 25;
+
+      // Draw Glowing Area Fill Gradient
+      const fillGrad = ctx.createLinearGradient(0, 20, 0, height);
+      fillGrad.addColorStop(0, 'rgba(255, 122, 48, 0.35)');
+      fillGrad.addColorStop(0.5, 'rgba(232, 89, 18, 0.12)');
+      fillGrad.addColorStop(1, 'rgba(255, 122, 48, 0.0)');
+
+      ctx.beginPath();
+      ctx.moveTo(startX, height - 20);
+
+      // Smooth bezier curves
+      for (let i = 0; i < totalPoints; i++) {
+        const x = startX + i * stepX;
+        const y = height - 25 - (currentPoints[i] / 120) * (height - 60);
+
+        if (i === 0) {
+          ctx.lineTo(x, y);
+        } else {
+          const prevX = startX + (i - 1) * stepX;
+          const prevY = height - 25 - (currentPoints[i - 1] / 120) * (height - 60);
+          const cpX = (prevX + x) / 2;
+          ctx.bezierCurveTo(cpX, prevY, cpX, y, x, y);
+        }
+      }
+
+      ctx.lineTo(startX + (totalPoints - 1) * stepX, height - 20);
+      ctx.closePath();
+      ctx.fillStyle = fillGrad;
+      ctx.fill();
+
+      // Draw Crisp Amber Stroke Line
+      ctx.beginPath();
+      for (let i = 0; i < totalPoints; i++) {
+        const x = startX + i * stepX;
+        const y = height - 25 - (currentPoints[i] / 120) * (height - 60);
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          const prevX = startX + (i - 1) * stepX;
+          const prevY = height - 25 - (currentPoints[i - 1] / 120) * (height - 60);
+          const cpX = (prevX + x) / 2;
+          ctx.bezierCurveTo(cpX, prevY, cpX, y, x, y);
+        }
+      }
+      ctx.strokeStyle = '#ff7a30';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+
+      // Highlight active peak dot (matching reference image focal dot)
+      const focalIdx = 19;
+      const focalX = startX + focalIdx * stepX;
+      const focalY = height - 25 - (currentPoints[focalIdx] / 120) * (height - 60);
+
+      // Outer Glow Ring
+      ctx.beginPath();
+      ctx.arc(focalX, focalY, 7, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+      ctx.fill();
+
+      // Inner Solid White Core Dot
+      ctx.beginPath();
+      ctx.arc(focalX, focalY, 3.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+
+      // Position the floating tooltip right above this dot
+      if (tooltip) {
+        tooltip.style.left = `${focalX}px`;
+        tooltip.style.top = `${Math.max(15, focalY - 60)}px`;
+      }
+    }
+
+    function animateChart() {
+      drawChart();
+      requestAnimationFrame(animateChart);
+    }
+
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+    });
+
+    // ----------------------------------------------------
+    // QUICK SEARCH MODAL (CMD + SPACE / KEYBOARD CONTROLS)
+    // ----------------------------------------------------
+    function openSearchModal() {
+      document.getElementById('quickModal').classList.add('open');
+      const input = document.getElementById('modalSearchInput');
+      input.value = '';
+      input.focus();
+    }
+
+    function closeSearchModal() {
+      document.getElementById('quickModal').classList.remove('open');
+    }
+
+    function closeSearchModalOnBackdrop(e) {
+      if (e.target.id === 'quickModal') {
+        closeSearchModal();
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      // ⌘ + Space or ⌘ + K or Ctrl + Space or Ctrl + K
+      if ((e.metaKey || e.ctrlKey) && (e.code === 'Space' || e.key === 'k' || e.key === 'K')) {
+        e.preventDefault();
+        const modal = document.getElementById('quickModal');
+        if (modal.classList.contains('open')) {
+          closeSearchModal();
+        } else {
+          openSearchModal();
+        }
+      }
+      if (e.key === 'Escape') {
+        closeSearchModal();
+      }
+    });
+
+    // Modal Realtime Filter
+    const allSearchItems = [
+      { name: 'Milli-Drive Super-Speed', desc: '+2% rule per car passed, Mach 15', url: '/milli-drive', icon: '🏎️' },
+      { name: 'Braided Hyper-Maze', desc: 'Exit solver & global best route highlighted', url: '/milli-maze', icon: '🌀' },
+      { name: 'Danmaku Core', desc: '2,500 bullets dodged with convex hull', url: '/danmaku', icon: '🌸' },
+      { name: 'Singularity Slingshot', desc: 'N-body gravity assist @ Mach 15', url: '/orbit', icon: '🌌' },
+      { name: 'Hex-Arena Cyber-Pong', desc: 'Specular reflection vs 6 balls', url: '/pong', icon: '🏓' },
+      { name: 'Hyper-Rhythm Synapse', desc: '3,000 BPM circular parry with PID', url: '/rhythm', icon: '⚡' },
+      { name: 'Quantum Light-Cycle', desc: '200 tiles/s Voronoi snake', url: '/snake', icon: '🐍' },
+      { name: 'Swarm War 3000', desc: 'Territory conquest vs 3 AI armadas', url: '/swarm', icon: '🛸' },
+      { name: 'Flash Trader Arbitrage', desc: 'Level 3 order book, 5,000 ticks/s', url: '/trader', icon: '📈' },
+      { name: 'Hex-Sweeper 6,000', desc: 'Gaussian matrix reduction solver', url: '/sweeper', icon: '💣' },
+      { name: 'Shadow Stealth Infiltrator', desc: 'Visibility polygon shadow dashing', url: '/stealth', icon: '🥷' },
+      { name: 'Orbital Drone Defense', desc: '2nd-order ballistic railgun lead', url: '/defense', icon: '🎯' },
+      { name: 'Portal Momentum Shift', desc: 'Non-Euclidean vector momentum', url: '/portal', icon: '🌀' },
+      { name: 'Circuit Master Router', desc: '100-pin orthogonal PCB flow router', url: '/circuit', icon: '🔌' },
+      { name: 'Scalper Royale Arena', desc: '1,000-seat stadium bot war', url: '/scalper-royale', icon: '🏟️' },
+      { name: 'Milli-Clicks Beast Mode', desc: '1,000+ CPS autonomous clicker', url: '/milli-clicks', icon: '⚡' },
+      { name: 'Reflex & Edge Ping Arena', desc: 'High-frequency latency benchmark', url: '/clicker', icon: '⏱️' }
+    ];
+
+    function handleModalSearch(query) {
+      const q = query.toLowerCase().trim();
+      const resultsContainer = document.getElementById('modalResults');
+      if (!q) {
+        renderModalResults(allSearchItems.slice(0, 6));
+        return;
+      }
+      const filtered = allSearchItems.filter(item => 
+        item.name.toLowerCase().includes(q) || item.desc.toLowerCase().includes(q)
+      );
+      renderModalResults(filtered);
+    }
+
+    function renderModalResults(items) {
+      const resultsContainer = document.getElementById('modalResults');
+      if (items.length === 0) {
+        resultsContainer.innerHTML = `<div style="padding:20px; text-align:center; color:var(--text-tertiary);">No engines matching query.</div>`;
+        return;
+      }
+      resultsContainer.innerHTML = items.map(item => `
+        <a href="${item.url}" class="modal-item">
+          <span>${item.icon} <strong>${item.name}</strong> (${item.desc})</span>
+          <span style="color:var(--accent-orange); font-size:0.75rem; font-weight:700;">LAUNCH →</span>
+        </a>
+      `).join('');
+    }
+
+    // ----------------------------------------------------
+    // ARCADE CATEGORY FILTER
+    // ----------------------------------------------------
+    function filterArcade(btn, cat) {
+      document.querySelectorAll('.filter-tag-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const cards = document.querySelectorAll('.game-card');
+      cards.forEach(card => {
+        if (cat === 'all' || card.getAttribute('data-cat') === cat) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    // ----------------------------------------------------
+    // TIME TABS & PULSE
+    // ----------------------------------------------------
+    function setTimeTab(btn, mode) {
+      document.querySelectorAll('.time-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      if (mode === 'live') {
+        machDisplay.innerText = 'Mach 16.20x';
+        tooltipVal.innerText = 'Mach 16.20 • 0.12ms';
+      } else if (mode === '1h') {
+        machDisplay.innerText = 'Mach 15.42x';
+        tooltipVal.innerText = 'Mach 15.42 • 0.18ms';
+      } else if (mode === '24h') {
+        machDisplay.innerText = 'Mach 14.88x';
+        tooltipVal.innerText = 'Mach 14.88 • 0.22ms';
+      } else {
+        machDisplay.innerText = 'Mach 15.10x';
+        tooltipVal.innerText = 'Mach 15.10 • 0.20ms';
+      }
+    }
+
+    function refreshTelemetryPulse() {
+      const randMach = (15.2 + Math.random() * 0.9).toFixed(2);
+      machDisplay.innerText = `Mach ${randMach}x`;
+      tooltipVal.innerText = `Mach ${randMach} • 0.15ms`;
+      // Perturb curve
+      initChartData();
+    }
+
+    function igniteHypersonicAll() {
+      window.location.href = '/milli-drive';
+    }
+
+    // Initialize on load
+    window.addEventListener('DOMContentLoaded', () => {
+      resizeCanvas();
+      initChartData();
+      animateChart();
+    });
+  </script>
+</body>
+</html>

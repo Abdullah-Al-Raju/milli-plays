@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Milli Shadow Infiltrator | Hypersonic Visibility Polygon Stealth</title>
+  <style>
+    :root {
+      --bg-dark: #04060d;
+      --card-bg: #090e1a;
+      --accent-cyan: #00f0ff;
+      --accent-green: #00ff88;
+      --accent-gold: #ffd700;
+      --accent-red: #ef4444;
+      --accent-purple: #a855f7;
+      --border-color: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg-dark);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "JetBrains Mono", sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+      user-select: none;
+    }
+    .top-nav {
+      background: #0d1424;
+      border-bottom: 1px solid var(--border-color);
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900;
+      font-size: 1.1rem;
+      color: #fff;
+      text-decoration: none;
+    }
+    .nav-badge {
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+      color: #fff;
+      font-size: 0.7rem;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 900;
+    }
+    .nav-links {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .nav-link:hover { color: #fff; background: rgba(255, 255, 255, 0.05); }
+    .nav-link.active {
+      color: var(--accent-purple);
+      background: rgba(168, 85, 247, 0.12);
+      border: 1px solid rgba(168, 85, 247, 0.4);
+    }
+
+    .wrapper {
+      max-width: 1360px;
+      margin: 14px auto;
+      padding: 0 16px;
+    }
+    .status-bar {
+      background: linear-gradient(90deg, #180d2b 0%, #0d1e38 100%);
+      border: 1px solid var(--accent-purple);
+      border-radius: 12px;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 12px;
+      box-shadow: 0 4px 25px rgba(168, 85, 247, 0.2);
+    }
+    .hud-stats {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .hud-box {
+      flex: 1;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px 14px;
+      text-align: center;
+      min-width: 120px;
+    }
+    .hud-label { font-size: 0.65rem; color: var(--text-muted); font-weight: 800; letter-spacing: 0.5px; }
+    .hud-val { font-size: 1.25rem; font-weight: 900; font-family: monospace; color: #fff; margin-top: 2px; }
+
+    .arena-grid {
+      display: grid;
+      grid-template-columns: 2.7fr 1fr;
+      gap: 16px;
+    }
+    .canvas-container {
+      position: relative;
+      background: #020308;
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      overflow: hidden;
+      height: 640px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    canvas { display: block; background: #020308; }
+
+    .side-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .btn {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-weight: 800;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+      width: 100%;
+    }
+    .btn-purple { background: var(--accent-purple); color: #fff; box-shadow: 0 0 16px rgba(168, 85, 247, 0.4); }
+    .btn-purple:hover { background: #c084fc; }
+    .btn-cyan { background: var(--accent-cyan); color: #000; }
+    .btn-cyan:hover { background: #55f3ff; }
+
+    .feed-box {
+      height: 180px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.72rem;
+      background: #03060f;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px;
+      color: #94a3b8;
+      display: flex;
+      flex-direction: column-reverse;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="/" class="nav-brand">
+      <span>🕶️ MILLI SHADOW INFILTRATOR</span>
+      <span class="nav-badge">VISIBILITY POLYGON STEALTH</span>
+    </a>
+    <div class="nav-links">
+      <a href="/" class="nav-link">🏠 Master Gate</a>
+      <a href="/drive" class="nav-link">🏎️ Drive</a>
+      <a href="/maze" class="nav-link">🌀 Maze</a>
+      <a href="/danmaku" class="nav-link">🌸 Danmaku</a>
+      <a href="/orbit" class="nav-link">🌌 Orbit</a>
+      <a href="/pong" class="nav-link">🏓 Pong</a>
+      <a href="/rhythm" class="nav-link">🎵 Rhythm</a>
+      <a href="/snake" class="nav-link">🐍 Snake</a>
+      <a href="/swarm" class="nav-link">⚔️ Swarm</a>
+      <a href="/stealth" class="nav-link active">🕶️ Stealth</a>
+      <a href="/trader" class="nav-link">📈 Trader</a>
+      <a href="/sweeper" class="nav-link">💣 Sweeper</a>
+      <a href="/defense" class="nav-link">🛸 Defense</a>
+      <a href="/portal" class="nav-link">🌀 Portal</a>
+      <a href="/circuit" class="nav-link">⚡ Circuit</a>
+    </div>
+  </nav>
+
+  <div class="wrapper">
+    <div class="status-bar">
+      <div>
+        <b style="color:var(--accent-purple); font-size:1rem;">⚡ HYPERSONIC VISIBILITY POLYGON SHADOW INFILTRATION</b>
+        <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">
+          Rotating CCTV sight cones, laser tripwires &amp; biometric sentry drones. Milli computes shadow polygons and dash-teleports between blind spots!
+        </div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-purple" onclick="toggleMilli()" id="btn-milli" style="width:auto; padding:8px 18px;">
+          🤖 Milli Shadow Dash AI: ACTIVE
+        </button>
+        <button class="btn btn-cyan" onclick="resetStealth()" style="width:auto; padding:8px 16px;">
+          🔄 Reset Facility
+        </button>
+      </div>
+    </div>
+
+    <div class="hud-stats">
+      <div class="hud-box">
+        <div class="hud-label">DATABANKS INFILTRATED</div>
+        <div id="hud-hacks" class="hud-val" style="color:var(--accent-gold);">0 / 5</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">DETECTION METER</div>
+        <div id="hud-det" class="hud-val" style="color:var(--accent-green);">0% (UNDETECTED)</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">ACTIVE SENSORS</div>
+        <div class="hud-val" style="color:var(--accent-purple);">8 CONES + LASERS</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">DASH COOLDOWN</div>
+        <div id="hud-dash" class="hud-val" style="color:var(--accent-cyan);">READY</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">SHADOW INTEGRITY</div>
+        <div class="hud-val" style="color:var(--accent-green);">100% STEALTH</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">STATUS</div>
+        <div id="hud-status" class="hud-val" style="color:var(--accent-green);">GHOST MODE</div>
+      </div>
+    </div>
+
+    <div class="arena-grid">
+      <div class="canvas-container" id="container">
+        <canvas id="stealth-canvas"></canvas>
+      </div>
+
+      <div class="side-panel">
+        <div>
+          <div style="font-size:0.85rem; font-weight:800; color:#fff; margin-bottom:8px;">⚙️ SECURITY PROTOCOLS</div>
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <button class="btn btn-cyan" onclick="addCamera()">Add Rotating CCTV</button>
+            <button class="btn btn-purple" onclick="accelerateSweep()">⚡ Accelerate Sensor Sweeps x1.5</button>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:0.85rem; font-weight:800; color:#fff; margin-bottom:8px;">🕹️ HUMAN INFILTRATION CONTROLS</div>
+          <div style="font-size:0.75rem; color:var(--text-muted); line-height:1.5;">
+            Toggle Auto-Pilot OFF to manually navigate with <b>Arrow Keys / WASD</b> and press <b>Spacebar</b> to dash. Stepping into any vision cone triggers instant alarm.
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:0.8rem; font-weight:700; color:#fff; margin-bottom:6px;">⚡ MILLI COGNITIVE LOGS</div>
+          <div class="feed-box" id="feed-box">
+            <div>[READY] Shadow Infiltrator armed. Visibility ray-marching initialized.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("stealth-canvas");
+    const ctx = canvas.getContext("2d");
+
+    let W = 880;
+    let H = 640;
+    canvas.width = W;
+    canvas.height = H;
+
+    let milliAuto = true;
+    let agent = { x: 60, y: H / 2, vx: 0, vy: 0, r: 8, speed: 4.5, isDashing: false, dashCooldown: 0 };
+    let detection = 0;
+    let hacksCount = 0;
+    let isAlarm = false;
+
+    // Security Cameras (Rotating vision cones)
+    let cameras = [
+      { x: 220, y: 150, angle: 0, sweepSpeed: 0.02, fov: 0.6, range: 170 },
+      { x: 440, y: 480, angle: Math.PI, sweepSpeed: -0.025, fov: 0.7, range: 180 },
+      { x: 640, y: 180, angle: Math.PI * 0.5, sweepSpeed: 0.03, fov: 0.6, range: 160 }
+    ];
+
+    // Laser tripwires (oscillating vertical/horizontal beams)
+    let lasers = [
+      { y: 320, minX: 100, maxX: 400, on: true, cycle: 0 },
+      { y: 220, minX: 450, maxX: 750, on: true, cycle: 50 }
+    ];
+
+    // Databank Terminals to hack
+    let terminals = [
+      { x: 220, y: 380, hacked: false },
+      { x: 440, y: 220, hacked: false },
+      { x: 660, y: 450, hacked: false },
+      { x: 800, y: 120, hacked: false },
+      { x: 800, y: 520, hacked: false }
+    ];
+
+    // Pillars (Obstacles that block vision cones creating shadows)
+    let pillars = [
+      { x: 220, y: 260, r: 24 },
+      { x: 440, y: 340, r: 28 },
+      { x: 640, y: 300, r: 24 }
+    ];
+
+    const keys = {};
+    window.addEventListener("keydown", e => { keys[e.key] = true; });
+    window.addEventListener("keyup", e => { keys[e.key] = false; });
+
+    function logFeed(msg) {
+      const feed = document.getElementById("feed-box");
+      const time = new Date().toISOString().substring(14, 23);
+      const div = document.createElement("div");
+      div.innerText = `[${time}] ${msg}`;
+      feed.prepend(div);
+      if (feed.children.length > 25) feed.removeChild(feed.lastChild);
+    }
+
+    function toggleMilli() {
+      milliAuto = !milliAuto;
+      document.getElementById("btn-milli").innerText = milliAuto ? "🤖 Milli Shadow Dash AI: ACTIVE" : "🕹️ Human Stealth: ENGAGED";
+      document.getElementById("btn-milli").className = milliAuto ? "btn btn-purple" : "btn btn-cyan";
+      logFeed(milliAuto ? "Milli visibility polygon optimizer engaged." : "Human manual stealth active.");
+    }
+
+    function addCamera() {
+      cameras.push({
+        x: 150 + Math.random() * 600,
+        y: 100 + Math.random() * 400,
+        angle: Math.random() * Math.PI * 2,
+        sweepSpeed: 0.02 + Math.random() * 0.02,
+        fov: 0.65,
+        range: 160
+      });
+      logFeed("New CCTV turret deployed to facility.");
+    }
+
+    function accelerateSweep() {
+      cameras.forEach(c => c.sweepSpeed *= 1.5);
+      logFeed("Security sweep speed multiplied x1.5!");
+    }
+
+    function resetStealth() {
+      agent = { x: 60, y: H / 2, vx: 0, vy: 0, r: 8, speed: 4.5, isDashing: false, dashCooldown: 0 };
+      terminals.forEach(t => t.hacked = false);
+      detection = 0;
+      hacksCount = 0;
+      isAlarm = false;
+      document.getElementById("hud-hacks").innerText = "0 / 5";
+      document.getElementById("hud-det").innerText = "0% (UNDETECTED)";
+      document.getElementById("hud-status").innerText = "GHOST MODE";
+      document.getElementById("hud-status").style.color = "var(--accent-green)";
+      logFeed("Facility state reset. Agent ready at infiltration zone.");
+    }
+
+    // CHECK IF POINT IS INSIDE A VISION CONE
+    function isInCone(px, py, cam) {
+      const dx = px - cam.x;
+      const dy = py - cam.y;
+      const dist = Math.hypot(dx, dy);
+      if (dist > cam.range) return false;
+
+      const angleToP = Math.atan2(dy, dx);
+      let diff = Math.abs(angleToP - cam.angle);
+      while (diff > Math.PI) diff = Math.abs(diff - Math.PI * 2);
+
+      if (diff > cam.fov / 2) return false;
+
+      // Check if blocked by pillar (shadow check)
+      for (let i = 0; i < pillars.length; i++) {
+        const p = pillars[i];
+        const pDx = p.x - cam.x;
+        const pDy = p.y - cam.y;
+        const pDist = Math.hypot(pDx, pDy);
+        if (pDist < dist) {
+          const pAngle = Math.atan2(pDy, pDx);
+          if (Math.abs(pAngle - angleToP) < 0.18) {
+            return false; // Point is in shadow of pillar!
+          }
+        }
+      }
+
+      return true;
+    }
+
+    // MILLI SHADOW DASH AI
+    function updateMilliAI() {
+      // Find nearest unhacked terminal
+      let target = null;
+      let minDist = Infinity;
+      terminals.forEach(t => {
+        if (!t.hacked) {
+          const d = Math.hypot(t.x - agent.x, t.y - agent.y);
+          if (d < minDist) {
+            minDist = d;
+            target = t;
+          }
+        }
+      });
+
+      if (!target) return;
+
+      const dx = target.x - agent.x;
+      const dy = target.y - agent.y;
+      const directAngle = Math.atan2(dy, dx);
+
+      // Probe candidate safe directions
+      let bestAngle = directAngle;
+      let minRisk = Infinity;
+
+      for (let a = -Math.PI; a <= Math.PI; a += 0.25) {
+        const testX = agent.x + Math.cos(a) * 35;
+        const testY = agent.y + Math.sin(a) * 35;
+
+        let risk = 0;
+        cameras.forEach(cam => {
+          if (isInCone(testX, testY, cam)) risk += 500;
+        });
+
+        // Laser check
+        lasers.forEach(l => {
+          if (l.on && Math.abs(testY - l.y) < 15 && testX >= l.minX && testX <= l.maxX) {
+            risk += 500;
+          }
+        });
+
+        const distToTarget = Math.hypot(target.x - testX, target.y - testY);
+        risk += distToTarget;
+
+        if (risk < minRisk) {
+          minRisk = risk;
+          bestAngle = a;
+        }
+      }
+
+      agent.vx = Math.cos(bestAngle) * agent.speed;
+      agent.vy = Math.sin(bestAngle) * agent.speed;
+
+      // Dash teleport if high danger
+      if (agent.dashCooldown <= 0 && minRisk > 300) {
+        agent.x += Math.cos(bestAngle) * 55;
+        agent.y += Math.sin(bestAngle) * 55;
+        agent.dashCooldown = 60;
+        logFeed("⚡ [Shadow Dash] Microsecond blink executed into pillar blind spot!");
+      }
+    }
+
+    function updateHumanControls() {
+      let dx = 0;
+      let dy = 0;
+      if (keys["ArrowUp"] || keys["w"]) dy -= 1;
+      if (keys["ArrowDown"] || keys["s"]) dy += 1;
+      if (keys["ArrowLeft"] || keys["a"]) dx -= 1;
+      if (keys["ArrowRight"] || keys["d"]) dx += 1;
+
+      const mag = Math.hypot(dx, dy);
+      if (mag > 0) {
+        agent.vx = (dx / mag) * agent.speed;
+        agent.vy = (dy / mag) * agent.speed;
+      } else {
+        agent.vx = 0;
+        agent.vy = 0;
+      }
+
+      if (keys[" "] && agent.dashCooldown <= 0) {
+        agent.x += agent.vx * 12;
+        agent.y += agent.vy * 12;
+        agent.dashCooldown = 60;
+      }
+    }
+
+    function update() {
+      // Rotate cameras
+      cameras.forEach(c => {
+        c.angle += c.sweepSpeed;
+      });
+
+      // Oscillate lasers
+      lasers.forEach(l => {
+        l.cycle++;
+        l.on = (l.cycle % 120) < 70;
+      });
+
+      if (agent.dashCooldown > 0) agent.dashCooldown--;
+      document.getElementById("hud-dash").innerText = agent.dashCooldown <= 0 ? "READY" : `${Math.round(agent.dashCooldown / 60 * 1000)}ms`;
+
+      if (milliAuto) {
+        updateMilliAI();
+      } else {
+        updateHumanControls();
+      }
+
+      agent.x += agent.vx;
+      agent.y += agent.vy;
+      agent.x = Math.max(20, Math.min(W - 20, agent.x));
+      agent.y = Math.max(20, Math.min(H - 20, agent.y));
+
+      // Detection check
+      let inLight = false;
+      cameras.forEach(cam => {
+        if (isInCone(agent.x, agent.y, cam)) inLight = true;
+      });
+
+      lasers.forEach(l => {
+        if (l.on && Math.abs(agent.y - l.y) < 12 && agent.x >= l.minX && agent.x <= l.maxX) {
+          inLight = true;
+        }
+      });
+
+      if (inLight) {
+        detection = Math.min(100, detection + 4);
+      } else {
+        detection = Math.max(0, detection - 1);
+      }
+
+      document.getElementById("hud-det").innerText = `${detection}%`;
+      if (detection >= 100) {
+        isAlarm = true;
+        document.getElementById("hud-status").innerText = "ALARM COMPROMISED";
+        document.getElementById("hud-status").style.color = "var(--accent-red)";
+      }
+
+      // Hack terminals
+      terminals.forEach(t => {
+        if (!t.hacked && Math.hypot(agent.x - t.x, agent.y - t.y) < 24) {
+          t.hacked = true;
+          hacksCount++;
+          document.getElementById("hud-hacks").innerText = `${hacksCount} / 5`;
+          logFeed(`✨ Databank Terminal #${hacksCount} infiltrated and wiped.`);
+          if (hacksCount === 5) {
+            document.getElementById("hud-status").innerText = "MISSION ACCOMPLISHED";
+            document.getElementById("hud-status").style.color = "var(--accent-green)";
+            logFeed("🏆 All facility databanks extracted with zero alarm detection!");
+          }
+        }
+      });
+    }
+
+    function draw() {
+      ctx.fillStyle = "#020308";
+      ctx.fillRect(0, 0, W, H);
+
+      // Render CCTV vision cones
+      cameras.forEach(cam => {
+        ctx.save();
+        ctx.fillStyle = "rgba(239, 68, 68, 0.16)";
+        ctx.beginPath();
+        ctx.moveTo(cam.x, cam.y);
+        ctx.arc(cam.x, cam.y, cam.range, cam.angle - cam.fov / 2, cam.angle + cam.fov / 2);
+        ctx.closePath();
+        ctx.fill();
+
+        // Camera Turret
+        ctx.fillStyle = "#ef4444";
+        ctx.beginPath();
+        ctx.arc(cam.x, cam.y, 8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+
+      // Render Lasers
+      lasers.forEach(l => {
+        if (l.on) {
+          ctx.save();
+          ctx.strokeStyle = "#ff007f";
+          ctx.shadowColor = "#ff007f";
+          ctx.shadowBlur = 12;
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(l.minX, l.y);
+          ctx.lineTo(l.maxX, l.y);
+          ctx.stroke();
+          ctx.restore();
+        }
+      });
+
+      // Render Pillars (Shadow Casters)
+      pillars.forEach(p => {
+        ctx.save();
+        ctx.fillStyle = "#0f172a";
+        ctx.strokeStyle = "#334155";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      });
+
+      // Render Databank Terminals
+      terminals.forEach(t => {
+        ctx.save();
+        ctx.fillStyle = t.hacked ? "#00ff88" : "#ffd700";
+        ctx.shadowColor = t.hacked ? "#00ff88" : "#ffd700";
+        ctx.shadowBlur = 14;
+        ctx.fillRect(t.x - 10, t.y - 10, 20, 20);
+        ctx.restore();
+      });
+
+      // Render Agent / Milli
+      ctx.save();
+      ctx.fillStyle = milliAuto ? "#a855f7" : "#00f0ff";
+      ctx.shadowColor = milliAuto ? "#a855f7" : "#00f0ff";
+      ctx.shadowBlur = 18;
+      ctx.beginPath();
+      ctx.arc(agent.x, agent.y, agent.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      requestAnimationFrame(() => {
+        update();
+        draw();
+      });
+    }
+
+    draw();
+  </script>
+</body>
+</html>

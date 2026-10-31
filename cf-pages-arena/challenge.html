@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cloudflare Turnstile Verification Gate | Cloudflare Pages</title>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <style>
+    :root {
+      --bg-dark: #0a0f1d;
+      --card-bg: #11192e;
+      --card-inner: #0b1122;
+      --accent-orange: #f6821f;
+      --accent-green: #00ff88;
+      --accent-cyan: #00f0ff;
+      --border-color: #1e293b;
+      --text-main: #e2e8f0;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      background: var(--bg-dark);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+
+    /* Top Nav */
+    .top-nav {
+      background: #0d1424;
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: #fff;
+      text-decoration: none;
+    }
+    .nav-badge {
+      background: rgba(246, 130, 31, 0.2);
+      border: 1px solid var(--accent-orange);
+      color: var(--accent-orange);
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .nav-links {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+    }
+    .nav-link:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .nav-link.active {
+      color: var(--accent-cyan);
+      background: rgba(0, 240, 255, 0.1);
+      border-color: rgba(0, 240, 255, 0.3);
+    }
+
+    .wrapper {
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 0 16px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 32px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      text-align: center;
+    }
+    .turnstile-container {
+      margin: 28px 0;
+      display: flex;
+      justify-content: center;
+      min-height: 70px;
+    }
+    .telemetry-card {
+      background: var(--card-inner);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 24px;
+      text-align: left;
+      font-size: 0.85rem;
+      font-family: monospace;
+    }
+    .btn {
+      border: none;
+      border-radius: 6px;
+      padding: 10px 18px;
+      font-weight: bold;
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    .btn-outline { background: transparent; border: 1px solid #334155; color: var(--text-muted); }
+    .btn-outline:hover { color: #fff; border-color: #64748b; }
+    .status-pill {
+      display: inline-block;
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      margin-top: 12px;
+    }
+    .status-pending { background: rgba(246, 130, 31, 0.2); color: var(--accent-orange); }
+    .status-success { background: rgba(0, 255, 136, 0.2); color: var(--accent-green); }
+    .status-failed { background: rgba(255, 68, 68, 0.2); color: #ef4444; }
+  </style>
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="/" class="nav-brand">
+      <span>⚡ CLOUDFLARE EDGE ARENA</span>
+      <span class="nav-badge">LIVE</span>
+    </a>
+    <div class="nav-links">
+      <a href="/" class="nav-link">🏠 Master Gate</a>
+      <a href="/drive" class="nav-link">🏎️ Milli-Drive</a>
+      <a href="/scalper-royale" class="nav-link">🏟️ Scalper Royale</a>
+      <a href="/matrix" class="nav-link">🌀 Laser Matrix</a>
+      <a href="/milli-clicks" class="nav-link">⚡ Milli-Clicks</a>
+      <a href="/clicker" class="nav-link">⚡ Reflex &amp; CPS</a>
+      <a href="/gauntlet" class="nav-link">🎯 5-Min Gauntlet</a>
+      <a href="/arena" class="nav-link">🎫 Drop Rush</a>
+      <a href="/challenge" class="nav-link active">🛡️ Turnstile</a>
+      <a href="/biometrics" class="nav-link">🔬 Biometrics</a>
+      <a href="javascript:void(0)" onclick="lockGate()" class="nav-link" style="color:#ef4444;">🔒 Lock</a>
+    </div>
+  </nav>
+
+  <div class="wrapper">
+    <div class="card">
+      <div style="font-size:2.8rem; margin-bottom:12px;">🛡️</div>
+      <h2 style="margin:0 0 8px 0;">Official Cloudflare Turnstile Gate</h2>
+      <p style="color:var(--text-muted); font-size:0.9rem; margin:0 0 20px 0;">
+        Interactive CAPTCHA alternative powered by Cloudflare Turnstile. Solve manually or inspect edge validation.
+      </p>
+
+      <!-- Official Turnstile Widget -->
+      <div class="turnstile-container">
+        <div id="cf-turnstile-widget" class="cf-turnstile"
+             data-sitekey="0x4AAAAAAFtuNmdenPEqPlr-"
+             data-theme="dark"
+             data-callback="onTurnstileSuccess"
+             data-error-callback="onTurnstileError"
+             data-expired-callback="onTurnstileExpired">
+        </div>
+      </div>
+
+      <div id="verification-status" class="status-pill status-pending">
+        ⏳ Awaiting Challenge Completion
+      </div>
+
+      <!-- Master Password Bypass Option -->
+      <div style="margin-top:24px; padding-top:16px; border-top:1px solid #1e293b;">
+        <span style="font-size:0.75rem; color:var(--text-muted); font-weight:bold;">OPERATOR MASTER CLEARANCE:</span>
+        <div style="margin-top:10px; display:flex; gap:8px; justify-content:center;">
+          <input type="password" id="master-pass-input" placeholder="SENTINEL_WAR_2026"
+                 style="background:#090d16; border:1px solid #334155; color:#fff; padding:8px 12px; border-radius:6px; font-size:0.85rem; width:200px;">
+          <button onclick="triggerMasterBypass()" class="btn btn-outline" style="font-size:0.8rem; border-color:var(--accent-orange); color:var(--accent-orange);">⚡ Bypass</button>
+        </div>
+      </div>
+
+      <!-- Live Edge Verification Telemetry -->
+      <div class="telemetry-card" id="telemetry-box">
+        <div style="color:var(--accent-cyan); margin-bottom:6px; font-weight:bold;">EDGE TELEMETRY LOG:</div>
+        <div id="telemetry-content" style="color:#94a3b8; font-size:0.8rem; line-height:1.5;">
+          Awaiting verification token...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let challengeStartTime = performance.now();
+
+    window.onTurnstileSuccess = async function(token) {
+      const elapsed = (performance.now() - challengeStartTime).toFixed(1);
+      const statusEl = document.getElementById("verification-status");
+      const telemEl = document.getElementById("telemetry-content");
+
+      statusEl.className = "status-pill status-pending";
+      statusEl.innerText = `🔄 Verifying Token at Cloudflare Edge (${elapsed}ms)...`;
+
+      try {
+        const resp = await fetch("/api/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: token })
+        });
+        const data = await resp.json();
+
+        if (data.success) {
+          statusEl.className = "status-pill status-success";
+          statusEl.innerText = "✔ TURNSTILE VERIFIED (PASS)";
+          telemEl.innerHTML = `
+<span style="color:#00ff88;">[STATUS]</span> SUCCESS (Cloudflare Turnstile Accepted)<br>
+<span style="color:#00f0ff;">[EDGE COLO]</span> ${data.edge_colo || "EDGE"}<br>
+<span style="color:#f6821f;">[HOSTNAME]</span> ${data.hostname || window.location.hostname}<br>
+<span style="color:#94a3b8;">[TIMESTAMP]</span> ${data.challenge_ts || new Date().toISOString()}<br>
+<span style="color:#00f0ff;">[TOKEN]</span> ${token.substring(0, 32)}...
+          `;
+        } else {
+          statusEl.className = "status-pill status-failed";
+          statusEl.innerText = "❌ VERIFICATION FAILED";
+          telemEl.innerText = JSON.stringify(data, null, 2);
+        }
+      } catch (err) {
+        statusEl.className = "status-pill status-failed";
+        statusEl.innerText = "❌ Network Error";
+        telemEl.innerText = err.message;
+      }
+    };
+
+    window.onTurnstileError = function(errorCode) {
+      const statusEl = document.getElementById("verification-status");
+      statusEl.className = "status-pill status-failed";
+      statusEl.innerText = `❌ Turnstile Error: ${errorCode}`;
+      document.getElementById("telemetry-content").innerText = `Turnstile widget reported error code: ${errorCode}`;
+    };
+
+    window.onTurnstileExpired = function() {
+      const statusEl = document.getElementById("verification-status");
+      statusEl.className = "status-pill status-pending";
+      statusEl.innerText = "⏳ Turnstile Token Expired. Retrying...";
+    };
+
+    async function triggerMasterBypass() {
+      const key = document.getElementById("master-pass-input").value;
+      const statusEl = document.getElementById("verification-status");
+      const telemEl = document.getElementById("telemetry-content");
+
+      const resp = await fetch("/api/verify", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Sentinel-Admin-Key": key
+        },
+        body: JSON.stringify({ admin_key: key })
+      });
+      const data = await resp.json();
+      if (data.success) {
+        statusEl.className = "status-pill status-success";
+        statusEl.innerText = "✔ MASTER KEY UNCONDITIONAL PASS";
+        telemEl.innerHTML = `
+<span style="color:#00ff88;">[AUTH METHOD]</span> ${data.auth_method}<br>
+<span style="color:#00f0ff;">[MESSAGE]</span> ${data.message}
+        `;
+      } else {
+        statusEl.className = "status-pill status-failed";
+        statusEl.innerText = "❌ Invalid Master Key";
+        telemEl.innerText = data.error || "Access Denied";
+      }
+    }
+
+    function lockGate() {
+      localStorage.removeItem("sentinel_unlocked");
+      document.cookie = "sentinel_admin_key=; path=/; max-age=0";
+      window.location.href = "/";
+    }
+  </script>
+</body>
+</html>

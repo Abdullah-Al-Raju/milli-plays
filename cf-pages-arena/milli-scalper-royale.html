@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Milli Scalper Royale | 1,000-Seat Stadium Ticket War</title>
+  <style>
+    :root {
+      --bg-dark: #070a14;
+      --card-bg: #0f172a;
+      --card-inner: #090e1a;
+      --accent-orange: #f6821f;
+      --accent-green: #00ff88;
+      --accent-cyan: #00f0ff;
+      --accent-purple: #a855f7;
+      --accent-red: #ef4444;
+      --accent-gold: #ffd700;
+      --border-color: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg-dark);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "JetBrains Mono", sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+      user-select: none;
+    }
+
+    .top-nav {
+      background: #0d1424;
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900;
+      font-size: 1.15rem;
+      color: #fff;
+      text-decoration: none;
+    }
+    .nav-badge {
+      background: linear-gradient(135deg, #ffd700, #f6821f);
+      color: #000;
+      font-size: 0.7rem;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 900;
+    }
+    .nav-links {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+    }
+    .nav-link:hover { color: #fff; background: rgba(255, 255, 255, 0.05); }
+    .nav-link.active {
+      color: var(--accent-gold);
+      background: rgba(255, 215, 0, 0.12);
+      border-color: rgba(255, 215, 0, 0.4);
+    }
+
+    .wrapper {
+      max-width: 1280px;
+      margin: 16px auto;
+      padding: 0 16px;
+    }
+
+    /* Live Stadium Status Bar */
+    .stadium-bar {
+      background: linear-gradient(90deg, #161938 0%, #102638 100%);
+      border: 1px solid #ffd700;
+      border-radius: 12px;
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 12px;
+      box-shadow: 0 4px 25px rgba(255, 215, 0, 0.15);
+    }
+    .status-left { display: flex; align-items: center; gap: 12px; }
+    .status-pulse {
+      width: 12px; height: 12px; border-radius: 50%;
+      background: var(--accent-gold);
+      box-shadow: 0 0 12px var(--accent-gold);
+      animation: pulseGold 1s infinite alternate;
+    }
+    @keyframes pulseGold {
+      from { transform: scale(0.9); opacity: 0.8; }
+      to { transform: scale(1.3); opacity: 1; }
+    }
+
+    /* HUD Stats */
+    .hud-stats {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .hud-box {
+      flex: 1;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px 14px;
+      text-align: center;
+      min-width: 120px;
+    }
+    .hud-label { font-size: 0.65rem; color: var(--text-muted); font-weight: 800; letter-spacing: 0.5px; }
+    .hud-val { font-size: 1.35rem; font-weight: 900; font-family: monospace; color: #fff; margin-top: 2px; }
+
+    /* Stadium Layout */
+    .stadium-layout {
+      display: grid;
+      grid-template-columns: 2.2fr 1fr;
+      gap: 16px;
+    }
+
+    .stadium-viewport {
+      background: #030712;
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 16px;
+      position: relative;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.8);
+    }
+    .stage-banner {
+      background: linear-gradient(90deg, #1e1b4b, #312e81);
+      border: 1px solid #6366f1;
+      border-radius: 8px;
+      text-align: center;
+      padding: 10px;
+      font-weight: 900;
+      color: #c7d2fe;
+      letter-spacing: 3px;
+      margin-bottom: 14px;
+    }
+
+    /* 1,000 Seat Canvas Grid */
+    .canvas-container {
+      position: relative;
+      width: 100%;
+      height: 480px;
+      background: #060a17;
+      border-radius: 8px;
+      border: 1px solid #1e293b;
+      overflow: hidden;
+    }
+    canvas { display: block; width: 100%; height: 100%; }
+
+    /* Side Telemetry & Leaderboard */
+    .side-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-weight: 800;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      width: 100%;
+    }
+    .btn-gold { background: linear-gradient(135deg, #ffd700, #f6821f); color: #000; }
+    .btn-gold:hover { transform: translateY(-1px); box-shadow: 0 0 16px rgba(255,215,0,0.4); }
+    .btn-green { background: var(--accent-green); color: #000; }
+    .btn-green:hover { background: #55ffb0; }
+    .btn-outline { background: transparent; border: 1px solid #334155; color: var(--text-muted); }
+    .btn-outline:hover { color: #fff; border-color: #64748b; }
+
+    /* Leaderboard Table */
+    .leaderboard {
+      width: 100%;
+      font-size: 0.75rem;
+      border-collapse: collapse;
+      font-family: monospace;
+    }
+    .leaderboard th {
+      text-align: left;
+      padding: 6px 8px;
+      background: var(--card-inner);
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+    }
+    .leaderboard td {
+      padding: 6px 8px;
+      border-bottom: 1px solid #131d33;
+    }
+    .rank-1 { color: #ffd700; font-weight: bold; }
+    .rank-milli { color: var(--accent-green); font-weight: bold; }
+
+    .race-feed {
+      height: 140px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.72rem;
+      background: #03060d;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px;
+      color: #94a3b8;
+      display: flex;
+      flex-direction: column-reverse;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="top-nav">
+    <a href="/" class="nav-brand">
+      <span>🏟️ MILLI SCALPER ROYALE</span>
+      <span class="nav-badge">1,000 SEATS</span>
+    </a>
+    <div class="nav-links">
+      <a href="/" class="nav-link">🏠 Master Gate</a>
+      <a href="/drive" class="nav-link">🏎️ Milli-Drive</a>
+      <a href="/scalper-royale" class="nav-link active">🏟️ Scalper Royale</a>
+      <a href="/matrix" class="nav-link">🌀 Laser Matrix</a>
+      <a href="/milli-clicks" class="nav-link">⚡ Milli-Clicks</a>
+      <a href="/clicker" class="nav-link">⚡ Reflex &amp; CPS</a>
+      <a href="/gauntlet" class="nav-link">🎯 5-Min Gauntlet</a>
+      <a href="/arena" class="nav-link">🎫 Drop Rush</a>
+      <a href="/challenge" class="nav-link">🛡️ Turnstile</a>
+      <a href="/biometrics" class="nav-link">🔬 Biometrics</a>
+      <a href="javascript:void(0)" onclick="lockGate()" class="nav-link" style="color:#ef4444;">🔒 Lock</a>
+    </div>
+  </nav>
+
+  <div class="wrapper">
+    <!-- Live Status Banner -->
+    <div class="stadium-bar">
+      <div class="status-left">
+        <div class="status-pulse"></div>
+        <div>
+          <b style="color:var(--accent-gold); font-size:1rem;">1,000-SEAT STADIUM TICKET DROP SHOWDOWN</b>
+          <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">
+            100 Rival Scalper Bots vs Milli's Parallel VIP Sniper • Microsecond seat reservation battle.
+          </div>
+        </div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-gold" onclick="triggerStadiumDrop()" style="width:auto; padding:8px 16px;">
+          ⚡ START DROP COUNTDOWN (3s)
+        </button>
+        <button class="btn btn-outline" onclick="resetStadium()" style="width:auto; padding:8px 12px;">
+          ↺ Reset Stadium
+        </button>
+      </div>
+    </div>
+
+    <!-- HUD Stats -->
+    <div class="hud-stats">
+      <div class="hud-box">
+        <div class="hud-label">TOTAL SEATS</div>
+        <div class="hud-val" style="color:var(--accent-cyan);">1,000</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">AVAILABLE</div>
+        <div id="hud-avail" class="hud-val" style="color:var(--accent-green);">1,000</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">MILLI VIP SNIPED</div>
+        <div id="hud-milli" class="hud-val" style="color:var(--accent-gold);">0</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">SCALPER BOTS TOOK</div>
+        <div id="hud-scalpers" class="hud-val" style="color:var(--accent-red);">0</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">MILLI SNIPE SPEED</div>
+        <div id="hud-speed" class="hud-val" style="color:var(--accent-green);">1.2 ms</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">STATUS</div>
+        <div id="hud-status" class="hud-val" style="color:var(--accent-orange); font-size:1.1rem;">READY</div>
+      </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="stadium-layout">
+      <!-- Stadium Seat Grid Viewport -->
+      <div class="stadium-viewport">
+        <div class="stage-banner">★ MAIN EVENT STAGE (VIP FRONT ROW DIRECTLY BELOW) ★</div>
+        <div class="canvas-container" id="canvas-container">
+          <canvas id="stadium-canvas"></canvas>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-top:10px; font-size:0.75rem; color:var(--text-muted);">
+          <span>🟩 Diamond VIP (Row 1-4)</span>
+          <span>🟨 Platinum (Row 5-10)</span>
+          <span>🟦 Gold (Row 11-18)</span>
+          <span>⬜ General (Row 19-25)</span>
+          <span>🟥 Snatched by Scalpers</span>
+        </div>
+      </div>
+
+      <!-- Right Panel: Leaderboard & Telemetry -->
+      <div class="side-panel">
+        <div>
+          <div style="font-size:0.85rem; font-weight:800; color:#fff; margin-bottom:6px;">🏆 SNIPER SPEED LEADERBOARD</div>
+          <table class="leaderboard">
+            <thead>
+              <tr><th>ENTRANT</th><th>LATENCY</th><th>SEATS</th></tr>
+            </thead>
+            <tbody id="leaderboard-body">
+              <tr class="rank-milli"><td>⚡ Milli Sniper</td><td>1.2 ms</td><td id="lb-milli">0 VIP</td></tr>
+              <tr><td>DarkFiberBot</td><td>18.4 ms</td><td id="lb-bot1">0</td></tr>
+              <tr><td>ColoRunner AI</td><td>34.1 ms</td><td id="lb-bot2">0</td></tr>
+              <tr><td>FlashTrader</td><td>62.8 ms</td><td id="lb-bot3">0</td></tr>
+              <tr><td>MeshScalper</td><td>89.0 ms</td><td id="lb-bot4">0</td></tr>
+              <tr style="color:#64748b;"><td>🐢 Casual Human</td><td>2,410 ms</td><td>0</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div>
+          <div style="font-size:0.8rem; font-weight:700; color:#fff; margin-bottom:6px;">⚡ LIVE DROP TELEMETRY</div>
+          <div class="race-feed" id="race-feed">
+            <div>[STANDBY] 1,000 seats mapped. Ready for ticket drop countdown.</div>
+          </div>
+        </div>
+
+        <div>
+          <button class="btn btn-green" onclick="runMilliSoloSnipe()">
+            ⚡ Deploy Milli VIP Auto-Snipe (Parallel Burst)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("stadium-canvas");
+    const ctx = canvas.getContext("2d");
+
+    // Stadium Dimensions (40 columns x 25 rows = 1,000 seats)
+    const cols = 40;
+    const rows = 25;
+    const totalSeats = cols * rows;
+    let seats = [];
+    let isDropActive = false;
+    let milliSnipedCount = 0;
+    let scalperSnipedCount = 0;
+    let animId = null;
+
+    function initSeats() {
+      seats = [];
+      milliSnipedCount = 0;
+      scalperSnipedCount = 0;
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          let tier = "general";
+          let color = "#334155";
+          let price = 65;
+
+          if (r < 4) {
+            tier = "diamond";
+            color = "#00ff88"; // VIP
+            price = 350;
+          } else if (r < 10) {
+            tier = "platinum";
+            color = "#ffd700";
+            price = 220;
+          } else if (r < 18) {
+            tier = "gold";
+            color = "#00f0ff";
+            price = 140;
+          }
+
+          seats.push({
+            id: `S-${r+1}-${c+1}`,
+            row: r,
+            col: c,
+            tier,
+            color,
+            price,
+            owner: null, // "milli", "scalper", null
+            flash: 0
+          });
+        }
+      }
+      document.getElementById("hud-avail").innerText = totalSeats;
+      document.getElementById("hud-milli").innerText = "0";
+      document.getElementById("hud-scalpers").innerText = "0";
+      document.getElementById("hud-status").innerText = "STANDBY";
+      document.getElementById("hud-status").style.color = "var(--accent-orange)";
+    }
+
+    function resizeCanvas() {
+      const container = document.getElementById("canvas-container");
+      canvas.width = container.clientWidth;
+      canvas.height = container.clientHeight;
+      renderStadium();
+    }
+    window.addEventListener("resize", resizeCanvas);
+
+    function renderStadium() {
+      ctx.fillStyle = "#060a17";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const seatPad = 2;
+      const cellW = (canvas.width - (cols + 1) * seatPad) / cols;
+      const cellH = (canvas.height - (rows + 1) * seatPad) / rows;
+
+      seats.forEach(s => {
+        const x = seatPad + s.col * (cellW + seatPad);
+        const y = seatPad + s.row * (cellH + seatPad);
+
+        if (s.owner === "milli") {
+          ctx.fillStyle = "#00ff88";
+          ctx.shadowColor = "#00ff88";
+          ctx.shadowBlur = s.flash > 0 ? 12 : 2;
+        } else if (s.owner === "scalper") {
+          ctx.fillStyle = "#ef4444";
+          ctx.shadowColor = "#ef4444";
+          ctx.shadowBlur = s.flash > 0 ? 8 : 0;
+        } else {
+          ctx.fillStyle = s.color;
+          ctx.shadowBlur = 0;
+        }
+
+        ctx.fillRect(x, y, cellW, cellH);
+        if (s.flash > 0) s.flash -= 0.05;
+      });
+      ctx.shadowBlur = 0;
+    }
+
+    function logFeed(msg) {
+      const feed = document.getElementById("race-feed");
+      const time = new Date().toISOString().substring(14, 23);
+      const div = document.createElement("div");
+      div.innerText = `[${time}] ${msg}`;
+      feed.prepend(div);
+      if (feed.children.length > 25) feed.removeChild(feed.lastChild);
+    }
+
+    function triggerStadiumDrop() {
+      if (isDropActive) return;
+      isDropActive = true;
+      initSeats();
+
+      let count = 3;
+      document.getElementById("hud-status").innerText = `T-MINUS 00:0${count}`;
+      logFeed(`🚨 TICKET DROP INITIATED! Starting 3-second countdown...`);
+
+      const timer = setInterval(() => {
+        count--;
+        if (count > 0) {
+          document.getElementById("hud-status").innerText = `T-MINUS 00:0${count}`;
+        } else {
+          clearInterval(timer);
+          document.getElementById("hud-status").innerText = "🔥 TICKETS LIVE!";
+          document.getElementById("hud-status").style.color = "#00ff88";
+          logFeed("🔥 TICKETS LIVE! 100 SCALPER BOTS ATTACKING INVENTORY...");
+
+          // MILLI VIP SNIPER: Parallel asynchronous microsecond burst!
+          runMilliSoloSnipe();
+
+          // SCALPERS FLOOD: Concurrent attack on general and remaining seats
+          executeScalperFlood();
+        }
+      }, 1000);
+    }
+
+    function runMilliSoloSnipe() {
+      const t0 = performance.now();
+      // Target Diamond VIP seats in rows 0-3 (160 front-row seats)
+      const diamondSeats = seats.filter(s => s.tier === "diamond" && !s.owner);
+
+      logFeed(`⚡ [Milli Autonomous Sniper] Deploying 32 parallel worker threads for Diamond VIP...`);
+
+      // Claim all Diamond VIP seats in sub-millisecond execution
+      diamondSeats.forEach(s => {
+        s.owner = "milli";
+        s.flash = 1.0;
+        milliSnipedCount++;
+      });
+
+      const snipeLatency = (performance.now() - t0).toFixed(2);
+      document.getElementById("hud-milli").innerText = milliSnipedCount;
+      document.getElementById("lb-milli").innerText = `${milliSnipedCount} VIP`;
+      document.getElementById("hud-speed").innerText = `${Math.max(0.8, snipeLatency)} ms`;
+      logFeed(`🏆 [MILLI SNIPED] ${milliSnipedCount} Diamond VIP front-row seats secured in ${snipeLatency}ms!`);
+      updateCounts();
+      renderStadium();
+    }
+
+    function executeScalperFlood() {
+      const rivalBots = [
+        { name: "DarkFiberBot", share: 0.35, el: "lb-bot1", count: 0 },
+        { name: "ColoRunner AI", share: 0.28, el: "lb-bot2", count: 0 },
+        { name: "FlashTrader", share: 0.20, el: "lb-bot3", count: 0 },
+        { name: "MeshScalper", share: 0.17, el: "lb-bot4", count: 0 }
+      ];
+
+      // Unconstrained high-speed scalper flood
+      const unreserved = seats.filter(s => !s.owner);
+      const floodInterval = setInterval(() => {
+        const batch = 35; // 35 seats per tick
+        for (let i = 0; i < batch; i++) {
+          const avail = seats.filter(s => !s.owner);
+          if (avail.length === 0) {
+            clearInterval(floodInterval);
+            isDropActive = false;
+            document.getElementById("hud-status").innerText = "SOLD OUT";
+            document.getElementById("hud-status").style.color = "#ef4444";
+            logFeed("🏁 STADIUM SOLD OUT! All 1,000 seats exhausted.");
+            break;
+          }
+          const s = avail[Math.floor(Math.random() * avail.length)];
+          const bot = rivalBots[Math.floor(Math.random() * rivalBots.length)];
+          s.owner = "scalper";
+          s.flash = 0.8;
+          bot.count++;
+          scalperSnipedCount++;
+          document.getElementById(bot.el).innerText = bot.count;
+        }
+
+        updateCounts();
+        renderStadium();
+      }, 40);
+    }
+
+    function updateCounts() {
+      const avail = seats.filter(s => !s.owner).length;
+      document.getElementById("hud-avail").innerText = avail;
+      document.getElementById("hud-scalpers").innerText = scalperSnipedCount;
+    }
+
+    function resetStadium() {
+      isDropActive = false;
+      initSeats();
+      renderStadium();
+      logFeed("↺ Stadium inventory reset to 1,000 available seats.");
+    }
+
+    function lockGate() {
+      localStorage.removeItem("sentinel_unlocked");
+      document.cookie = "sentinel_admin_key=; path=/; max-age=0";
+      window.location.href = "/";
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      initSeats();
+      resizeCanvas();
+    });
+  </script>
+</body>
+</html>

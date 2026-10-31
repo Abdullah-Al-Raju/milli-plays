@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Milli Orbit Evasion | N-Body Gravitational Singularity Slingshot</title>
+  <style>
+    :root {
+      --bg-dark: #04060d;
+      --card-bg: #090e1a;
+      --accent-cyan: #00f0ff;
+      --accent-green: #00ff88;
+      --accent-purple: #a855f7;
+      --accent-gold: #ffd700;
+      --accent-red: #ef4444;
+      --border-color: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg-dark);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "JetBrains Mono", sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+      user-select: none;
+    }
+    .top-nav {
+      background: #0d1424;
+      border-bottom: 1px solid var(--border-color);
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900;
+      font-size: 1.1rem;
+      color: #fff;
+      text-decoration: none;
+    }
+    .nav-badge {
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      color: #000;
+      font-size: 0.7rem;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 900;
+    }
+    .nav-links {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .nav-link:hover { color: #fff; background: rgba(255, 255, 255, 0.05); }
+    .nav-link.active {
+      color: var(--accent-cyan);
+      background: rgba(0, 240, 255, 0.12);
+      border: 1px solid rgba(0, 240, 255, 0.4);
+    }
+
+    .wrapper {
+      max-width: 1360px;
+      margin: 14px auto;
+      padding: 0 16px;
+    }
+    .status-bar {
+      background: linear-gradient(90deg, #0d1b30 0%, #170d2b 100%);
+      border: 1px solid var(--accent-cyan);
+      border-radius: 12px;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 12px;
+      box-shadow: 0 4px 25px rgba(0, 240, 255, 0.2);
+    }
+    .hud-stats {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .hud-box {
+      flex: 1;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px 14px;
+      text-align: center;
+      min-width: 120px;
+    }
+    .hud-label { font-size: 0.65rem; color: var(--text-muted); font-weight: 800; letter-spacing: 0.5px; }
+    .hud-val { font-size: 1.25rem; font-weight: 900; font-family: monospace; color: #fff; margin-top: 2px; }
+
+    .arena-grid {
+      display: grid;
+      grid-template-columns: 2.7fr 1fr;
+      gap: 16px;
+    }
+    .canvas-container {
+      position: relative;
+      background: #020308;
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      overflow: hidden;
+      height: 640px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    canvas { display: block; background: #020308; }
+
+    .side-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .btn {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-weight: 800;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+      width: 100%;
+    }
+    .btn-cyan { background: var(--accent-cyan); color: #000; box-shadow: 0 0 16px rgba(0, 240, 255, 0.4); }
+    .btn-cyan:hover { background: #55f3ff; transform: translateY(-1px); }
+    .btn-green { background: var(--accent-green); color: #000; }
+    .btn-green:hover { background: #55ffb0; }
+    .btn-purple { background: var(--accent-purple); color: #fff; }
+
+    .feed-box {
+      height: 180px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.72rem;
+      background: #03060f;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px;
+      color: #94a3b8;
+      display: flex;
+      flex-direction: column-reverse;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="/" class="nav-brand">
+      <span>🌌 MILLI ORBIT EVASION</span>
+      <span class="nav-badge">N-BODY GRAVITATIONAL SLINGSHOT</span>
+    </a>
+    <div class="nav-links">
+      <a href="/" class="nav-link">🏠 Master Gate</a>
+      <a href="/drive" class="nav-link">🏎️ Drive</a>
+      <a href="/maze" class="nav-link">🌀 Maze</a>
+      <a href="/danmaku" class="nav-link">🌸 Danmaku</a>
+      <a href="/orbit" class="nav-link active">🌌 Orbit</a>
+      <a href="/pong" class="nav-link">🏓 Pong</a>
+      <a href="/rhythm" class="nav-link">🎵 Rhythm</a>
+      <a href="/snake" class="nav-link">🐍 Snake</a>
+      <a href="/swarm" class="nav-link">⚔️ Swarm</a>
+      <a href="/stealth" class="nav-link">🕶️ Stealth</a>
+      <a href="/trader" class="nav-link">📈 Trader</a>
+      <a href="/sweeper" class="nav-link">💣 Sweeper</a>
+      <a href="/defense" class="nav-link">🛸 Defense</a>
+      <a href="/portal" class="nav-link">🌀 Portal</a>
+      <a href="/circuit" class="nav-link">⚡ Circuit</a>
+    </div>
+  </nav>
+
+  <div class="wrapper">
+    <div class="status-bar">
+      <div>
+        <b style="color:var(--accent-cyan); font-size:1rem;">⚡ N-BODY CELESTIAL GRAVITATIONAL SINGULARITY SLINGSHOT</b>
+        <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">
+          Supermassive black holes, orbiting pulsars &amp; antimatter energy nodes. Milli computes Runge-Kutta 4th order slingshot vectors at Mach 15!
+        </div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-cyan" onclick="toggleMilli()" id="btn-milli" style="width:auto; padding:8px 18px;">
+          🤖 Milli Auto-Pilot: ACTIVE
+        </button>
+        <button class="btn btn-green" onclick="resetOrbit()" style="width:auto; padding:8px 16px;">
+          🔄 Re-Launch Ship
+        </button>
+      </div>
+    </div>
+
+    <div class="hud-stats">
+      <div class="hud-box">
+        <div class="hud-label">VELOCITY (MACH)</div>
+        <div id="hud-mach" class="hud-val" style="color:var(--accent-cyan);">Mach 1.20</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">ENERGY CORES COLLECTED</div>
+        <div id="hud-cores" class="hud-val" style="color:var(--accent-gold);">0</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">GRAVITATIONAL G-FORCE</div>
+        <div id="hud-gforce" class="hud-val" style="color:var(--accent-purple);">1.4 G</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">SINGULARITY DISTANCE</div>
+        <div id="hud-dist" class="hud-val" style="color:var(--accent-green);">320 AU</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">EVENT HORIZON MARGIN</div>
+        <div id="hud-horizon" class="hud-val" style="color:var(--accent-cyan);">SAFE</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">FLIGHT STATUS</div>
+        <div id="hud-status" class="hud-val" style="color:var(--accent-green);">ORBIT STABLE</div>
+      </div>
+    </div>
+
+    <div class="arena-grid">
+      <div class="canvas-container" id="container">
+        <canvas id="orbit-canvas"></canvas>
+      </div>
+
+      <div class="side-panel">
+        <div>
+          <div style="font-size:0.85rem; font-weight:800; color:#fff; margin-bottom:8px;">⚙️ CELESTIAL CONFIGURATION</div>
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <button class="btn btn-cyan" onclick="spawnBody('blackhole')">Add Micro-Black Hole</button>
+            <button class="btn btn-purple" onclick="spawnBody('pulsar')">Add Orbiting Pulsar</button>
+            <button class="btn btn-green" onclick="boostVelocity()">🚀 Hypersonic Slingshot Boost</button>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:0.85rem; font-weight:800; color:#fff; margin-bottom:8px;">🕹️ MANUAL THRUST CONTROLS</div>
+          <div style="font-size:0.75rem; color:var(--text-muted); line-height:1.5;">
+            Toggle Auto-Pilot OFF to manually burn thrusters using <b>WASD / Arrow Keys</b>. Warning: Overcoming orbital inertia requires micro-second burn precision.
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:0.8rem; font-weight:700; color:#fff; margin-bottom:6px;">⚡ MILLI COGNITIVE LOGS</div>
+          <div class="feed-box" id="feed-box">
+            <div>[READY] Celestial Gravity Engine armed. Runge-Kutta 4th order integrator live.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("orbit-canvas");
+    const ctx = canvas.getContext("2d");
+
+    let W = 880;
+    let H = 640;
+    canvas.width = W;
+    canvas.height = H;
+
+    let milliAuto = true;
+    let ship = {
+      x: W / 2 - 180, y: H / 2,
+      vx: 0, vy: 4.2,
+      angle: 0,
+      trail: [],
+      alive: true
+    };
+
+    // Celestial Gravity Wells
+    let bodies = [
+      { x: W / 2, y: H / 2, mass: 8500, r: 28, type: "blackhole", name: "Singularity Alpha" },
+      { x: W / 2 + 180, y: H / 2, mass: 2200, r: 14, type: "pulsar", name: "Pulsar Beta", orbitR: 180, orbitA: 0, orbitSpeed: 0.015 }
+    ];
+
+    // Antimatter Energy Cores to collect
+    let cores = [];
+    let coresCollected = 0;
+    let particles = [];
+
+    const keys = {};
+    window.addEventListener("keydown", e => { keys[e.key] = true; });
+    window.addEventListener("keyup", e => { keys[e.key] = false; });
+
+    function logFeed(msg) {
+      const feed = document.getElementById("feed-box");
+      const time = new Date().toISOString().substring(14, 23);
+      const div = document.createElement("div");
+      div.innerText = `[${time}] ${msg}`;
+      feed.prepend(div);
+      if (feed.children.length > 25) feed.removeChild(feed.lastChild);
+    }
+
+    function toggleMilli() {
+      milliAuto = !milliAuto;
+      document.getElementById("btn-milli").innerText = milliAuto ? "🤖 Milli Auto-Pilot: ACTIVE" : "🕹️ Manual Thrust: ENGAGED";
+      document.getElementById("btn-milli").className = milliAuto ? "btn btn-cyan" : "btn btn-green";
+      logFeed(milliAuto ? "Milli AI orbital autopilot engaged." : "Manual thrusters unlocked.");
+    }
+
+    function spawnCore() {
+      const a = Math.random() * Math.PI * 2;
+      const dist = 90 + Math.random() * 220;
+      cores.push({
+        x: W / 2 + Math.cos(a) * dist,
+        y: H / 2 + Math.sin(a) * dist,
+        r: 6,
+        pulse: 0
+      });
+    }
+
+    for (let i = 0; i < 5; i++) spawnCore();
+
+    function spawnBody(type) {
+      const a = Math.random() * Math.PI * 2;
+      const r = 240;
+      bodies.push({
+        x: W / 2 + Math.cos(a) * r,
+        y: H / 2 + Math.sin(a) * r,
+        mass: type === "blackhole" ? 6000 : 2500,
+        r: type === "blackhole" ? 22 : 12,
+        type: type,
+        name: type === "blackhole" ? "Wandering Singularity" : "Micro-Pulsar",
+        orbitR: r, orbitA: a, orbitSpeed: 0.01
+      });
+      logFeed(`New ${type} celestial body formed in local orbital sector.`);
+    }
+
+    function boostVelocity() {
+      ship.vx *= 1.35;
+      ship.vy *= 1.35;
+      logFeed("Hypersonic burn executed. Relativistic slingshot initiated!");
+    }
+
+    function resetOrbit() {
+      ship = {
+        x: W / 2 - 180, y: H / 2,
+        vx: 0, vy: 4.2,
+        angle: 0,
+        trail: [],
+        alive: true
+      };
+      coresCollected = 0;
+      document.getElementById("hud-status").innerText = "ORBIT STABLE";
+      document.getElementById("hud-status").style.color = "var(--accent-green)";
+      logFeed("Ship respawned in stable circular orbit.");
+    }
+
+    // RUNGE-KUTTA 4th ORDER GRAVITATIONAL ACCELERATION
+    function computeGravitationalAcceleration(px, py) {
+      let ax = 0;
+      let ay = 0;
+
+      for (let i = 0; i < bodies.length; i++) {
+        const b = bodies[i];
+        const dx = b.x - px;
+        const dy = b.y - py;
+        const distSq = dx * dx + dy * dy;
+        const dist = Math.sqrt(distSq);
+
+        if (dist > 1) {
+          const force = (b.mass) / distSq;
+          ax += force * (dx / dist);
+          ay += force * (dy / dist);
+        }
+      }
+
+      return { ax, ay };
+    }
+
+    // MILLI AUTONOMOUS SLINGSHOT AI
+    function updateMilliAI() {
+      if (cores.length === 0) return;
+
+      // Find nearest core
+      let nearest = cores[0];
+      let minDist = Infinity;
+      for (let i = 0; i < cores.length; i++) {
+        const d = Math.hypot(cores[i].x - ship.x, cores[i].y - ship.y);
+        if (d < minDist) {
+          minDist = d;
+          nearest = cores[i];
+        }
+      }
+
+      // Compute vector to target core
+      const targetDx = nearest.x - ship.x;
+      const targetDy = nearest.y - ship.y;
+      const targetAngle = Math.atan2(targetDy, targetDx);
+
+      // Repulsion from event horizon of all black holes
+      let evadeX = 0;
+      let evadeY = 0;
+      for (let i = 0; i < bodies.length; i++) {
+        const b = bodies[i];
+        const dx = ship.x - b.x;
+        const dy = ship.y - b.y;
+        const dist = Math.hypot(dx, dy);
+        const dangerZone = b.r * 2.8;
+
+        if (dist < dangerZone) {
+          const force = (dangerZone - dist) * 0.15;
+          evadeX += (dx / dist) * force;
+          evadeY += (dy / dist) * force;
+        }
+      }
+
+      // Desired thrust
+      const thrustMag = 0.22;
+      ship.vx += Math.cos(targetAngle) * thrustMag * 0.4 + evadeX;
+      ship.vy += Math.sin(targetAngle) * thrustMag * 0.4 + evadeY;
+    }
+
+    function updateHumanControls() {
+      const thrust = 0.25;
+      if (keys["ArrowUp"] || keys["w"]) ship.vy -= thrust;
+      if (keys["ArrowDown"] || keys["s"]) ship.vy += thrust;
+      if (keys["ArrowLeft"] || keys["a"]) ship.vx -= thrust;
+      if (keys["ArrowRight"] || keys["d"]) ship.vx += thrust;
+    }
+
+    function update() {
+      // Update orbiting bodies
+      for (let i = 0; i < bodies.length; i++) {
+        const b = bodies[i];
+        if (b.orbitR) {
+          b.orbitA += b.orbitSpeed;
+          b.x = W / 2 + Math.cos(b.orbitA) * b.orbitR;
+          b.y = H / 2 + Math.sin(b.orbitA) * b.orbitR;
+        }
+      }
+
+      if (!ship.alive) return;
+
+      // AI or Human Thrust
+      if (milliAuto) {
+        updateMilliAI();
+      } else {
+        updateHumanControls();
+      }
+
+      // RK4 Numerical Gravity Step
+      const k1 = computeGravitationalAcceleration(ship.x, ship.y);
+      const k2 = computeGravitationalAcceleration(ship.x + ship.vx * 0.5, ship.y + ship.vy * 0.5);
+      const ax = (k1.ax + k2.ax) * 0.5;
+      const ay = (k1.ay + k2.ay) * 0.5;
+
+      ship.vx += ax;
+      ship.vy += ay;
+      ship.x += ship.vx;
+      ship.y += ship.vy;
+
+      ship.angle = Math.atan2(ship.vy, ship.vx);
+
+      // Trail
+      ship.trail.push({ x: ship.x, y: ship.y });
+      if (ship.trail.length > 50) ship.trail.shift();
+
+      // Check collision with event horizons
+      let minDistToHole = Infinity;
+      for (let i = 0; i < bodies.length; i++) {
+        const b = bodies[i];
+        const dist = Math.hypot(ship.x - b.x, ship.y - b.y);
+        if (dist < minDistToHole) minDistToHole = dist;
+
+        if (dist < b.r + 4) {
+          ship.alive = false;
+          document.getElementById("hud-status").innerText = "SPAGHETTIFIED (EVENT HORIZON)";
+          document.getElementById("hud-status").style.color = "var(--accent-red)";
+          logFeed(`🚨 CRITICAL: Ship crossed Event Horizon of ${b.name}! Singularity collapse.`);
+          break;
+        }
+      }
+
+      // Check collection of energy cores
+      for (let i = cores.length - 1; i >= 0; i--) {
+        const c = cores[i];
+        const dist = Math.hypot(ship.x - c.x, ship.y - c.y);
+        if (dist < c.r + 12) {
+          cores.splice(i, 1);
+          coresCollected++;
+          spawnCore();
+          logFeed(`✨ Core absorbed! Orbital speed boosted. Total: ${coresCollected}`);
+        }
+      }
+
+      // Velocity in Mach
+      const speed = Math.hypot(ship.vx, ship.vy);
+      const mach = (speed * 0.75 + 1.0).toFixed(2);
+      document.getElementById("hud-mach").innerText = `Mach ${mach}`;
+      document.getElementById("hud-cores").innerText = coresCollected;
+      document.getElementById("hud-gforce").innerText = `${(Math.hypot(ax, ay) * 12).toFixed(1)} G`;
+      document.getElementById("hud-dist").innerText = `${Math.round(minDistToHole)} AU`;
+      document.getElementById("hud-horizon").innerText = minDistToHole < 55 ? "CRITICAL PROXIMITY" : "SAFE MARGIN";
+      document.getElementById("hud-horizon").style.color = minDistToHole < 55 ? "var(--accent-red)" : "var(--accent-green)";
+    }
+
+    function draw() {
+      ctx.fillStyle = "#020308";
+      ctx.fillRect(0, 0, W, H);
+
+      // Starfield
+      ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+      for (let i = 0; i < 40; i++) {
+        const sx = ((i * 137) % W);
+        const sy = ((i * 243) % H);
+        ctx.fillRect(sx, sy, 1.2, 1.2);
+      }
+
+      // Render Gravity Wells / Black Holes
+      for (let i = 0; i < bodies.length; i++) {
+        const b = bodies[i];
+        ctx.save();
+
+        if (b.type === "blackhole") {
+          // Gravitational lensing accretion disk
+          const grad = ctx.createRadialGradient(b.x, b.y, b.r * 0.8, b.x, b.y, b.r * 2.8);
+          grad.addColorStop(0, "#000000");
+          grad.addColorStop(0.35, "rgba(0, 240, 255, 0.8)");
+          grad.addColorStop(0.7, "rgba(168, 85, 247, 0.4)");
+          grad.addColorStop(1, "rgba(0, 0, 0, 0)");
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(b.x, b.y, b.r * 2.8, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Black hole event horizon (pitch black core)
+          ctx.fillStyle = "#000000";
+          ctx.strokeStyle = "#00f0ff";
+          ctx.lineWidth = 2;
+          ctx.shadowColor = "#00f0ff";
+          ctx.shadowBlur = 15;
+          ctx.beginPath();
+          ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        } else {
+          // Pulsar
+          ctx.fillStyle = "#ffd700";
+          ctx.shadowColor = "#ffd700";
+          ctx.shadowBlur = 20;
+          ctx.beginPath();
+          ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      // Render Antimatter Cores
+      for (let i = 0; i < cores.length; i++) {
+        const c = cores[i];
+        ctx.save();
+        ctx.fillStyle = "#ffd700";
+        ctx.shadowColor = "#ffd700";
+        ctx.shadowBlur = 16;
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Render Ship Trail
+      if (ship.trail.length > 1) {
+        ctx.save();
+        ctx.strokeStyle = milliAuto ? "rgba(0, 255, 136, 0.45)" : "rgba(0, 240, 255, 0.45)";
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ship.trail.forEach((p, idx) => {
+          if (idx === 0) ctx.moveTo(p.x, p.y);
+          else ctx.lineTo(p.x, p.y);
+        });
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Render Ship
+      if (ship.alive) {
+        ctx.save();
+        ctx.translate(ship.x, ship.y);
+        ctx.rotate(ship.angle);
+
+        ctx.fillStyle = milliAuto ? "#00ff88" : "#00f0ff";
+        ctx.shadowColor = milliAuto ? "#00ff88" : "#00f0ff";
+        ctx.shadowBlur = 18;
+
+        ctx.beginPath();
+        ctx.moveTo(14, 0);
+        ctx.lineTo(-10, -7);
+        ctx.lineTo(-6, 0);
+        ctx.lineTo(-10, 7);
+        ctx.closePath();
+        ctx.fill();
+
+        // Thrust flame
+        ctx.fillStyle = "#ff007f";
+        ctx.beginPath();
+        ctx.moveTo(-6, 0);
+        ctx.lineTo(-15 - Math.random() * 8, 0);
+        ctx.stroke();
+
+        ctx.restore();
+      }
+
+      requestAnimationFrame(() => {
+        update();
+        draw();
+      });
+    }
+
+    draw();
+  </script>
+</body>
+</html>

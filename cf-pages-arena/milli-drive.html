@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Milli-Drive | Hypersonic Neural Vision &amp; Autonomous Pilot</title>
+  <style>
+    :root {
+      --bg-dark: #070a14;
+      --card-bg: #0f172a;
+      --card-inner: #090e1a;
+      --accent-orange: #f6821f;
+      --accent-green: #00ff88;
+      --accent-cyan: #00f0ff;
+      --accent-purple: #a855f7;
+      --accent-red: #ef4444;
+      --accent-gold: #ffd700;
+      --border-color: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg-dark);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "JetBrains Mono", sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+      user-select: none;
+    }
+
+    /* Top Nav */
+    .top-nav {
+      background: #0d1424;
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900;
+      font-size: 1.15rem;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: 0.5px;
+    }
+    .nav-badge {
+      background: linear-gradient(135deg, #00ff88, #00f0ff);
+      color: #000;
+      font-size: 0.7rem;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 900;
+    }
+    .nav-links {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+    }
+    .nav-link:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .nav-link.active {
+      color: var(--accent-green);
+      background: rgba(0, 255, 136, 0.12);
+      border-color: rgba(0, 255, 136, 0.4);
+    }
+
+    .wrapper {
+      max-width: 1280px;
+      margin: 16px auto;
+      padding: 0 16px;
+    }
+
+    /* One-Click Milli Auto Bar */
+    .milli-status-bar {
+      background: linear-gradient(90deg, #13243a 0%, #1e163b 100%);
+      border: 1px solid #00f0ff;
+      border-radius: 12px;
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 12px;
+      box-shadow: 0 4px 25px rgba(0, 240, 255, 0.15);
+    }
+    .status-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .status-pulse {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      box-shadow: 0 0 12px var(--accent-green);
+      animation: pulseAnim 1s infinite alternate;
+    }
+    @keyframes pulseAnim {
+      from { transform: scale(0.9); opacity: 0.8; }
+      to { transform: scale(1.3); opacity: 1; }
+    }
+
+    /* Game HUD */
+    .game-hud {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .hud-stats {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .hud-box {
+      background: var(--card-inner);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px 14px;
+      min-width: 100px;
+      text-align: center;
+    }
+    .hud-label {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+    .hud-val {
+      font-size: 1.25rem;
+      font-weight: 900;
+      font-family: monospace;
+      color: #fff;
+    }
+
+    /* Main Highway Canvas Container */
+    .game-layout {
+      display: grid;
+      grid-template-columns: 2.2fr 1fr;
+      gap: 16px;
+    }
+    .canvas-box {
+      position: relative;
+      background: #050811;
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      overflow: hidden;
+      height: 600px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.8), inset 0 0 50px rgba(0,0,0,0.6);
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Right Control & Telemetry Panel */
+    .side-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-weight: 800;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    .btn-green { background: var(--accent-green); color: #000; }
+    .btn-green:hover { background: #55ffb0; transform: translateY(-1px); box-shadow: 0 0 16px rgba(0,255,136,0.4); }
+    .btn-cyan { background: var(--accent-cyan); color: #000; }
+    .btn-red { background: var(--accent-red); color: #fff; }
+    .btn-red:hover { background: #ff6b6b; box-shadow: 0 0 16px rgba(239,68,68,0.4); }
+    .btn-outline { background: transparent; border: 1px solid #334155; color: var(--text-muted); }
+    .btn-outline:hover { color: #fff; border-color: #64748b; }
+
+    .cortex-container {
+      background: var(--card-inner);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px;
+    }
+    .cortex-canvas {
+      width: 100%;
+      height: 75px;
+      display: block;
+      background: #03060d;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+    .lidar-feed {
+      height: 150px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.72rem;
+      background: #03060d;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px;
+      color: #94a3b8;
+      display: flex;
+      flex-direction: column-reverse;
+      line-height: 1.4;
+    }
+
+    /* Touch Controls for Manual Mode */
+    .touch-controls {
+      display: none;
+      position: absolute;
+      bottom: 20px;
+      left: 0;
+      right: 0;
+      justify-content: space-between;
+      padding: 0 30px;
+      pointer-events: none;
+    }
+    .touch-btn {
+      pointer-events: auto;
+      width: 65px;
+      height: 65px;
+      border-radius: 50%;
+      background: rgba(0, 240, 255, 0.25);
+      border: 2px solid var(--accent-cyan);
+      color: #fff;
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+
+    /* Start / Crash Overlay */
+    .overlay-screen {
+      position: absolute;
+      inset: 0;
+      background: rgba(5, 8, 17, 0.88);
+      backdrop-filter: blur(6px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      text-align: center;
+      padding: 24px;
+    }
+    .overlay-title {
+      font-size: 2.2rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #00ff88, #00f0ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="top-nav">
+    <a href="/" class="nav-brand">
+      <span>⚡ MILLI-DRIVE</span>
+      <span class="nav-badge">HYPERSONIC NEURAL</span>
+    </a>
+    <div class="nav-links">
+      <a href="/" class="nav-link">🏠 Master Gate</a>
+      <a href="/drive" class="nav-link active">🏎️ Milli-Drive</a>
+      <a href="/maze" class="nav-link">🌀 Milli-Maze</a>
+      <a href="/scalper-royale" class="nav-link">🏟️ Scalper Royale</a>
+      <a href="/matrix" class="nav-link">🌀 Laser Matrix</a>
+      <a href="/milli-clicks" class="nav-link">⚡ Milli-Clicks</a>
+      <a href="/clicker" class="nav-link">⚡ Reflex &amp; CPS</a>
+      <a href="/gauntlet" class="nav-link">🎯 5-Min Gauntlet</a>
+      <a href="/arena" class="nav-link">🎫 Drop Rush</a>
+      <a href="/challenge" class="nav-link">🛡️ Turnstile</a>
+      <a href="/biometrics" class="nav-link">🔬 Biometrics</a>
+      <a href="javascript:void(0)" onclick="lockGate()" class="nav-link" style="color:#ef4444;">🔒 Lock</a>
+    </div>
+  </nav>
+
+  <div class="wrapper">
+    <!-- One-Click Milli Auto Bar -->
+    <div class="milli-status-bar">
+      <div class="status-left">
+        <div class="status-pulse" id="milli-pulse"></div>
+        <div>
+          <b id="milli-bar-status" style="color:var(--accent-green); font-size:1rem;">⚡ MILLI NEURAL VISION &amp; AUTONOMOUS PILOT: ENGAGED</b>
+          <div id="milli-bar-sub" style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">
+            Compounding Velocity (+2% per car) • Real-time Neural Bounding Boxes • Milli sees and dodges every obstacle.
+          </div>
+        </div>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button id="toggle-brain-btn" class="btn btn-green" onclick="toggleMilliBrain()">
+          🧠 Milli Brain: CONNECTED
+        </button>
+        <button id="toggle-pilot-btn" class="btn btn-cyan" onclick="togglePilot()">
+          🤖 Mode: AUTONOMOUS
+        </button>
+        <button class="btn btn-outline" onclick="toggleSound()" id="sound-btn">
+          🔊 Sound: ON
+        </button>
+      </div>
+    </div>
+
+    <!-- Live Telemetry HUD -->
+    <div class="game-hud">
+      <div class="hud-stats">
+        <div class="hud-box">
+          <div class="hud-label">DISTANCE</div>
+          <div id="hud-dist" class="hud-val" style="color:var(--accent-cyan);">0 m</div>
+        </div>
+        <div class="hud-box">
+          <div class="hud-label">VELOCITY</div>
+          <div id="hud-speed" class="hud-val" style="color:var(--accent-green);">145 MPH</div>
+        </div>
+        <div class="hud-box">
+          <div class="hud-label">MACH SPEED</div>
+          <div id="hud-mach" class="hud-val" style="color:var(--accent-gold);">0.19 M</div>
+        </div>
+        <div class="hud-box">
+          <div class="hud-label">DODGES</div>
+          <div id="hud-dodges" class="hud-val" style="color:var(--accent-orange);">0</div>
+        </div>
+        <div class="hud-box">
+          <div class="hud-label">SURGE POWER</div>
+          <div id="hud-surge" class="hud-val" style="color:#f43f5e;">x1.00</div>
+        </div>
+        <div class="hud-box">
+          <div class="hud-label">REACTION WINDOW</div>
+          <div id="hud-window" class="hud-val" style="color:var(--accent-purple);">48 ms</div>
+        </div>
+        <div class="hud-box">
+          <div class="hud-label">COLLISION RISK</div>
+          <div id="hud-risk" class="hud-val" style="color:var(--accent-green);">0%</div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-cyan" onclick="startDrive()" style="width:auto; padding:8px 16px;">
+          ▶ Launch Run
+        </button>
+        <button class="btn btn-outline" onclick="resetDrive()" style="width:auto; padding:8px 12px;">
+          ↺ Reset
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Game Layout -->
+    <div class="game-layout">
+      <!-- Highway Viewport -->
+      <div class="canvas-box" id="canvas-box">
+        <canvas id="drive-canvas"></canvas>
+
+        <!-- Touch Controls for mobile/tablet manual drive -->
+        <div class="touch-controls" id="touch-controls">
+          <button class="touch-btn" onpointerdown="steerManual(-1)">◀</button>
+          <button class="touch-btn" onpointerdown="steerManual(1)">▶</button>
+        </div>
+
+        <!-- Overlay Screen -->
+        <div id="drive-overlay" class="overlay-screen">
+          <div class="overlay-title" id="overlay-heading">MILLI-DRIVE HYPERSONIC</div>
+          <p style="color:var(--text-muted); max-width:540px; margin-bottom:18px; font-size:0.9rem; line-height:1.6;" id="overlay-desc">
+            <b>New Rule:</b> Speed compounds by <b>+2% on every single car Milli passes</b>!
+            Watch Milli’s neural vision cortex track oncoming hazards with real-time target bounding boxes, optic gaze vectoring, and zero-collision trajectory calculations breaking into Mach speeds!
+          </p>
+          <div id="overlay-stats" style="display:none; margin-bottom:16px;"></div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
+            <button class="btn btn-green" onclick="startWithMilli()" style="padding:12px 24px;">
+              ⚡ Launch Milli Hypersonic Pilot
+            </button>
+            <button class="btn btn-red" onclick="testBlindRadar()" style="padding:12px 20px;">
+              💀 Disconnect Milli (Test Blind Radar Crash)
+            </button>
+            <button class="btn btn-outline" onclick="startManual()" style="padding:12px 20px;">
+              🎮 Manual Human Drive
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Sensory & Raycasting Telemetry Panel -->
+      <div class="side-panel">
+        <div>
+          <h3 style="font-size:1.0rem; margin-bottom:4px; color:#fff;">🧠 Milli Synaptic Cortex</h3>
+          <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:10px;">
+            Visual neural network and live cognitive thought stream.
+          </div>
+
+          <div class="cortex-container">
+            <canvas id="cortex-canvas" class="cortex-canvas"></canvas>
+            <div class="lidar-feed" id="lidar-feed">
+              <div>[SYSTEM] Milli Cognitive Cortex initialized. Vision online.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lidar Lane Status Meters -->
+        <div>
+          <div style="font-size:0.8rem; font-weight:700; color:#fff; margin-bottom:8px;">📡 4-LANE LIDAR CLEARANCE</div>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <div>
+              <div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:3px;">
+                <span>LANE 1 (LEFT)</span>
+                <span id="lane-1-status" style="color:var(--accent-green); font-weight:bold;">CLEAR</span>
+              </div>
+              <div style="height:6px; background:#1e293b; border-radius:3px; overflow:hidden;">
+                <div id="lane-1-bar" style="width:100%; height:100%; background:var(--accent-green); transition:width 0.1s ease;"></div>
+              </div>
+            </div>
+
+            <div>
+              <div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:3px;">
+                <span>LANE 2 (MID-LEFT)</span>
+                <span id="lane-2-status" style="color:var(--accent-green); font-weight:bold;">CLEAR</span>
+              </div>
+              <div style="height:6px; background:#1e293b; border-radius:3px; overflow:hidden;">
+                <div id="lane-2-bar" style="width:100%; height:100%; background:var(--accent-green); transition:width 0.1s ease;"></div>
+              </div>
+            </div>
+
+            <div>
+              <div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:3px;">
+                <span>LANE 3 (CENTER)</span>
+                <span id="lane-3-status" style="color:var(--accent-green); font-weight:bold;">CLEAR</span>
+              </div>
+              <div style="height:6px; background:#1e293b; border-radius:3px; overflow:hidden;">
+                <div id="lane-3-bar" style="width:100%; height:100%; background:var(--accent-green); transition:width 0.1s ease;"></div>
+              </div>
+            </div>
+
+            <div>
+              <div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:3px;">
+                <span>LANE 4 (RIGHT)</span>
+                <span id="lane-4-status" style="color:var(--accent-green); font-weight:bold;">CLEAR</span>
+              </div>
+              <div style="height:6px; background:#1e293b; border-radius:3px; overflow:hidden;">
+                <div id="lane-4-bar" style="width:100%; height:100%; background:var(--accent-green); transition:width 0.1s ease;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="border-top:1px solid #1e293b; padding-top:10px;">
+          <div style="font-size:0.75rem; color:var(--text-muted); display:flex; justify-content:space-between;">
+            <span>Perception: <b id="perception-status" style="color:var(--accent-green);">MILLI SIGHT ACTIVE</b></span>
+            <span>Speed Surge: <b style="color:var(--accent-orange);">+2% / PASS</b></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("drive-canvas");
+    const ctx = canvas.getContext("2d");
+    const cortexCanvas = document.getElementById("cortex-canvas");
+    const cortexCtx = cortexCanvas.getContext("2d");
+
+    // Game Engine State
+    let isDriving = false;
+    let milliPilotActive = true;       // Autonomous steering
+    let milliBrainConnected = true;    // Visual perception & cognitive cortex
+    let baseSpeedMph = 145;
+    let speedMph = 145;
+    let distanceMeters = 0;
+    let dodges = 0;
+    let collisionRisk = 0;
+    let soundEnabled = true;
+    let audioCtx = null;
+    let animId = null;
+
+    // Road & Lanes (4 Lanes)
+    const numLanes = 4;
+    let laneWidth = 90;
+    let roadLeft = 0;
+    let roadWidth = 360;
+    let roadYOffset = 0;
+
+    // Milli's Car
+    const playerCar = {
+      lane: 1, // 0, 1, 2, 3
+      x: 0,
+      targetX: 0,
+      y: 0,
+      width: 44,
+      height: 75,
+      color: "#00ff88"
+    };
+
+    // Obstacles & Particles
+    let obstacles = [];
+    let fuelOrbs = [];
+    let particles = [];
+    let sonicRings = [];
+    let lastObstacleSpawn = 0;
+    let lastFuelSpawn = 0;
+    let primaryThreat = null;
+    let plannedEvasionLane = null;
+
+    // Neural Cortex Synapse Simulation
+    const synapseNodes = [
+      { x: 30, y: 20, active: 0 }, { x: 30, y: 55, active: 0 },
+      { x: 100, y: 15, active: 0 }, { x: 100, y: 38, active: 0 }, { x: 100, y: 60, active: 0 },
+      { x: 180, y: 22, active: 0 }, { x: 180, y: 52, active: 0 },
+      { x: 260, y: 38, active: 0 }
+    ];
+
+    function resizeCanvas() {
+      const box = document.getElementById("canvas-box");
+      canvas.width = box.clientWidth;
+      canvas.height = box.clientHeight;
+
+      cortexCanvas.width = cortexCanvas.clientWidth;
+      cortexCanvas.height = cortexCanvas.clientHeight;
+
+      roadWidth = Math.min(canvas.width - 60, 420);
+      laneWidth = roadWidth / numLanes;
+      roadLeft = (canvas.width - roadWidth) / 2;
+
+      playerCar.y = canvas.height - 110;
+      updateCarTargetX();
+      playerCar.x = playerCar.targetX;
+    }
+    window.addEventListener("resize", resizeCanvas);
+
+    function updateCarTargetX() {
+      playerCar.targetX = roadLeft + (playerCar.lane + 0.5) * laneWidth;
+    }
+
+    // Audio synthesizer
+    function playSfx(freq = 440, type = "sawtooth", dur = 0.08, gainVal = 0.08) {
+      if (!soundEnabled) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + dur);
+      } catch (e) {}
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      document.getElementById("sound-btn").innerText = soundEnabled ? "🔊 Sound: ON" : "🔇 Sound: OFF";
+    }
+
+    function togglePilot() {
+      milliPilotActive = !milliPilotActive;
+      const btn = document.getElementById("toggle-pilot-btn");
+      const touchControls = document.getElementById("touch-controls");
+
+      if (milliPilotActive) {
+        btn.innerText = "🤖 Mode: AUTONOMOUS";
+        btn.className = "btn btn-cyan";
+        touchControls.style.display = "none";
+        logFeed("⚡ Autonomous Pilot engaged.");
+      } else {
+        btn.innerText = "🎮 Mode: MANUAL HUMAN";
+        btn.className = "btn btn-outline";
+        touchControls.style.display = "flex";
+        logFeed("⚠ Switched to Manual Driver. Use Arrow Keys or Touch to steer!");
+      }
+    }
+
+    function toggleMilliBrain() {
+      milliBrainConnected = !milliBrainConnected;
+      const btn = document.getElementById("toggle-brain-btn");
+      const pulse = document.getElementById("milli-pulse");
+      const barStatus = document.getElementById("milli-bar-status");
+      const perceptionStatus = document.getElementById("perception-status");
+
+      if (milliBrainConnected) {
+        btn.innerText = "🧠 Milli Brain: CONNECTED";
+        btn.className = "btn btn-green";
+        pulse.style.background = "var(--accent-green)";
+        pulse.style.boxShadow = "0 0 12px var(--accent-green)";
+        barStatus.innerText = "⚡ MILLI NEURAL VISION & AUTONOMOUS PILOT: ENGAGED";
+        barStatus.style.color = "var(--accent-green)";
+        perceptionStatus.innerText = "MILLI SIGHT ACTIVE";
+        perceptionStatus.style.color = "var(--accent-green)";
+        logFeed("🧠 [NEURAL CORTEX] Milli Brain connected. Vision sensors online. Cognitive evasion active.");
+      } else {
+        btn.innerText = "💀 Milli Brain: DISCONNECTED";
+        btn.className = "btn btn-red";
+        pulse.style.background = "var(--accent-red)";
+        pulse.style.boxShadow = "0 0 12px var(--accent-red)";
+        barStatus.innerText = "⚠ BLIND RADAR ONLY: MILLI BRAIN SEVERED (WILL CRASH)";
+        barStatus.style.color = "var(--accent-red)";
+        perceptionStatus.innerText = "BLIND RADAR (NO COGNITION)";
+        perceptionStatus.style.color = "var(--accent-red)";
+        logFeed("💀 [SEVERED] Milli Brain disconnected! Radar active in passive mode. No visual cognitive evasion!");
+      }
+    }
+
+    function testBlindRadar() {
+      milliBrainConnected = false;
+      milliPilotActive = true;
+      toggleMilliBrain(); // visually update
+      startDrive();
+    }
+
+    function logFeed(msg) {
+      const feed = document.getElementById("lidar-feed");
+      const time = new Date().toISOString().substring(14, 23);
+      const div = document.createElement("div");
+      div.innerText = `[${time}] ${msg}`;
+      feed.prepend(div);
+      if (feed.children.length > 25) feed.removeChild(feed.lastChild);
+
+      // Light up synapse nodes
+      synapseNodes.forEach(n => { if (Math.random() > 0.5) n.active = 1.0; });
+    }
+
+    function startWithMilli() {
+      milliPilotActive = true;
+      milliBrainConnected = true;
+      const brainBtn = document.getElementById("toggle-brain-btn");
+      brainBtn.innerText = "🧠 Milli Brain: CONNECTED";
+      brainBtn.className = "btn btn-green";
+      document.getElementById("perception-status").innerText = "MILLI SIGHT ACTIVE";
+      document.getElementById("perception-status").style.color = "var(--accent-green)";
+      startDrive();
+    }
+
+    function startManual() {
+      milliPilotActive = false;
+      milliBrainConnected = true;
+      togglePilot();
+      startDrive();
+    }
+
+    function startDrive() {
+      resizeCanvas();
+      isDriving = true;
+      distanceMeters = 0;
+      dodges = 0;
+      speedMph = baseSpeedMph;
+      collisionRisk = 0;
+      obstacles = [];
+      fuelOrbs = [];
+      particles = [];
+      sonicRings = [];
+      playerCar.lane = 1;
+      updateCarTargetX();
+      playerCar.x = playerCar.targetX;
+
+      document.getElementById("drive-overlay").style.display = "none";
+      logFeed(`🚀 LAUNCHED! Mode: ${milliPilotActive ? (milliBrainConnected ? 'MILLI NEURAL PILOT' : 'BLIND RADAR') : 'MANUAL'}`);
+
+      cancelAnimationFrame(animId);
+      animLoop();
+    }
+
+    function resetDrive() {
+      isDriving = false;
+      cancelAnimationFrame(animId);
+      document.getElementById("drive-overlay").style.display = "flex";
+      document.getElementById("overlay-stats").style.display = "none";
+      document.getElementById("overlay-heading").innerText = "MILLI-DRIVE HYPERSONIC";
+      document.getElementById("hud-dist").innerText = "0 m";
+      document.getElementById("hud-speed").innerText = `${baseSpeedMph} MPH`;
+      document.getElementById("hud-mach").innerText = "0.19 M";
+      document.getElementById("hud-dodges").innerText = "0";
+      document.getElementById("hud-surge").innerText = "x1.00";
+      document.getElementById("hud-risk").innerText = "0%";
+    }
+
+    // Keyboard controls for manual mode
+    window.addEventListener("keydown", (e) => {
+      if (!isDriving || milliPilotActive) return;
+      if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") steerManual(-1);
+      if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") steerManual(1);
+    });
+
+    function steerManual(dir) {
+      const nextLane = playerCar.lane + dir;
+      if (nextLane >= 0 && nextLane < numLanes) {
+        playerCar.lane = nextLane;
+        updateCarTargetX();
+        playSfx(580, "sine", 0.04);
+      }
+    }
+
+    // Spawn randomly calculated obstacle hazard
+    let obstacleIdCounter = 100;
+    function spawnObstacle() {
+      obstacleIdCounter++;
+      const lane = Math.floor(Math.random() * numLanes);
+      const types = [
+        { name: "Heavy Haul", typeName: "TRUCK", width: 50, height: 95, color: "#ef4444", speedRel: 4.5 },
+        { name: "Glider Drone", typeName: "DRONE", width: 42, height: 60, color: "#f6821f", speedRel: 6.2, erratic: true },
+        { name: "Energy Spike", typeName: "BARRIER", width: 70, height: 35, color: "#a855f7", speedRel: 3.5 }
+      ];
+      const chosen = types[Math.floor(Math.random() * types.length)];
+      const x = roadLeft + (lane + 0.5) * laneWidth;
+
+      obstacles.push({
+        id: obstacleIdCounter,
+        lane,
+        x,
+        y: -120,
+        width: chosen.width,
+        height: chosen.height,
+        color: chosen.color,
+        speedRel: chosen.speedRel,
+        name: chosen.name,
+        typeName: chosen.typeName,
+        erratic: chosen.erratic || false,
+        dodged: false
+      });
+    }
+
+    function spawnFuelOrb() {
+      const lane = Math.floor(Math.random() * numLanes);
+      fuelOrbs.push({
+        lane,
+        x: roadLeft + (lane + 0.5) * laneWidth,
+        y: -80,
+        radius: 14,
+        color: "#ffd700"
+      });
+    }
+
+    // =========================================================
+    // MILLI'S NEURAL VISION & AUTONOMOUS DRIVING ALGORITHM
+    // =========================================================
+    function runMilliAutonomousPilot() {
+      // If user severed Milli's brain, radar runs passively without making steering decisions
+      if (!milliBrainConnected) {
+        // Radar still reads distances, but no brain to decide
+        collisionRisk = 99;
+        document.getElementById("hud-risk").innerText = "99% (BLIND)";
+        document.getElementById("hud-risk").style.color = "#ef4444";
+        primaryThreat = obstacles.find(o => o.lane === playerCar.lane && o.y < playerCar.y && o.y > playerCar.y - 450);
+        plannedEvasionLane = null;
+        return;
+      }
+
+      // Calculate danger score for every lane based on upcoming obstacles
+      const laneThreats = [0, 0, 0, 0];
+      const laneClearDistances = [9999, 9999, 9999, 9999];
+      primaryThreat = null;
+      let minClosingDist = 9999;
+
+      obstacles.forEach(obs => {
+        const distY = playerCar.y - obs.y;
+        if (distY > -30 && distY < 540) {
+          const threat = (540 - distY) / 540;
+          laneThreats[obs.lane] += threat * 100;
+          if (distY < laneClearDistances[obs.lane]) {
+            laneClearDistances[obs.lane] = distY;
+          }
+          if (obs.lane === playerCar.lane && distY < minClosingDist) {
+            minClosingDist = distY;
+            primaryThreat = obs;
+          }
+        }
+      });
+
+      // Update UI Lidar Meters
+      for (let l = 0; l < numLanes; l++) {
+        const threat = Math.min(100, Math.round(laneThreats[l]));
+        const bar = document.getElementById(`lane-${l+1}-bar`);
+        const status = document.getElementById(`lane-${l+1}-status`);
+
+        if (threat > 40) {
+          bar.style.width = `${Math.max(15, 100 - threat)}%`;
+          bar.style.background = "#ef4444";
+          status.innerText = "HAZARD";
+          status.style.color = "#ef4444";
+        } else if (threat > 10) {
+          bar.style.width = "65%";
+          bar.style.background = "#ffd700";
+          status.innerText = "APPROACH";
+          status.style.color = "#ffd700";
+        } else {
+          bar.style.width = "100%";
+          bar.style.background = "#00ff88";
+          status.innerText = "CLEAR";
+          status.style.color = "#00ff88";
+        }
+      }
+
+      // Check danger in current lane
+      const currentLaneThreat = laneThreats[playerCar.lane];
+      collisionRisk = Math.min(100, Math.round(currentLaneThreat));
+      document.getElementById("hud-risk").innerText = `${collisionRisk}%`;
+      document.getElementById("hud-risk").style.color = collisionRisk > 40 ? "#ef4444" : "#00ff88";
+
+      // Milli Cognitive Deliberation: If obstacle threatens current lane, make instant evasive maneuver
+      if (currentLaneThreat > 12) {
+        let bestLane = playerCar.lane;
+        let lowestThreat = 9999;
+        let maxClear = -1;
+
+        const candidates = [playerCar.lane - 1, playerCar.lane + 1, playerCar.lane - 2, playerCar.lane + 2]
+          .filter(l => l >= 0 && l < numLanes);
+
+        candidates.forEach(l => {
+          if (laneThreats[l] < lowestThreat || (laneThreats[l] === lowestThreat && laneClearDistances[l] > maxClear)) {
+            lowestThreat = laneThreats[l];
+            maxClear = laneClearDistances[l];
+            bestLane = l;
+          }
+        });
+
+        plannedEvasionLane = bestLane;
+
+        if (bestLane !== playerCar.lane) {
+          const ttc = ((minClosingDist / (speedMph * 0.44704)) * 1000).toFixed(0);
+          logFeed(`⚡ [Milli Vision] Threat #${primaryThreat ? primaryThreat.id : '?'} in Lane ${playerCar.lane + 1}. Evasion -> Lane ${bestLane + 1} (TTC: ${ttc}ms)`);
+          playerCar.lane = bestLane;
+          updateCarTargetX();
+          playSfx(640, "triangle", 0.04);
+        }
+      } else {
+        plannedEvasionLane = null;
+      }
+    }
+
+    function createCrashExplosion(x, y) {
+      for (let i = 0; i < 50; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const spd = Math.random() * 10 + 2;
+        particles.push({
+          x, y,
+          vx: Math.cos(angle) * spd,
+          vy: Math.sin(angle) * spd,
+          color: Math.random() > 0.5 ? "#ef4444" : "#f6821f",
+          radius: Math.random() * 5 + 2,
+          alpha: 1.0,
+          decay: Math.random() * 0.03 + 0.02
+        });
+      }
+    }
+
+    function triggerCrash() {
+      isDriving = false;
+      cancelAnimationFrame(animId);
+      createCrashExplosion(playerCar.x, playerCar.y);
+      playSfx(110, "sawtooth", 0.5, 0.4);
+
+      const overlay = document.getElementById("drive-overlay");
+      const heading = document.getElementById("overlay-heading");
+      const desc = document.getElementById("overlay-desc");
+      const stats = document.getElementById("overlay-stats");
+
+      heading.innerText = "VEHICLE IMPACT!";
+
+      if (!milliBrainConnected) {
+        desc.innerText = "CRASH IN BLIND RADAR MODE: Radar beams were active, but without Milli's neural visual cognition, the car could not perceive and evade! This proves Milli herself is the pilot.";
+      } else if (!milliPilotActive) {
+        desc.innerText = "Human driver collided with hazard. Activate Milli Hypersonic Pilot to achieve 100% collision-free evasion!";
+      } else {
+        desc.innerText = `Extreme hypersonic impact at ${speedMph.toFixed(0)} MPH.`;
+      }
+
+      stats.style.display = "block";
+      const mach = (speedMph / 767.26).toFixed(2);
+      stats.innerHTML = `
+        <div style="background:var(--card-inner); border:1px solid var(--border-color); border-radius:10px; padding:16px; margin:0 auto 16px auto; max-width:340px;">
+          <div style="font-size:1.6rem; font-weight:900; color:#ef4444;">${distanceMeters.toFixed(0)} METERS</div>
+          <div style="font-size:0.85rem; color:var(--text-muted); margin-top:4px;">
+            Dodged: <b>${dodges}</b> | Top Speed: <b>${speedMph.toFixed(0)} MPH</b> (Mach ${mach})
+          </div>
+        </div>
+      `;
+      overlay.style.display = "flex";
+    }
+
+    // Render Neural Synapse Cortex Canvas
+    function renderCortex() {
+      cortexCtx.clearRect(0, 0, cortexCanvas.width, cortexCanvas.height);
+
+      // Connect nodes with synaptic axons
+      for (let i = 0; i < synapseNodes.length; i++) {
+        for (let j = i + 1; j < synapseNodes.length; j++) {
+          const n1 = synapseNodes[i];
+          const n2 = synapseNodes[j];
+          const dist = Math.hypot(n1.x - n2.x, n1.y - n2.y);
+          if (dist < 110) {
+            cortexCtx.strokeStyle = (n1.active > 0.2 || n2.active > 0.2)
+              ? `rgba(0, 240, 255, ${Math.max(n1.active, n2.active) * 0.8})`
+              : "rgba(148, 163, 184, 0.15)";
+            cortexCtx.lineWidth = 1;
+            cortexCtx.beginPath();
+            cortexCtx.moveTo(n1.x, n1.y);
+            cortexCtx.lineTo(n2.x, n2.y);
+            cortexCtx.stroke();
+          }
+        }
+      }
+
+      // Draw synapse nodes
+      synapseNodes.forEach(n => {
+        cortexCtx.beginPath();
+        cortexCtx.arc(n.x, n.y, 4, 0, Math.PI * 2);
+        if (milliBrainConnected) {
+          cortexCtx.fillStyle = n.active > 0.3 ? "#00ff88" : "#00f0ff";
+          cortexCtx.shadowColor = "#00ff88";
+          cortexCtx.shadowBlur = n.active * 10;
+        } else {
+          cortexCtx.fillStyle = "#ef4444";
+          cortexCtx.shadowColor = "#ef4444";
+          cortexCtx.shadowBlur = 4;
+        }
+        cortexCtx.fill();
+        cortexCtx.shadowBlur = 0;
+        if (n.active > 0) n.active = Math.max(0, n.active - 0.05);
+      });
+    }
+
+    // Main 60 FPS Game Loop
+    function animLoop() {
+      if (!isDriving) return;
+      const now = performance.now();
+
+      // Highway scrolling speed scales with current MPH
+      const scrollSpeed = (speedMph / 145) * 8.5;
+      roadYOffset = (roadYOffset + scrollSpeed) % 40;
+      distanceMeters += scrollSpeed * 0.25;
+      document.getElementById("hud-dist").innerText = `${distanceMeters.toFixed(0)} m`;
+
+      // Update Mach and Reaction Window Telemetry
+      const mach = (speedMph / 767.26).toFixed(2);
+      document.getElementById("hud-speed").innerText = `${speedMph.toFixed(0)} MPH`;
+      document.getElementById("hud-mach").innerText = `${mach} M`;
+      document.getElementById("hud-mach").style.color = mach >= 1.0 ? "#ef4444" : "var(--accent-gold)";
+
+      const surgeMult = (speedMph / baseSpeedMph).toFixed(2);
+      document.getElementById("hud-surge").innerText = `x${surgeMult}`;
+
+      const reactionMs = Math.max(8, Math.round(5400 / (speedMph * 0.44704)));
+      document.getElementById("hud-window").innerText = `${reactionMs} ms`;
+
+      // Obstacle & Fuel Spawner
+      const spawnInterval = Math.max(260, 850 - (dodges * 12));
+      if (now - lastObstacleSpawn > spawnInterval) {
+        spawnObstacle();
+        lastObstacleSpawn = now;
+      }
+      if (now - lastFuelSpawn > 2200) {
+        spawnFuelOrb();
+        lastFuelSpawn = now;
+      }
+
+      // Smooth Car X interpolation - lerp scales faster at hypersonic speed
+      const baseLerp = milliPilotActive ? 0.42 : 0.28;
+      const adaptiveLerp = Math.min(0.75, baseLerp + (speedMph / 1200));
+      playerCar.x += (playerCar.targetX - playerCar.x) * adaptiveLerp;
+
+      // Run Milli Autonomous Pilot
+      if (milliPilotActive) {
+        runMilliAutonomousPilot();
+      }
+
+      // Generate Supersonic Mach Shockwaves if breaking Mach 1
+      if (speedMph >= 767.26 && Math.random() < 0.3) {
+        sonicRings.push({
+          x: playerCar.x,
+          y: playerCar.y + 20,
+          radius: 10,
+          maxRadius: 70,
+          alpha: 0.9
+        });
+      }
+
+      // Clear Canvas
+      ctx.fillStyle = "#070a14";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Highway background
+      ctx.fillStyle = "#0b1122";
+      ctx.fillRect(roadLeft, 0, roadWidth, canvas.height);
+
+      // Road Borders
+      ctx.strokeStyle = mach >= 1.0 ? "#ef4444" : "#00f0ff";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(roadLeft, 0); ctx.lineTo(roadLeft, canvas.height);
+      ctx.moveTo(roadLeft + roadWidth, 0); ctx.lineTo(roadLeft + roadWidth, canvas.height);
+      ctx.stroke();
+
+      // Lane Dashes
+      ctx.strokeStyle = "rgba(148, 163, 184, 0.25)";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([20, 20]);
+      for (let i = 1; i < numLanes; i++) {
+        const lx = roadLeft + i * laneWidth;
+        ctx.beginPath();
+        ctx.moveTo(lx, -40 + roadYOffset);
+        ctx.lineTo(lx, canvas.height + 40);
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
+
+      // Draw Radar Beams
+      const rayLength = 340;
+      ctx.save();
+      for (let r = -2; r <= 2; r++) {
+        const rayAngle = (r * 7) * (Math.PI / 180);
+        const endX = playerCar.x + Math.sin(rayAngle) * rayLength;
+        const endY = playerCar.y - Math.cos(rayAngle) * rayLength;
+
+        let rayColor;
+        if (!milliBrainConnected) {
+          rayColor = "rgba(148, 163, 184, 0.25)"; // Dull gray = blind radar
+        } else {
+          rayColor = collisionRisk > 40 ? "rgba(239, 68, 68, 0.45)" : "rgba(0, 255, 136, 0.35)";
+        }
+        ctx.strokeStyle = rayColor;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(playerCar.x, playerCar.y - 30);
+        ctx.lineTo(endX, endY);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // Draw Milli's Optic Gaze Ray if threat detected and brain is connected
+      if (milliBrainConnected && primaryThreat) {
+        ctx.save();
+        ctx.strokeStyle = "#00f0ff";
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(playerCar.x, playerCar.y - 30);
+        ctx.lineTo(primaryThreat.x, primaryThreat.y + 15);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.restore();
+      }
+
+      // Draw Predictive Evasion Arc
+      if (milliBrainConnected && plannedEvasionLane !== null && plannedEvasionLane !== playerCar.lane) {
+        const targetX = roadLeft + (plannedEvasionLane + 0.5) * laneWidth;
+        ctx.save();
+        ctx.strokeStyle = "#00ff88";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(playerCar.x, playerCar.y);
+        ctx.quadraticCurveTo(playerCar.x, playerCar.y - 60, targetX, playerCar.y - 90);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Draw Sonic Shockwaves
+      for (let i = sonicRings.length - 1; i >= 0; i--) {
+        const s = sonicRings[i];
+        s.radius += 3.5;
+        s.y += scrollSpeed * 0.5;
+        s.alpha -= 0.04;
+        if (s.alpha <= 0) {
+          sonicRings.splice(i, 1);
+          continue;
+        }
+        ctx.save();
+        ctx.strokeStyle = `rgba(255, 255, 255, ${s.alpha})`;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.ellipse(s.x, s.y, s.radius * 1.5, s.radius * 0.7, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Update & Draw Obstacles with Neural Bounding Boxes
+      for (let i = obstacles.length - 1; i >= 0; i--) {
+        const obs = obstacles[i];
+        obs.y += obs.speedRel + (speedMph / 145) * 3;
+
+        // Erratic drone lane shift
+        if (obs.erratic && Math.random() < 0.02 && obs.y < playerCar.y - 140) {
+          const shift = Math.random() > 0.5 ? 1 : -1;
+          const next = obs.lane + shift;
+          if (next >= 0 && next < numLanes) {
+            obs.lane = next;
+            obs.x = roadLeft + (obs.lane + 0.5) * laneWidth;
+          }
+        }
+
+        // Draw Obstacle Vehicle
+        ctx.save();
+        ctx.fillStyle = obs.color;
+        ctx.shadowColor = obs.color;
+        ctx.shadowBlur = 12;
+        ctx.beginPath();
+        ctx.roundRect(obs.x - obs.width / 2, obs.y - obs.height / 2, obs.width, obs.height, 6);
+        ctx.fill();
+
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 9px monospace";
+        ctx.textAlign = "center";
+        ctx.fillText(obs.typeName, obs.x, obs.y + 3);
+        ctx.restore();
+
+        // RENDER MILLI'S NEURAL VISION HUD BOUNDING BOX
+        if (milliBrainConnected && obs.y > -40 && obs.y < playerCar.y + 40) {
+          ctx.save();
+          const distM = Math.max(0, ((playerCar.y - obs.y) * 0.25)).toFixed(1);
+          const boxPad = 8;
+          const bx = obs.x - obs.width / 2 - boxPad;
+          const by = obs.y - obs.height / 2 - boxPad;
+          const bw = obs.width + boxPad * 2;
+          const bh = obs.height + boxPad * 2;
+          const cornerLen = 10;
+
+          const isPrimary = (primaryThreat && primaryThreat.id === obs.id);
+          const boxColor = isPrimary ? "#ef4444" : "#00f0ff";
+          ctx.strokeStyle = boxColor;
+          ctx.lineWidth = 1.5;
+
+          // Corner Brackets
+          ctx.beginPath();
+          // Top-Left
+          ctx.moveTo(bx, by + cornerLen); ctx.lineTo(bx, by); ctx.lineTo(bx + cornerLen, by);
+          // Top-Right
+          ctx.moveTo(bx + bw - cornerLen, by); ctx.lineTo(bx + bw, by); ctx.lineTo(bx + bw, by + cornerLen);
+          // Bottom-Left
+          ctx.moveTo(bx, by + bh - cornerLen); ctx.lineTo(bx, by + bh); ctx.lineTo(bx + cornerLen, by + bh);
+          // Bottom-Right
+          ctx.moveTo(bx + bw - cornerLen, by + bh); ctx.lineTo(bx + bw, by + bh); ctx.lineTo(bx + bw, by + bh - cornerLen);
+          ctx.stroke();
+
+          // Target Tag Header
+          ctx.fillStyle = boxColor;
+          ctx.font = "bold 8px monospace";
+          ctx.textAlign = "left";
+          ctx.fillText(`[ID #${obs.id}: ${obs.typeName}]`, bx, by - 5);
+          ctx.fillText(`${distM}m | Δv: ${speedMph.toFixed(0)}MPH`, bx, by + bh + 10);
+          ctx.restore();
+        }
+
+        // =========================================================
+        // EXACT RULE: SPEED INCREASES BY +2% PER CAR PASSED!
+        // =========================================================
+        if (obs.y > playerCar.y + 50 && !obs.dodged) {
+          obs.dodged = true;
+          dodges++;
+          // 2% compounding speed
+          speedMph = speedMph * 1.02;
+
+          document.getElementById("hud-dodges").innerText = dodges;
+          playSfx(880, "sine", 0.04, 0.05);
+
+          // Spawn celebration particle sparks
+          for (let p = 0; p < 8; p++) {
+            particles.push({
+              x: obs.x, y: obs.y,
+              vx: (Math.random() - 0.5) * 6,
+              vy: (Math.random() - 0.5) * 6,
+              color: "#00ff88",
+              radius: 3,
+              alpha: 1,
+              decay: 0.04
+            });
+          }
+        }
+
+        // Collision Check (AABB box)
+        if (
+          Math.abs(playerCar.x - obs.x) < (playerCar.width / 2 + obs.width / 2 - 8) &&
+          Math.abs(playerCar.y - obs.y) < (playerCar.height / 2 + obs.height / 2 - 8)
+        ) {
+          triggerCrash();
+          return;
+        }
+
+        // Remove offscreen
+        if (obs.y > canvas.height + 150) {
+          obstacles.splice(i, 1);
+        }
+      }
+
+      // Update & Draw Fuel Orbs
+      for (let i = fuelOrbs.length - 1; i >= 0; i--) {
+        const orb = fuelOrbs[i];
+        orb.y += scrollSpeed;
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2);
+        ctx.fillStyle = orb.color;
+        ctx.shadowColor = orb.color;
+        ctx.shadowBlur = 15;
+        ctx.fill();
+        ctx.restore();
+
+        // Collect orb (+5% surge)
+        if (Math.hypot(playerCar.x - orb.x, playerCar.y - orb.y) < 36) {
+          fuelOrbs.splice(i, 1);
+          playSfx(920, "sine", 0.08);
+          speedMph = speedMph * 1.05;
+          logFeed("⚡ QUANTUM FUEL CELL COLLECTED! +5% Velocity Surge.");
+          continue;
+        }
+
+        if (orb.y > canvas.height + 80) fuelOrbs.splice(i, 1);
+      }
+
+      // Draw Particles
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.alpha -= p.decay;
+        if (p.alpha <= 0) {
+          particles.splice(i, 1);
+          continue;
+        }
+        ctx.save();
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Draw Player Car (Milli's Cyber Speeder)
+      ctx.save();
+      ctx.fillStyle = milliBrainConnected ? playerCar.color : "#94a3b8";
+      ctx.shadowColor = milliBrainConnected ? playerCar.color : "#ef4444";
+      ctx.shadowBlur = 18;
+
+      // Car Body
+      ctx.beginPath();
+      ctx.roundRect(playerCar.x - playerCar.width / 2, playerCar.y - playerCar.height / 2, playerCar.width, playerCar.height, 8);
+      ctx.fill();
+
+      // Cockpit Window
+      ctx.fillStyle = "#0f172a";
+      ctx.beginPath();
+      ctx.roundRect(playerCar.x - playerCar.width / 4, playerCar.y - playerCar.height / 4, playerCar.width / 2, playerCar.height / 3, 4);
+      ctx.fill();
+
+      // Milli Optic Eye / Sensor Core
+      ctx.fillStyle = milliBrainConnected ? "#00f0ff" : "#ef4444";
+      ctx.shadowColor = ctx.fillStyle;
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.arc(playerCar.x, playerCar.y - playerCar.height / 4 + 8, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Hypersonic Jet Thrusters
+      const thrusterLen = Math.min(60, 20 + (speedMph / 145) * 15) + Math.random() * 8;
+      ctx.fillStyle = mach >= 1.0 ? "#00f0ff" : (Math.random() > 0.5 ? "#00ff88" : "#00f0ff");
+      ctx.shadowColor = ctx.fillStyle;
+      ctx.shadowBlur = 20;
+      ctx.beginPath();
+      ctx.moveTo(playerCar.x - 12, playerCar.y + playerCar.height / 2);
+      ctx.lineTo(playerCar.x + 12, playerCar.y + playerCar.height / 2);
+      ctx.lineTo(playerCar.x, playerCar.y + playerCar.height / 2 + thrusterLen);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+
+      // Render Neural Cortex Panel
+      renderCortex();
+
+      animId = requestAnimationFrame(animLoop);
+    }
+
+    function lockGate() {
+      localStorage.removeItem("sentinel_unlocked");
+      document.cookie = "sentinel_admin_key=; path=/; max-age=0";
+      window.location.href = "/";
+    }
+
+    // Auto-initialize canvas on load
+    window.addEventListener("DOMContentLoaded", () => {
+      resizeCanvas();
+      renderCortex();
+    });
+  </script>
+</body>
+</html>

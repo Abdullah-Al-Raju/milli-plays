@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Milli Flash Trader | Sub-Millisecond L2 Order Book Arbitrage</title>
+  <style>
+    :root {
+      --bg-dark: #04060d;
+      --card-bg: #090e1a;
+      --accent-cyan: #00f0ff;
+      --accent-green: #00ff88;
+      --accent-gold: #ffd700;
+      --accent-red: #ef4444;
+      --border-color: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg-dark);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "JetBrains Mono", sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+      user-select: none;
+    }
+    .top-nav {
+      background: #0d1424;
+      border-bottom: 1px solid var(--border-color);
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900;
+      font-size: 1.1rem;
+      color: #fff;
+      text-decoration: none;
+    }
+    .nav-badge {
+      background: linear-gradient(135deg, var(--accent-green), var(--accent-gold));
+      color: #000;
+      font-size: 0.7rem;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 900;
+    }
+    .nav-links {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .nav-link:hover { color: #fff; background: rgba(255, 255, 255, 0.05); }
+    .nav-link.active {
+      color: var(--accent-gold);
+      background: rgba(255, 215, 0, 0.12);
+      border: 1px solid rgba(255, 215, 0, 0.4);
+    }
+
+    .wrapper {
+      max-width: 1360px;
+      margin: 14px auto;
+      padding: 0 16px;
+    }
+    .status-bar {
+      background: linear-gradient(90deg, #1f1b09 0%, #0d1e38 100%);
+      border: 1px solid var(--accent-gold);
+      border-radius: 12px;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 12px;
+      box-shadow: 0 4px 25px rgba(255, 215, 0, 0.2);
+    }
+    .hud-stats {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .hud-box {
+      flex: 1;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px 14px;
+      text-align: center;
+      min-width: 120px;
+    }
+    .hud-label { font-size: 0.65rem; color: var(--text-muted); font-weight: 800; letter-spacing: 0.5px; }
+    .hud-val { font-size: 1.25rem; font-weight: 900; font-family: monospace; color: #fff; margin-top: 2px; }
+
+    .arena-grid {
+      display: grid;
+      grid-template-columns: 2.7fr 1fr;
+      gap: 16px;
+    }
+    .canvas-container {
+      position: relative;
+      background: #020308;
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      overflow: hidden;
+      height: 640px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.8);
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      gap: 12px;
+    }
+
+    .side-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .btn {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-weight: 800;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+      width: 100%;
+    }
+    .btn-gold { background: linear-gradient(135deg, #ffd700, #f6821f); color: #000; box-shadow: 0 0 16px rgba(255, 215, 0, 0.4); }
+    .btn-gold:hover { transform: translateY(-1px); }
+    .btn-green { background: var(--accent-green); color: #000; }
+    .btn-red { background: var(--accent-red); color: #fff; }
+    .btn-cyan { background: var(--accent-cyan); color: #000; }
+
+    .feed-box {
+      height: 180px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.72rem;
+      background: #03060f;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px;
+      color: #94a3b8;
+      display: flex;
+      flex-direction: column-reverse;
+      line-height: 1.4;
+    }
+
+    .orderbook-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: monospace;
+      font-size: 0.78rem;
+    }
+    .orderbook-table th, .orderbook-table td {
+      padding: 4px 8px;
+      text-align: right;
+    }
+    .orderbook-table th { color: var(--text-muted); font-size: 0.7rem; }
+    .bid-row { color: #00ff88; }
+    .ask-row { color: #ff007f; }
+  </style>
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="/" class="nav-brand">
+      <span>📈 MILLI FLASH TRADER</span>
+      <span class="nav-badge">NANO-SECOND ARBITRAGE</span>
+    </a>
+    <div class="nav-links">
+      <a href="/" class="nav-link">🏠 Master Gate</a>
+      <a href="/drive" class="nav-link">🏎️ Drive</a>
+      <a href="/maze" class="nav-link">🌀 Maze</a>
+      <a href="/danmaku" class="nav-link">🌸 Danmaku</a>
+      <a href="/orbit" class="nav-link">🌌 Orbit</a>
+      <a href="/pong" class="nav-link">🏓 Pong</a>
+      <a href="/rhythm" class="nav-link">🎵 Rhythm</a>
+      <a href="/snake" class="nav-link">🐍 Snake</a>
+      <a href="/swarm" class="nav-link">⚔️ Swarm</a>
+      <a href="/stealth" class="nav-link">🕶️ Stealth</a>
+      <a href="/trader" class="nav-link active">📈 Trader</a>
+      <a href="/sweeper" class="nav-link">💣 Sweeper</a>
+      <a href="/defense" class="nav-link">🛸 Defense</a>
+      <a href="/portal" class="nav-link">🌀 Portal</a>
+      <a href="/circuit" class="nav-link">⚡ Circuit</a>
+    </div>
+  </nav>
+
+  <div class="wrapper">
+    <div class="status-bar">
+      <div>
+        <b style="color:var(--accent-gold); font-size:1rem;">⚡ SUB-MILLISECOND HIGH-FREQUENCY ORDER BOOK ARBITRAGE</b>
+        <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">
+          L2 market depth, Brownian stochastic drift &amp; predatory front-running bots. Milli snipes triangular arbitrage in 0.2 ms!
+        </div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-gold" onclick="toggleMilli()" id="btn-milli" style="width:auto; padding:8px 18px;">
+          🤖 Milli HFT Sniper: ACTIVE
+        </button>
+        <button class="btn btn-cyan" onclick="resetTrader()" style="width:auto; padding:8px 16px;">
+          🔄 Reset Portfolio
+        </button>
+      </div>
+    </div>
+
+    <div class="hud-stats">
+      <div class="hud-box">
+        <div class="hud-label">NET PROFIT &amp; LOSS (PNL)</div>
+        <div id="hud-pnl" class="hud-val" style="color:var(--accent-green);">+$0.00</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">ARBITRAGE SNIPES</div>
+        <div id="hud-snipes" class="hud-val" style="color:var(--accent-gold);">0 EXECUTED</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">EXECUTION LATENCY</div>
+        <div class="hud-val" style="color:var(--accent-cyan);">0.24 ms</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">WIN RATE</div>
+        <div id="hud-winrate" class="hud-val" style="color:var(--accent-green);">100.0%</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">MARKET TICK RATE</div>
+        <div class="hud-val" style="color:var(--accent-gold);">5,000 TICKS/S</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">TRADING DESK</div>
+        <div id="hud-status" class="hud-val" style="color:var(--accent-green);">SNIPING SPREADS</div>
+      </div>
+    </div>
+
+    <div class="arena-grid">
+      <div class="canvas-container" id="container">
+        <!-- Live Chart Canvas -->
+        <canvas id="chart-canvas" height="260"></canvas>
+
+        <!-- Live Order Book Ladder -->
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; background:#070b16; border:1px solid #1e293b; border-radius:8px; padding:10px;">
+          <div>
+            <div style="font-size:0.75rem; font-weight:800; color:var(--accent-green); margin-bottom:4px;">EXCHANGE A (NEW YORK EQUINIX)</div>
+            <table class="orderbook-table" id="book-a"></table>
+          </div>
+          <div>
+            <div style="font-size:0.75rem; font-weight:800; color:var(--accent-cyan); margin-bottom:4px;">EXCHANGE B (LONDON LD4)</div>
+            <table class="orderbook-table" id="book-b"></table>
+          </div>
+        </div>
+      </div>
+
+      <div class="side-panel">
+        <div>
+          <div style="font-size:0.85rem; font-weight:800; color:#fff; margin-bottom:8px;">⚡ MARKET SHOCKS</div>
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <button class="btn btn-red" onclick="triggerFlashCrash()">🚨 Trigger 30% Flash Crash</button>
+            <button class="btn btn-gold" onclick="injectLiquidity()">⚡ Surge Order Book Liquidity</button>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:0.85rem; font-weight:800; color:#fff; margin-bottom:8px;">🕹️ HUMAN MANUAL TRADING</div>
+          <div style="display:flex; gap:6px; margin-bottom:6px;">
+            <button class="btn btn-green" onclick="humanTrade('buy')">Buy Limit</button>
+            <button class="btn btn-red" onclick="humanTrade('sell')">Sell Limit</button>
+          </div>
+          <div style="font-size:0.75rem; color:var(--text-muted); line-height:1.4;">
+            Human click reaction: ~180 ms. Front-running bots will intercept your order before it reaches the matching engine.
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:0.8rem; font-weight:700; color:#fff; margin-bottom:6px;">⚡ MILLI COGNITIVE LOGS</div>
+          <div class="feed-box" id="feed-box">
+            <div>[READY] Order Book Arbitrage Engine armed. Microsecond socket active.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("chart-canvas");
+    const ctx = canvas.getContext("2d");
+
+    let W = 848;
+    let H = 260;
+    canvas.width = W;
+    canvas.height = H;
+
+    let milliAuto = true;
+    let priceHistory = [];
+    let currentPrice = 64500.00;
+    let pnl = 0.00;
+    let snipes = 0;
+    let trades = 0;
+
+    // Exchange order books
+    let exA = { bid: 64498.50, ask: 64500.00, depth: [] };
+    let exB = { bid: 64497.00, ask: 64499.00, depth: [] };
+
+    for (let i = 0; i < 100; i++) {
+      priceHistory.push(currentPrice + (Math.random() - 0.5) * 40);
+    }
+
+    function logFeed(msg) {
+      const feed = document.getElementById("feed-box");
+      const time = new Date().toISOString().substring(14, 23);
+      const div = document.createElement("div");
+      div.innerText = `[${time}] ${msg}`;
+      feed.prepend(div);
+      if (feed.children.length > 25) feed.removeChild(feed.lastChild);
+    }
+
+    function toggleMilli() {
+      milliAuto = !milliAuto;
+      document.getElementById("btn-milli").innerText = milliAuto ? "🤖 Milli HFT Sniper: ACTIVE" : "🕹️ Manual Trader: ENGAGED";
+      document.getElementById("btn-milli").className = milliAuto ? "btn btn-gold" : "btn btn-cyan";
+      logFeed(milliAuto ? "Milli sub-millisecond arbitrage sniper resumed." : "Manual order submission mode enabled.");
+    }
+
+    function triggerFlashCrash() {
+      currentPrice *= 0.72;
+      logFeed("🚨 [FLASH CRASH] Market plummeted -28.0% in 150 milliseconds! Milli short-hedge executed.");
+      pnl += 4250.00;
+      snipes += 5;
+    }
+
+    function injectLiquidity() {
+      logFeed("⚡ 10,000 BTC institutional buy wall absorbed across Equinix & LD4.");
+      pnl += 850.00;
+      snipes += 2;
+    }
+
+    function humanTrade(type) {
+      logFeed(`❌ [FRONT-RUN BLOCKED] Human order submitted at 195ms latency. Front-run by rival HFT bots for -$25.00 slippage.`);
+      pnl -= 25.00;
+    }
+
+    function resetTrader() {
+      pnl = 0.00;
+      snipes = 0;
+      trades = 0;
+      currentPrice = 64500.00;
+      document.getElementById("hud-pnl").innerText = "+$0.00";
+      document.getElementById("hud-snipes").innerText = "0 EXECUTED";
+      logFeed("Portfolio reset to $0.00 base.");
+    }
+
+    // MILLI SUB-MILLISECOND ARBITRAGE AI
+    function updateMilliAI() {
+      // Check triangular spread: Can we buy on B and sell on A for risk-free profit?
+      const spread = exA.bid - exB.ask;
+      if (spread > 1.20) {
+        // SNIPE ARBITRAGE!
+        const profit = spread * 2.5; // 2.5 BTC volume
+        pnl += profit;
+        snipes++;
+        document.getElementById("hud-pnl").innerText = `+$${pnl.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        document.getElementById("hud-snipes").innerText = `${snipes} EXECUTED`;
+        logFeed(`✨ [ARBITRAGE SNIPE] Bought ExB @ $${exB.ask.toFixed(2)}, Sold ExA @ $${exA.bid.toFixed(2)} (+$${profit.toFixed(2)} profit in 0.22ms)`);
+      }
+    }
+
+    function tickMarket() {
+      // Geometric Brownian Motion step
+      const drift = (Math.random() - 0.495) * 8.5;
+      currentPrice += drift;
+      priceHistory.push(currentPrice);
+      if (priceHistory.length > 120) priceHistory.shift();
+
+      // Discrepancy between exchanges creates arbitrage windows
+      exA.bid = currentPrice - 0.5 - Math.random() * 0.8;
+      exA.ask = currentPrice + 0.5 + Math.random() * 0.8;
+
+      exB.bid = currentPrice - 0.5 + (Math.random() - 0.5) * 2.5;
+      exB.ask = currentPrice + 0.5 + (Math.random() - 0.5) * 2.5;
+
+      if (milliAuto) {
+        updateMilliAI();
+      }
+
+      // Render Order Books
+      const tblA = document.getElementById("book-a");
+      tblA.innerHTML = `
+        <tr class="ask-row"><td>ASK</td><td>$${(exA.ask + 1.2).toFixed(2)}</td><td>4.82 BTC</td></tr>
+        <tr class="ask-row"><td>ASK</td><td>$${exA.ask.toFixed(2)}</td><td>2.50 BTC</td></tr>
+        <tr class="bid-row"><td>BID</td><td>$${exA.bid.toFixed(2)}</td><td>3.15 BTC</td></tr>
+        <tr class="bid-row"><td>BID</td><td>$${(exA.bid - 1.2).toFixed(2)}</td><td>6.40 BTC</td></tr>
+      `;
+
+      const tblB = document.getElementById("book-b");
+      tblB.innerHTML = `
+        <tr class="ask-row"><td>ASK</td><td>$${(exB.ask + 1.2).toFixed(2)}</td><td>5.10 BTC</td></tr>
+        <tr class="ask-row"><td>ASK</td><td>$${exB.ask.toFixed(2)}</td><td>1.95 BTC</td></tr>
+        <tr class="bid-row"><td>BID</td><td>$${exB.bid.toFixed(2)}</td><td>4.20 BTC</td></tr>
+        <tr class="bid-row"><td>BID</td><td>$${(exB.bid - 1.2).toFixed(2)}</td><td>8.30 BTC</td></tr>
+      `;
+
+      drawChart();
+    }
+
+    function drawChart() {
+      ctx.fillStyle = "#020308";
+      ctx.fillRect(0, 0, W, H);
+
+      // Gridlines
+      ctx.strokeStyle = "rgba(30, 41, 59, 0.4)";
+      ctx.lineWidth = 1;
+      for (let y = 30; y < H; y += 40) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+      }
+
+      // Render Price Sparkline
+      const minP = Math.min(...priceHistory);
+      const maxP = Math.max(...priceHistory) || minP + 1;
+
+      ctx.save();
+      ctx.strokeStyle = "#ffd700";
+      ctx.lineWidth = 2.5;
+      ctx.shadowColor = "#ffd700";
+      ctx.shadowBlur = 12;
+      ctx.beginPath();
+
+      priceHistory.forEach((p, idx) => {
+        const x = (idx / (priceHistory.length - 1)) * W;
+        const y = H - 25 - ((p - minP) / (maxP - minP)) * (H - 50);
+        if (idx === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+      ctx.restore();
+
+      // Current Price Label
+      ctx.fillStyle = "#00ff88";
+      ctx.font = "bold 14px monospace";
+      ctx.fillText(`BTC/USD: $${currentPrice.toFixed(2)}`, 20, 30);
+    }
+
+    setInterval(tickMarket, 60);
+  </script>
+</body>
+</html>

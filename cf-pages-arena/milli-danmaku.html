@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Milli Danmaku Core | 2,500-Bullet Hypersonic Geometric Hell</title>
+  <style>
+    :root {
+      --bg-dark: #050711;
+      --card-bg: #0c1222;
+      --card-inner: #070b16;
+      --accent-magenta: #ff007f;
+      --accent-cyan: #00f0ff;
+      --accent-green: #00ff88;
+      --accent-gold: #ffd700;
+      --accent-purple: #b5179e;
+      --border-color: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg-dark);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "JetBrains Mono", sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+      user-select: none;
+    }
+    .top-nav {
+      background: #0d1424;
+      border-bottom: 1px solid var(--border-color);
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900;
+      font-size: 1.1rem;
+      color: #fff;
+      text-decoration: none;
+    }
+    .nav-badge {
+      background: linear-gradient(135deg, var(--accent-magenta), var(--accent-purple));
+      color: #fff;
+      font-size: 0.7rem;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 900;
+    }
+    .nav-links {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .nav-link:hover { color: #fff; background: rgba(255, 255, 255, 0.05); }
+    .nav-link.active {
+      color: var(--accent-magenta);
+      background: rgba(255, 0, 127, 0.12);
+      border: 1px solid rgba(255, 0, 127, 0.4);
+    }
+
+    .wrapper {
+      max-width: 1360px;
+      margin: 14px auto;
+      padding: 0 16px;
+    }
+    .status-bar {
+      background: linear-gradient(90deg, #180924 0%, #0e1a38 100%);
+      border: 1px solid var(--accent-magenta);
+      border-radius: 12px;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 12px;
+      box-shadow: 0 4px 25px rgba(255, 0, 127, 0.2);
+    }
+    .hud-stats {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .hud-box {
+      flex: 1;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px 14px;
+      text-align: center;
+      min-width: 120px;
+    }
+    .hud-label { font-size: 0.65rem; color: var(--text-muted); font-weight: 800; letter-spacing: 0.5px; }
+    .hud-val { font-size: 1.25rem; font-weight: 900; font-family: monospace; color: #fff; margin-top: 2px; }
+
+    .arena-grid {
+      display: grid;
+      grid-template-columns: 2.7fr 1fr;
+      gap: 16px;
+    }
+    .canvas-container {
+      position: relative;
+      background: #020308;
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      overflow: hidden;
+      height: 640px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    canvas { display: block; background: #020308; }
+
+    .side-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .btn {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-weight: 800;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+      width: 100%;
+    }
+    .btn-magenta { background: var(--accent-magenta); color: #fff; box-shadow: 0 0 16px rgba(255, 0, 127, 0.4); }
+    .btn-magenta:hover { background: #ff3399; transform: translateY(-1px); }
+    .btn-green { background: var(--accent-green); color: #000; }
+    .btn-green:hover { background: #55ffb0; }
+    .btn-cyan { background: var(--accent-cyan); color: #000; }
+    .btn-cyan:hover { background: #55f3ff; }
+
+    .feed-box {
+      height: 180px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.72rem;
+      background: #03060f;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px;
+      color: #94a3b8;
+      display: flex;
+      flex-direction: column-reverse;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="/" class="nav-brand">
+      <span>🌸 MILLI DANMAKU CORE</span>
+      <span class="nav-badge">HYPERSONIC BULLET HELL</span>
+    </a>
+    <div class="nav-links">
+      <a href="/" class="nav-link">🏠 Master Gate</a>
+      <a href="/drive" class="nav-link">🏎️ Drive</a>
+      <a href="/maze" class="nav-link">🌀 Maze</a>
+      <a href="/danmaku" class="nav-link active">🌸 Danmaku</a>
+      <a href="/orbit" class="nav-link">🌌 Orbit</a>
+      <a href="/pong" class="nav-link">🏓 Pong</a>
+      <a href="/rhythm" class="nav-link">🎵 Rhythm</a>
+      <a href="/snake" class="nav-link">🐍 Snake</a>
+      <a href="/swarm" class="nav-link">⚔️ Swarm</a>
+      <a href="/stealth" class="nav-link">🕶️ Stealth</a>
+      <a href="/trader" class="nav-link">📈 Trader</a>
+      <a href="/sweeper" class="nav-link">💣 Sweeper</a>
+      <a href="/defense" class="nav-link">🛸 Defense</a>
+      <a href="/portal" class="nav-link">🌀 Portal</a>
+      <a href="/circuit" class="nav-link">⚡ Circuit</a>
+    </div>
+  </nav>
+
+  <div class="wrapper">
+    <div class="status-bar">
+      <div>
+        <b style="color:var(--accent-magenta); font-size:1rem;">⚡ 2,500-BULLET GEOMETRIC DANMAKU CORE</b>
+        <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">
+          Logarithmic spirals, fractal flower blooms &amp; laser sweeping grids. Milli navigates 1-pixel micro-clearances at 60 FPS!
+        </div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-magenta" onclick="toggleMilli()" id="btn-milli" style="width:auto; padding:8px 18px;">
+          🤖 Milli Auto-Pilot: ACTIVE
+        </button>
+        <button class="btn btn-cyan" onclick="resetDanmaku()" style="width:auto; padding:8px 16px;">
+          🔄 Reset Core
+        </button>
+      </div>
+    </div>
+
+    <div class="hud-stats">
+      <div class="hud-box">
+        <div class="hud-label">BULLETS ON SCREEN</div>
+        <div id="hud-bullets" class="hud-val" style="color:var(--accent-magenta);">0</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">GRAZE COUNT (NEAR MISS)</div>
+        <div id="hud-grazes" class="hud-val" style="color:var(--accent-gold);">0</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">SURVIVAL TIME</div>
+        <div id="hud-time" class="hud-val" style="color:var(--accent-cyan);">0.0s</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">MILLI HITBOX</div>
+        <div class="hud-val" style="color:var(--accent-green);">1 PIXEL</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">PATTERN PHASE</div>
+        <div id="hud-phase" class="hud-val" style="color:#fff;">PHASE 1: SPIRAL</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">STATUS</div>
+        <div id="hud-status" class="hud-val" style="color:var(--accent-green);">PERFECT</div>
+      </div>
+    </div>
+
+    <div class="arena-grid">
+      <div class="canvas-container" id="container">
+        <canvas id="danmaku-canvas"></canvas>
+      </div>
+
+      <div class="side-panel">
+        <div>
+          <div style="font-size:0.85rem; font-weight:800; color:#fff; margin-bottom:8px;">⚙️ PATTERN PHASE OVERRIDE</div>
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <button class="btn btn-cyan" onclick="setPhase(1)">Phase 1: Dual Archimedean Spirals</button>
+            <button class="btn btn-cyan" onclick="setPhase(2)">Phase 2: Chrysanthemum Bloom</button>
+            <button class="btn btn-cyan" onclick="setPhase(3)">Phase 3: Hyper-Laser Lattice</button>
+            <button class="btn btn-magenta" onclick="setPhase(4)">Phase 4: Chaos Supernova (2,500+)</button>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:0.85rem; font-weight:800; color:#fff; margin-bottom:8px;">🕹️ HUMAN CONTROLS</div>
+          <div style="font-size:0.75rem; color:var(--text-muted); line-height:1.5;">
+            Toggle Auto-Pilot OFF to attempt manual control. Use <b>Arrow Keys / Mouse</b> to guide avatar. Warning: Human survival rate &lt; 2.5 seconds.
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:0.8rem; font-weight:700; color:#fff; margin-bottom:6px;">⚡ MILLI COGNITIVE LOGS</div>
+          <div class="feed-box" id="feed-box">
+            <div>[READY] Danmaku Core armed. Convex Hull spatial partition active.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("danmaku-canvas");
+    const ctx = canvas.getContext("2d");
+
+    let W = 880;
+    let H = 640;
+    canvas.width = W;
+    canvas.height = H;
+
+    let milliAuto = true;
+    let bullets = [];
+    let player = { x: W / 2, y: H * 0.75, r: 2.5, vx: 0, vy: 0, speed: 4.8 };
+    let boss = { x: W / 2, y: 130, angle: 0, hp: 100000 };
+    let phase = 1;
+    let grazes = 0;
+    let startTime = Date.now();
+    let isAlive = true;
+    let tick = 0;
+
+    // Keys for manual mode
+    const keys = {};
+    window.addEventListener("keydown", e => { keys[e.key] = true; });
+    window.addEventListener("keyup", e => { keys[e.key] = false; });
+
+    function logFeed(msg) {
+      const feed = document.getElementById("feed-box");
+      const time = new Date().toISOString().substring(14, 23);
+      const div = document.createElement("div");
+      div.innerText = `[${time}] ${msg}`;
+      feed.prepend(div);
+      if (feed.children.length > 25) feed.removeChild(feed.lastChild);
+    }
+
+    function toggleMilli() {
+      milliAuto = !milliAuto;
+      document.getElementById("btn-milli").innerText = milliAuto ? "🤖 Milli Auto-Pilot: ACTIVE" : "🕹️ Human Control: ENGAGED";
+      document.getElementById("btn-milli").className = milliAuto ? "btn btn-magenta" : "btn btn-green";
+      logFeed(milliAuto ? "Milli AI resumed control. Convex hull safety active." : "Manual human control engaged. Good luck.");
+    }
+
+    function setPhase(p) {
+      phase = p;
+      const names = ["", "PHASE 1: SPIRAL", "PHASE 2: BLOOM", "PHASE 3: LATTICE", "PHASE 4: SUPERNOVA"];
+      document.getElementById("hud-phase").innerText = names[p];
+      logFeed(`Boss transitioned to ${names[p]}`);
+    }
+
+    function resetDanmaku() {
+      bullets = [];
+      player = { x: W / 2, y: H * 0.75, r: 2.5, vx: 0, vy: 0, speed: 4.8 };
+      grazes = 0;
+      startTime = Date.now();
+      isAlive = true;
+      tick = 0;
+      document.getElementById("hud-status").innerText = "PERFECT";
+      document.getElementById("hud-status").style.color = "var(--accent-green)";
+      logFeed("Danmaku Core restarted.");
+    }
+
+    // Bullet Spawner
+    function spawnBullets() {
+      tick++;
+      boss.angle += 0.04;
+
+      if (phase === 1) {
+        // Dual Archimedean Spirals
+        if (tick % 2 === 0) {
+          const arms = 6;
+          for (let i = 0; i < arms; i++) {
+            const a = boss.angle + (i * Math.PI * 2) / arms;
+            bullets.push({
+              x: boss.x, y: boss.y,
+              vx: Math.cos(a) * 3.2, vy: Math.sin(a) * 3.2,
+              r: 3.5, color: "#ff007f", grazed: false
+            });
+            const a2 = -boss.angle + (i * Math.PI * 2) / arms;
+            bullets.push({
+              x: boss.x, y: boss.y,
+              vx: Math.cos(a2) * 2.6, vy: Math.sin(a2) * 2.6,
+              r: 3, color: "#00f0ff", grazed: false
+            });
+          }
+        }
+      } else if (phase === 2) {
+        // Chrysanthemum Bloom
+        if (tick % 8 === 0) {
+          const petals = 24;
+          for (let i = 0; i < petals; i++) {
+            const a = (i * Math.PI * 2) / petals + Math.sin(tick * 0.05) * 0.5;
+            bullets.push({
+              x: boss.x, y: boss.y,
+              vx: Math.cos(a) * 3.5, vy: Math.sin(a) * 3.5,
+              r: 3.5, color: "#ffd700", grazed: false
+            });
+          }
+        }
+      } else if (phase === 3) {
+        // Hyper-Laser Lattice
+        if (tick % 4 === 0) {
+          const a = (tick * 0.12) % (Math.PI * 2);
+          bullets.push({
+            x: boss.x + Math.sin(tick * 0.1) * 120, y: boss.y,
+            vx: Math.cos(a) * 4.2, vy: Math.sin(a) * 4.2,
+            r: 4, color: "#00ff88", grazed: false
+          });
+        }
+        // Targeted aimed shards
+        if (tick % 15 === 0) {
+          const angleToP = Math.atan2(player.y - boss.y, player.x - boss.x);
+          for (let d = -0.3; d <= 0.3; d += 0.15) {
+            bullets.push({
+              x: boss.x, y: boss.y,
+              vx: Math.cos(angleToP + d) * 5.0, vy: Math.sin(angleToP + d) * 5.0,
+              r: 3, color: "#ff007f", grazed: false
+            });
+          }
+        }
+      } else if (phase === 4) {
+        // Chaos Supernova (100+ bullets/sec)
+        for (let k = 0; k < 4; k++) {
+          const a = Math.random() * Math.PI * 2;
+          const spd = 2.0 + Math.random() * 3.5;
+          bullets.push({
+            x: boss.x + (Math.random() - 0.5) * 40, y: boss.y + (Math.random() - 0.5) * 40,
+            vx: Math.cos(a) * spd, vy: Math.sin(a) * spd,
+            r: 3 + Math.random() * 2,
+            color: k % 2 === 0 ? "#ff007f" : (k % 3 === 0 ? "#00f0ff" : "#ffd700"),
+            grazed: false
+          });
+        }
+      }
+
+      // Auto cycle phases
+      const elapsed = (Date.now() - startTime) / 1000;
+      if (elapsed > 12 && phase === 1) setPhase(2);
+      if (elapsed > 25 && phase === 2) setPhase(3);
+      if (elapsed > 40 && phase === 3) setPhase(4);
+    }
+
+    // MILLI'S CONVEX HULL REACTION AI
+    function updateMilliAI() {
+      // Repulsive vector field from all bullets within 120px
+      let repX = 0;
+      let repY = 0;
+      let threatCount = 0;
+
+      for (let i = 0; i < bullets.length; i++) {
+        const b = bullets[i];
+        const dx = player.x - b.x;
+        const dy = player.y - b.y;
+        const dist = Math.hypot(dx, dy);
+
+        if (dist < 110 && dist > 0.001) {
+          // Weight inversely proportional to squared distance
+          const weight = 1 / (dist * dist);
+          repX += (dx / dist) * weight * 1500;
+          repY += (dy / dist) * weight * 1500;
+          threatCount++;
+        }
+      }
+
+      // Slight gravitational pull towards bottom center sweet spot
+      const centerTargetX = W / 2;
+      const centerTargetY = H * 0.78;
+      const toCenterX = (centerTargetX - player.x) * 0.015;
+      const toCenterY = (centerTargetY - player.y) * 0.015;
+
+      let moveX = repX + toCenterX;
+      let moveY = repY + toCenterY;
+
+      // Arena boundary penalty
+      const margin = 40;
+      if (player.x < margin) moveX += (margin - player.x) * 0.2;
+      if (player.x > W - margin) moveX -= (player.x - (W - margin)) * 0.2;
+      if (player.y < margin) moveY += (margin - player.y) * 0.2;
+      if (player.y > H - margin) moveY -= (player.y - (H - margin)) * 0.2;
+
+      // Normalize speed
+      const mag = Math.hypot(moveX, moveY);
+      if (mag > 0.1) {
+        player.x += (moveX / mag) * player.speed;
+        player.y += (moveY / mag) * player.speed;
+      }
+    }
+
+    function updateHumanControls() {
+      let dx = 0;
+      let dy = 0;
+      if (keys["ArrowLeft"] || keys["a"]) dx -= 1;
+      if (keys["ArrowRight"] || keys["d"]) dx += 1;
+      if (keys["ArrowUp"] || keys["w"]) dy -= 1;
+      if (keys["ArrowDown"] || keys["s"]) dy += 1;
+
+      const mag = Math.hypot(dx, dy);
+      if (mag > 0) {
+        player.x += (dx / mag) * player.speed;
+        player.y += (dy / mag) * player.speed;
+      }
+    }
+
+    function update() {
+      if (!isAlive) return;
+
+      spawnBullets();
+
+      if (milliAuto) {
+        updateMilliAI();
+      } else {
+        updateHumanControls();
+      }
+
+      // Clamp player within arena
+      player.x = Math.max(10, Math.min(W - 10, player.x));
+      player.y = Math.max(10, Math.min(H - 10, player.y));
+
+      // Update bullets & collision
+      for (let i = bullets.length - 1; i >= 0; i--) {
+        const b = bullets[i];
+        b.x += b.vx;
+        b.y += b.vy;
+
+        // Check graze & hit
+        const dist = Math.hypot(player.x - b.x, player.y - b.y);
+
+        // Hit: 1-pixel tolerance
+        if (dist < player.r + b.r - 2) {
+          isAlive = false;
+          document.getElementById("hud-status").innerText = milliAuto ? "SHIELD BREACH" : "HUMAN CRASH";
+          document.getElementById("hud-status").style.color = "var(--accent-magenta)";
+          logFeed(`💥 Impact detected at (${Math.round(player.x)}, ${Math.round(player.y)})!`);
+          break;
+        }
+
+        // Graze: within 16px
+        if (dist < 18 && !b.grazed) {
+          b.grazed = true;
+          grazes++;
+        }
+
+        // Despawn off-screen
+        if (b.x < -20 || b.x > W + 20 || b.y < -20 || b.y > H + 20) {
+          bullets.splice(i, 1);
+        }
+      }
+
+      // Cap bullets to 2,800 max for smooth 60 FPS
+      if (bullets.length > 2800) {
+        bullets.splice(0, bullets.length - 2800);
+      }
+
+      // Telemetry
+      document.getElementById("hud-bullets").innerText = bullets.length.toLocaleString();
+      document.getElementById("hud-grazes").innerText = grazes.toLocaleString();
+      document.getElementById("hud-time").innerText = ((Date.now() - startTime) / 1000).toFixed(1) + "s";
+    }
+
+    function draw() {
+      ctx.fillStyle = "#020308";
+      ctx.fillRect(0, 0, W, H);
+
+      // Background grid
+      ctx.strokeStyle = "rgba(30, 41, 59, 0.4)";
+      ctx.lineWidth = 1;
+      for (let x = 0; x < W; x += 40) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+      }
+      for (let y = 0; y < H; y += 40) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+      }
+
+      // Boss core
+      ctx.save();
+      ctx.fillStyle = "#ff007f";
+      ctx.shadowColor = "#ff007f";
+      ctx.shadowBlur = 25;
+      ctx.beginPath();
+      ctx.arc(boss.x, boss.y, 24, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Rotating boss ring
+      ctx.strokeStyle = "#00f0ff";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(boss.x, boss.y, 36, boss.angle * 2, boss.angle * 2 + Math.PI * 1.5);
+      ctx.stroke();
+      ctx.restore();
+
+      // Render Bullets
+      for (let i = 0; i < bullets.length; i++) {
+        const b = bullets[i];
+        ctx.fillStyle = b.color;
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Render Player / Milli
+      ctx.save();
+      // Outer aura
+      ctx.strokeStyle = milliAuto ? "#00ff88" : "#00f0ff";
+      ctx.lineWidth = 1.5;
+      ctx.shadowColor = milliAuto ? "#00ff88" : "#00f0ff";
+      ctx.shadowBlur = 15;
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, 14, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // True 1-pixel red core hitbox
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, player.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // Request next frame
+      requestAnimationFrame(() => {
+        update();
+        draw();
+      });
+    }
+
+    draw();
+  </script>
+</body>
+</html>

@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Milli Laser Matrix | Hypersonic Bullet-Hell Evasion</title>
+  <style>
+    :root {
+      --bg-dark: #070a14;
+      --card-bg: #0f172a;
+      --card-inner: #090e1a;
+      --accent-orange: #f6821f;
+      --accent-green: #00ff88;
+      --accent-cyan: #00f0ff;
+      --accent-purple: #a855f7;
+      --accent-red: #ef4444;
+      --accent-gold: #ffd700;
+      --border-color: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg-dark);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "JetBrains Mono", sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+      user-select: none;
+    }
+
+    .top-nav {
+      background: #0d1424;
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900;
+      font-size: 1.15rem;
+      color: #fff;
+      text-decoration: none;
+    }
+    .nav-badge {
+      background: linear-gradient(135deg, #a855f7, #00f0ff);
+      color: #000;
+      font-size: 0.7rem;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 900;
+    }
+    .nav-links {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+    }
+    .nav-link:hover { color: #fff; background: rgba(255, 255, 255, 0.05); }
+    .nav-link.active {
+      color: var(--accent-cyan);
+      background: rgba(0, 240, 255, 0.12);
+      border-color: rgba(0, 240, 255, 0.4);
+    }
+
+    .wrapper {
+      max-width: 1280px;
+      margin: 16px auto;
+      padding: 0 16px;
+    }
+
+    /* Live Status Bar */
+    .matrix-bar {
+      background: linear-gradient(90deg, #1f1138 0%, #102638 100%);
+      border: 1px solid #a855f7;
+      border-radius: 12px;
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 12px;
+      box-shadow: 0 4px 25px rgba(168, 85, 247, 0.15);
+    }
+    .status-left { display: flex; align-items: center; gap: 12px; }
+    .status-pulse {
+      width: 12px; height: 12px; border-radius: 50%;
+      background: var(--accent-purple);
+      box-shadow: 0 0 12px var(--accent-purple);
+      animation: pulsePurple 1s infinite alternate;
+    }
+    @keyframes pulsePurple {
+      from { transform: scale(0.9); opacity: 0.8; }
+      to { transform: scale(1.3); opacity: 1; }
+    }
+
+    /* HUD Stats */
+    .hud-stats {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .hud-box {
+      flex: 1;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px 14px;
+      text-align: center;
+      min-width: 110px;
+    }
+    .hud-label { font-size: 0.65rem; color: var(--text-muted); font-weight: 800; letter-spacing: 0.5px; }
+    .hud-val { font-size: 1.3rem; font-weight: 900; font-family: monospace; color: #fff; margin-top: 2px; }
+
+    /* Matrix Layout */
+    .matrix-layout {
+      display: grid;
+      grid-template-columns: 2.2fr 1fr;
+      gap: 16px;
+    }
+
+    .canvas-container {
+      position: relative;
+      background: #03060f;
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      overflow: hidden;
+      height: 560px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.8);
+    }
+    canvas { display: block; width: 100%; height: 100%; }
+
+    /* Side Panel */
+    .side-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-weight: 800;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      width: 100%;
+    }
+    .btn-purple { background: var(--accent-purple); color: #fff; }
+    .btn-purple:hover { background: #b86bfc; box-shadow: 0 0 16px rgba(168,85,247,0.4); }
+    .btn-green { background: var(--accent-green); color: #000; }
+    .btn-green:hover { background: #55ffb0; }
+    .btn-cyan { background: var(--accent-cyan); color: #000; }
+    .btn-outline { background: transparent; border: 1px solid #334155; color: var(--text-muted); }
+    .btn-outline:hover { color: #fff; border-color: #64748b; }
+
+    .matrix-feed {
+      height: 170px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.72rem;
+      background: #03060d;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px;
+      color: #94a3b8;
+      display: flex;
+      flex-direction: column-reverse;
+      line-height: 1.4;
+    }
+
+    /* Start / GameOver Overlay */
+    .overlay-screen {
+      position: absolute;
+      inset: 0;
+      background: rgba(5, 8, 17, 0.88);
+      backdrop-filter: blur(6px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      text-align: center;
+      padding: 24px;
+    }
+    .overlay-title {
+      font-size: 2.2rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #a855f7, #00f0ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="top-nav">
+    <a href="/" class="nav-brand">
+      <span>🌀 MILLI LASER MATRIX</span>
+      <span class="nav-badge">HYPERSONIC EVASION</span>
+    </a>
+    <div class="nav-links">
+      <a href="/" class="nav-link">🏠 Master Gate</a>
+      <a href="/drive" class="nav-link">🏎️ Milli-Drive</a>
+      <a href="/scalper-royale" class="nav-link">🏟️ Scalper Royale</a>
+      <a href="/matrix" class="nav-link active">🌀 Laser Matrix</a>
+      <a href="/milli-clicks" class="nav-link">⚡ Milli-Clicks</a>
+      <a href="/clicker" class="nav-link">⚡ Reflex &amp; CPS</a>
+      <a href="/gauntlet" class="nav-link">🎯 5-Min Gauntlet</a>
+      <a href="/arena" class="nav-link">🎫 Drop Rush</a>
+      <a href="/challenge" class="nav-link">🛡️ Turnstile</a>
+      <a href="/biometrics" class="nav-link">🔬 Biometrics</a>
+      <a href="javascript:void(0)" onclick="lockGate()" class="nav-link" style="color:#ef4444;">🔒 Lock</a>
+    </div>
+  </nav>
+
+  <div class="wrapper">
+    <!-- Live Status Bar -->
+    <div class="matrix-bar">
+      <div class="status-left">
+        <div class="status-pulse"></div>
+        <div>
+          <b style="color:var(--accent-purple); font-size:1rem;">⚡ MILLI 360° POTENTIAL FIELD PATHFINDER ACTIVE</b>
+          <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">
+            Mathematical laser barrage • Repulsive potential field navigation • Milli dodges thousands of projectiles.
+          </div>
+        </div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button id="toggle-pilot-btn" class="btn btn-green" onclick="togglePilot()" style="width:auto; padding:8px 16px;">
+          🤖 Pilot: AUTONOMOUS MILLI
+        </button>
+        <button class="btn btn-outline" onclick="toggleSound()" id="sound-btn" style="width:auto; padding:8px 12px;">
+          🔊 Sound: ON
+        </button>
+      </div>
+    </div>
+
+    <!-- HUD Stats -->
+    <div class="hud-stats">
+      <div class="hud-box">
+        <div class="hud-label">SURVIVAL TIME</div>
+        <div id="hud-time" class="hud-val" style="color:var(--accent-cyan);">0.0s</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">DODGED PROJECTILES</div>
+        <div id="hud-dodges" class="hud-val" style="color:var(--accent-green);">0</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">DENSITY LEVEL</div>
+        <div id="hud-density" class="hud-val" style="color:var(--accent-orange);">TIER 1</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">CALCULATED ESCAPE VECTORS</div>
+        <div id="hud-vectors" class="hud-val" style="color:var(--accent-purple);">60 FPS</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">STATUS</div>
+        <div id="hud-status" class="hud-val" style="color:var(--accent-green);">READY</div>
+      </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="matrix-layout">
+      <!-- Matrix Canvas -->
+      <div class="canvas-container" id="canvas-container">
+        <canvas id="matrix-canvas"></canvas>
+
+        <!-- Overlay Screen -->
+        <div id="matrix-overlay" class="overlay-screen">
+          <div class="overlay-title" id="overlay-heading">MILLI LASER MATRIX</div>
+          <p style="color:var(--text-muted); max-width:500px; margin-bottom:18px; font-size:0.9rem; line-height:1.6;" id="overlay-desc">
+            Laser ribbons, rotating spiral beams, and homing pulses flood the grid.
+            Watch Milli compute real-time vector potential fields ($\vec{F}_{rep}$) and slip through millimeter gaps!
+          </p>
+          <div id="overlay-stats" style="display:none; margin-bottom:16px;"></div>
+          <div style="display:flex; gap:10px;">
+            <button class="btn btn-purple" onclick="startMatrixRun(true)" style="padding:12px 24px;">
+              ⚡ Launch Milli Auto-Pilot
+            </button>
+            <button class="btn btn-outline" onclick="startMatrixRun(false)" style="padding:12px 20px;">
+              🎮 Play Manually (Mouse / WASD)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Telemetry Panel -->
+      <div class="side-panel">
+        <div>
+          <div style="font-size:0.85rem; font-weight:800; color:#fff; margin-bottom:6px;">📡 360° REPULSIVE VECTOR RADAR</div>
+          <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:10px;">
+            Milli samples 360 directions, calculating potential field gradients to find zero-threat escape corridors.
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:0.8rem; font-weight:700; color:#fff; margin-bottom:6px;">⚡ VECTOR ESCAPE LOGS</div>
+          <div class="matrix-feed" id="matrix-feed">
+            <div>[READY] Potential Field Engine loaded. Ready to dodge.</div>
+          </div>
+        </div>
+
+        <div>
+          <button class="btn btn-cyan" onclick="startMatrixRun(milliPilot)">
+            ▶ Restart Matrix Evasion
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("matrix-canvas");
+    const ctx = canvas.getContext("2d");
+
+    let isPlaying = false;
+    let milliPilot = true;
+    let startTime = 0;
+    let dodgedCount = 0;
+    let animId = null;
+    let soundEnabled = true;
+    let audioCtx = null;
+
+    // Player Avatar
+    const player = {
+      x: 300,
+      y: 250,
+      radius: 12,
+      color: "#00ff88",
+      vx: 0,
+      vy: 0
+    };
+
+    // Projectile Array
+    let bullets = [];
+    let lasers = [];
+    let particles = [];
+    let spiralAngle = 0;
+    let lastSpawn = 0;
+
+    // Mouse position for manual play
+    const mouse = { x: 300, y: 250 };
+    canvas.addEventListener("mousemove", (e) => {
+      if (milliPilot) return;
+      const rect = canvas.getBoundingClientRect();
+      mouse.x = e.clientX - rect.left;
+      mouse.y = e.clientY - rect.top;
+    });
+
+    function resizeCanvas() {
+      const container = document.getElementById("canvas-container");
+      canvas.width = container.clientWidth;
+      canvas.height = container.clientHeight;
+      if (!isPlaying) {
+        player.x = canvas.width / 2;
+        player.y = canvas.height / 2;
+      }
+    }
+    window.addEventListener("resize", resizeCanvas);
+
+    function playSfx(freq = 440, type = "sine", dur = 0.05) {
+      if (!soundEnabled) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + dur);
+      } catch (e) {}
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      document.getElementById("sound-btn").innerText = soundEnabled ? "🔊 Sound: ON" : "🔇 Sound: OFF";
+    }
+
+    function togglePilot() {
+      milliPilot = !milliPilot;
+      const btn = document.getElementById("toggle-pilot-btn");
+      if (milliPilot) {
+        btn.innerText = "🤖 Pilot: AUTONOMOUS MILLI";
+        btn.className = "btn btn-green";
+        logFeed("⚡ Autonomous Milli Pilot engaged. Potential field pathfinding active.");
+      } else {
+        btn.innerText = "🎮 Pilot: MANUAL HUMAN (Mouse)";
+        btn.className = "btn btn-outline";
+        logFeed("⚠ Switched to Manual. Move your mouse/finger to survive!");
+      }
+    }
+
+    function logFeed(msg) {
+      const feed = document.getElementById("matrix-feed");
+      const time = new Date().toISOString().substring(14, 23);
+      const div = document.createElement("div");
+      div.innerText = `[${time}] ${msg}`;
+      feed.prepend(div);
+      if (feed.children.length > 25) feed.removeChild(feed.lastChild);
+    }
+
+    function startMatrixRun(auto = true) {
+      resizeCanvas();
+      milliPilot = auto;
+      isPlaying = true;
+      startTime = performance.now();
+      dodgedCount = 0;
+      bullets = [];
+      lasers = [];
+      particles = [];
+      player.x = canvas.width / 2;
+      player.y = canvas.height * 0.78;
+
+      document.getElementById("matrix-overlay").style.display = "none";
+      document.getElementById("hud-status").innerText = "RUNNING";
+      document.getElementById("hud-status").style.color = "#00ff88";
+
+      cancelAnimationFrame(animId);
+      loop();
+    }
+
+    // Mathematical Bullet Spawners
+    const turret = { x: 300, y: 180 };
+    function spawnBulletPatterns(now) {
+      turret.x = canvas.width / 2;
+      turret.y = canvas.height * 0.32;
+
+      const elapsed = (now - startTime) / 1000.0;
+      const densityTier = Math.min(5, Math.floor(elapsed / 6) + 1);
+      document.getElementById("hud-density").innerText = `TIER ${densityTier}`;
+
+      // Pattern 1: Rotating Spiral Center Turret Barrage
+      spiralAngle += 0.18;
+      const arms = 3 + densityTier;
+      for (let a = 0; a < arms; a++) {
+        const ang = spiralAngle + (a * (Math.PI * 2 / arms));
+        const spd = 2.4 + (densityTier * 0.4);
+        bullets.push({
+          x: turret.x,
+          y: turret.y,
+          vx: Math.cos(ang) * spd,
+          vy: Math.sin(ang) * spd,
+          radius: 4,
+          color: "#00f0ff"
+        });
+      }
+
+      // Pattern 2: Perimeter Inward Shooters
+      if (Math.random() < 0.4) {
+        const side = Math.floor(Math.random() * 4);
+        let bx, by;
+        if (side === 0) { bx = Math.random() * canvas.width; by = 0; }
+        else if (side === 1) { bx = canvas.width; by = Math.random() * canvas.height; }
+        else if (side === 2) { bx = Math.random() * canvas.width; by = canvas.height; }
+        else { bx = 0; by = Math.random() * canvas.height; }
+
+        const angleToCenter = Math.atan2(canvas.height / 2 - by, canvas.width / 2 - bx);
+        bullets.push({
+          x: bx,
+          y: by,
+          vx: Math.cos(angleToCenter) * 3.2,
+          vy: Math.sin(angleToCenter) * 3.2,
+          radius: 5,
+          color: "#a855f7"
+        });
+      }
+    }
+
+    // =========================================================
+    // MILLI'S 360° POTENTIAL FIELD PATHFINDER
+    // =========================================================
+    function runMilliMatrixPilot() {
+      // Repulsive vector sum from all nearby bullets
+      let repX = 0;
+      let repY = 0;
+      const sensorRadius = 140;
+
+      bullets.forEach(b => {
+        const dx = player.x - b.x;
+        const dy = player.y - b.y;
+        const dist = Math.hypot(dx, dy);
+
+        if (dist < sensorRadius && dist > 1) {
+          // Inverse square repulsion force
+          const force = (sensorRadius - dist) / (dist * dist);
+          repX += (dx / dist) * force * 150;
+          repY += (dy / dist) * force * 150;
+        }
+      });
+
+      // Weak attraction to arena center (to prevent corner trapping)
+      const centerDx = (canvas.width / 2) - player.x;
+      const centerDy = (canvas.height / 2) - player.y;
+      repX += centerDx * 0.005;
+      repY += centerDy * 0.005;
+
+      // Arena boundary repulsion
+      const pad = 40;
+      if (player.x < pad) repX += (pad - player.x) * 0.2;
+      if (player.x > canvas.width - pad) repX -= (player.x - (canvas.width - pad)) * 0.2;
+      if (player.y < pad) repY += (pad - player.y) * 0.2;
+      if (player.y > canvas.height - pad) repY -= (player.y - (canvas.height - pad)) * 0.2;
+
+      // Apply velocity with smooth damping
+      player.vx = player.vx * 0.82 + repX * 0.18;
+      player.vy = player.vy * 0.82 + repY * 0.18;
+
+      player.x += player.vx;
+      player.y += player.vy;
+
+      // Clamp within canvas
+      player.x = Math.max(player.radius, Math.min(canvas.width - player.radius, player.x));
+      player.y = Math.max(player.radius, Math.min(canvas.height - player.radius, player.y));
+    }
+
+    function triggerCrash() {
+      isPlaying = false;
+      cancelAnimationFrame(animId);
+      playSfx(110, "sawtooth", 0.4);
+
+      // Create explosion particles
+      for (let i = 0; i < 40; i++) {
+        const ang = Math.random() * Math.PI * 2;
+        const spd = Math.random() * 8 + 2;
+        particles.push({
+          x: player.x, y: player.y,
+          vx: Math.cos(ang) * spd,
+          vy: Math.sin(ang) * spd,
+          color: Math.random() > 0.5 ? "#ef4444" : "#a855f7",
+          radius: 3,
+          alpha: 1
+        });
+      }
+
+      const elapsed = ((performance.now() - startTime) / 1000.0).toFixed(1);
+      const overlay = document.getElementById("matrix-overlay");
+      document.getElementById("overlay-heading").innerText = "IMPACT DETECTED!";
+      document.getElementById("overlay-desc").innerText = milliPilot
+        ? `Milli survived ${elapsed}s in the hyper-density laser matrix.`
+        : `Human player impacted by projectile after ${elapsed}s.`;
+
+      document.getElementById("overlay-stats").style.display = "block";
+      document.getElementById("overlay-stats").innerHTML = `
+        <div style="background:var(--card-inner); border:1px solid var(--border-color); border-radius:10px; padding:16px; margin:0 auto; max-width:320px;">
+          <div style="font-size:1.8rem; font-weight:900; color:var(--accent-cyan);">${elapsed} SECONDS</div>
+          <div style="font-size:0.85rem; color:var(--text-muted); margin-top:4px;">Dodged: <b>${dodgedCount}</b> Projectiles</div>
+        </div>
+      `;
+      overlay.style.display = "flex";
+      document.getElementById("hud-status").innerText = "GAME OVER";
+      document.getElementById("hud-status").style.color = "#ef4444";
+    }
+
+    function loop() {
+      if (!isPlaying) return;
+      const now = performance.now();
+      const elapsed = ((now - startTime) / 1000.0).toFixed(1);
+      document.getElementById("hud-time").innerText = `${elapsed}s`;
+
+      // Spawn bullets every 120ms
+      if (now - lastSpawn > 120) {
+        spawnBulletPatterns(now);
+        lastSpawn = now;
+      }
+
+      // Pilot actuation
+      if (milliPilot) {
+        runMilliMatrixPilot();
+      } else {
+        // Manual mouse follow
+        player.x += (mouse.x - player.x) * 0.25;
+        player.y += (mouse.y - player.y) * 0.25;
+      }
+
+      // Clear Canvas
+      ctx.fillStyle = "#03060f";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Cyber Grid lines
+      ctx.strokeStyle = "rgba(168, 85, 247, 0.08)";
+      ctx.lineWidth = 1;
+      for (let x = 0; x < canvas.width; x += 40) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+      }
+      for (let y = 0; y < canvas.height; y += 40) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+      }
+
+      // Draw Milli's Predictive Vector Rays if autonomous
+      if (milliPilot) {
+        ctx.save();
+        ctx.strokeStyle = "rgba(0, 255, 136, 0.4)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(player.x, player.y);
+        ctx.lineTo(player.x + player.vx * 12, player.y + player.vy * 12);
+        ctx.stroke();
+
+        ctx.strokeStyle = "rgba(0, 240, 255, 0.15)";
+        ctx.beginPath();
+        ctx.arc(player.x, player.y, 140, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Draw Center Turret Crystal
+      ctx.save();
+      ctx.fillStyle = "#a855f7";
+      ctx.shadowColor = "#a855f7";
+      ctx.shadowBlur = 18;
+      ctx.beginPath();
+      ctx.arc(turret.x, turret.y, 14, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#fff";
+      ctx.beginPath();
+      ctx.arc(turret.x, turret.y, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // Update & Draw Bullets
+      for (let i = bullets.length - 1; i >= 0; i--) {
+        const b = bullets[i];
+        b.x += b.vx;
+        b.y += b.vy;
+
+        ctx.save();
+        ctx.fillStyle = b.color;
+        ctx.shadowColor = b.color;
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        // Check collision with player (active after 800ms grace period)
+        const dist = Math.hypot(player.x - b.x, player.y - b.y);
+        if (now - startTime > 800 && dist < player.radius + b.radius) {
+          triggerCrash();
+          return;
+        }
+
+        // Count dodged when leaving screen
+        if (b.x < -20 || b.x > canvas.width + 20 || b.y < -20 || b.y > canvas.height + 20) {
+          bullets.splice(i, 1);
+          dodgedCount++;
+          document.getElementById("hud-dodges").innerText = dodgedCount;
+        }
+      }
+
+      // Draw Player
+      ctx.save();
+      ctx.fillStyle = player.color;
+      ctx.shadowColor = player.color;
+      ctx.shadowBlur = 15;
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Inner Core
+      ctx.fillStyle = "#fff";
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, player.radius * 0.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      animId = requestAnimationFrame(loop);
+    }
+
+    function lockGate() {
+      localStorage.removeItem("sentinel_unlocked");
+      document.cookie = "sentinel_admin_key=; path=/; max-age=0";
+      window.location.href = "/";
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      resizeCanvas();
+    });
+  </script>
+</body>
+</html>

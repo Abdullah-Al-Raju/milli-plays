@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sentinel Biometrics &amp; Kinematics Lab | Cloudflare Pages</title>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <style>
+    :root {
+      --bg-dark: #0a0f1d;
+      --card-bg: #11192e;
+      --card-inner: #0b1122;
+      --accent-orange: #f6821f;
+      --accent-green: #00ff88;
+      --accent-cyan: #00f0ff;
+      --accent-purple: #a855f7;
+      --accent-red: #ef4444;
+      --border-color: #1e293b;
+      --text-main: #e2e8f0;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      background: var(--bg-dark);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+
+    /* Top Nav */
+    .top-nav {
+      background: #0d1424;
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: #fff;
+      text-decoration: none;
+    }
+    .nav-badge {
+      background: rgba(246, 130, 31, 0.2);
+      border: 1px solid var(--accent-orange);
+      color: var(--accent-orange);
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .nav-links {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+    }
+    .nav-link:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .nav-link.active {
+      color: var(--accent-cyan);
+      background: rgba(0, 240, 255, 0.1);
+      border-color: rgba(0, 240, 255, 0.3);
+    }
+
+    .wrapper {
+      max-width: 1180px;
+      margin: 24px auto;
+      padding: 0 16px;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 2.2fr 1fr;
+      gap: 20px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    }
+
+    .canvas-container {
+      position: relative;
+      background: #080d1a;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      overflow: hidden;
+      height: 480px;
+      cursor: crosshair;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Telemetry HUD */
+    .telemetry-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .telem-pill {
+      background: var(--card-inner);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+    }
+    .telem-label {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      font-weight: bold;
+      letter-spacing: 0.5px;
+    }
+    .telem-val {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #fff;
+      margin-top: 4px;
+      font-family: monospace;
+    }
+
+    /* Probability Meter */
+    .bot-gauge-box {
+      background: var(--card-inner);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .gauge-bar-bg {
+      height: 14px;
+      background: #1e293b;
+      border-radius: 7px;
+      overflow: hidden;
+      margin: 12px 0 6px 0;
+      display: flex;
+    }
+    .gauge-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #00ff88, #ffb800, #ef4444);
+      transition: width 0.2s ease;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 6px;
+      padding: 10px 16px;
+      font-weight: bold;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      width: 100%;
+      margin-bottom: 8px;
+      text-decoration: none;
+    }
+    .btn-primary { background: var(--accent-cyan); color: #000; }
+    .btn-orange { background: var(--accent-orange); color: #fff; }
+    .btn-outline { background: transparent; border: 1px solid #334155; color: var(--text-muted); }
+    .btn-outline:hover { color: #fff; border-color: #64748b; }
+  </style>
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="/" class="nav-brand">
+      <span>⚡ CLOUDFLARE EDGE ARENA</span>
+      <span class="nav-badge">LIVE</span>
+    </a>
+    <div class="nav-links">
+      <a href="/" class="nav-link">🏠 Master Gate</a>
+      <a href="/drive" class="nav-link">🏎️ Milli-Drive</a>
+      <a href="/scalper-royale" class="nav-link">🏟️ Scalper Royale</a>
+      <a href="/matrix" class="nav-link">🌀 Laser Matrix</a>
+      <a href="/milli-clicks" class="nav-link">⚡ Milli-Clicks</a>
+      <a href="/clicker" class="nav-link">⚡ Reflex &amp; CPS</a>
+      <a href="/gauntlet" class="nav-link">🎯 5-Min Gauntlet</a>
+      <a href="/arena" class="nav-link">🎫 Drop Rush</a>
+      <a href="/challenge" class="nav-link">🛡️ Turnstile</a>
+      <a href="/biometrics" class="nav-link active">🔬 Biometrics</a>
+      <a href="javascript:void(0)" onclick="lockGate()" class="nav-link" style="color:#ef4444;">🔒 Lock</a>
+    </div>
+  </nav>
+
+  <div class="wrapper">
+    <div class="main-grid">
+      <!-- Left Column: Interactive Drawing & Motion Visualizer -->
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <div>
+            <h3 style="margin:0; font-size:1.15rem;">🔬 Neuromuscular Kinematic Tracking Canvas</h3>
+            <div style="font-size:0.8rem; color:var(--text-muted); margin-top:3px;">
+              Move your mouse or finger across the canvas to inspect real-time trajectory velocity, jerk, and entropy.
+            </div>
+          </div>
+          <button onclick="clearCanvas()" class="btn btn-outline" style="width:auto; padding:5px 12px; margin:0;">↺ Clear</button>
+        </div>
+
+        <div class="canvas-container" id="canvas-container">
+          <canvas id="motion-canvas"></canvas>
+        </div>
+
+        <div class="telemetry-grid">
+          <div class="telem-pill">
+            <div class="telem-label">INSTANT VELOCITY</div>
+            <div class="telem-val" id="val-vel" style="color:var(--accent-cyan);">0.0 px/ms</div>
+          </div>
+          <div class="telem-pill">
+            <div class="telem-label">ACCELERATION</div>
+            <div class="telem-val" id="val-acc" style="color:var(--accent-orange);">0.0 px/ms²</div>
+          </div>
+          <div class="telem-pill">
+            <div class="telem-label">KINEMATIC JERK</div>
+            <div class="telem-val" id="val-jerk" style="color:var(--accent-purple);">0.0</div>
+          </div>
+          <div class="telem-pill">
+            <div class="telem-label">CURVATURE ENTROPY</div>
+            <div class="telem-val" id="val-entropy" style="color:var(--accent-green);">0.00</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: AI Classifier & Turnstile Integration -->
+      <div class="card" style="display:flex; flex-direction:column; justify-content:space-between;">
+        <div>
+          <h3 style="margin:0 0 14px 0; font-size:1.15rem;">🤖 Anti-Bot Classifier</h3>
+
+          <div class="bot-gauge-box">
+            <div style="font-size:0.75rem; color:var(--text-muted); font-weight:bold;">MACHINE / BOT PROBABILITY</div>
+            <div class="gauge-bar-bg">
+              <div id="gauge-fill" class="gauge-bar-fill"></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--text-muted);">
+              <span style="color:var(--accent-green);">0% (HUMAN)</span>
+              <span id="gauge-percent" style="font-weight:bold; color:#fff;">0%</span>
+              <span style="color:var(--accent-red);">100% (BOT)</span>
+            </div>
+            <div id="classifier-verdict" style="margin-top:10px; font-weight:800; font-size:0.95rem; color:var(--accent-green);">
+              NATURAL HUMAN MOTOR TRAJECTORY
+            </div>
+          </div>
+
+          <div style="margin-bottom:16px;">
+            <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:8px; font-weight:bold;">TRAJECTORY SIMULATORS:</div>
+            <button onclick="simulateNeuroBot()" class="btn btn-primary">
+              ⚡ Simulate NeuroMouse AI Trajectory
+            </button>
+            <button onclick="simulateLinearBot()" class="btn btn-outline">
+              🤖 Simulate Robotic Linear Jump (Detectable)
+            </button>
+          </div>
+
+          <!-- Official Turnstile Widget -->
+          <div style="border-top:1px solid #1e293b; padding-top:16px; margin-top:16px;">
+            <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:8px; font-weight:bold;">
+              OFFICIAL CLOUDFLARE TURNSTILE TEST:
+            </div>
+            <div id="lab-turnstile" class="cf-turnstile"
+                 data-sitekey="0x4AAAAAAFtuNmdenPEqPlr-"
+                 data-theme="dark"
+                 data-callback="onLabTurnstileSuccess">
+            </div>
+            <div id="turnstile-status" style="font-size:0.8rem; margin-top:8px; color:var(--text-muted);">
+              Awaiting Turnstile interaction...
+            </div>
+          </div>
+        </div>
+
+        <div style="font-size:0.75rem; color:var(--text-muted); text-align:center; padding-top:12px; border-top:1px solid #1e293b;">
+          Master Key Override: <b style="color:var(--accent-orange);">SENTINEL_WAR_2026</b>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("motion-canvas");
+    const ctx = canvas.getContext("2d");
+    let points = [];
+    let lastTime = performance.now();
+    let lastX = 0;
+    let lastY = 0;
+    let lastVel = 0;
+    let lastAcc = 0;
+
+    function resizeCanvas() {
+      const container = document.getElementById("canvas-container");
+      canvas.width = container.clientWidth;
+      canvas.height = container.clientHeight;
+      drawBackground();
+    }
+    window.addEventListener("resize", resizeCanvas);
+
+    function drawBackground() {
+      ctx.fillStyle = "#080d1a";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw subtle grid
+      ctx.strokeStyle = "rgba(30, 41, 59, 0.4)";
+      ctx.lineWidth = 1;
+      for (let x = 0; x < canvas.width; x += 40) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      for (let y = 0; y < canvas.height; y += 40) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+    }
+
+    function clearCanvas() {
+      points = [];
+      drawBackground();
+    }
+
+    canvas.addEventListener("pointermove", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const now = performance.now();
+      const dt = Math.max(1, now - lastTime);
+
+      const dx = x - lastX;
+      const dy = y - lastY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const vel = dist / dt; // px/ms
+      const acc = (vel - lastVel) / dt; // px/ms^2
+      const jerk = (acc - lastAcc) / dt;
+
+      lastTime = now;
+      lastX = x;
+      lastY = y;
+      lastVel = vel;
+      lastAcc = acc;
+
+      points.push({ x, y, vel, acc, jerk, time: now });
+      if (points.length > 80) points.shift();
+
+      renderTrajectory();
+      updateMetrics(vel, acc, jerk);
+    });
+
+    function renderTrajectory() {
+      drawBackground();
+      if (points.length < 2) return;
+
+      for (let i = 1; i < points.length; i++) {
+        const p1 = points[i - 1];
+        const p2 = points[i];
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        const alpha = i / points.length;
+        ctx.strokeStyle = `rgba(0, 240, 255, ${alpha})`;
+        ctx.lineWidth = 3;
+        ctx.lineCap = "round";
+        ctx.stroke();
+      }
+
+      // Latest point glow
+      const head = points[points.length - 1];
+      ctx.beginPath();
+      ctx.arc(head.x, head.y, 6, 0, Math.PI * 2);
+      ctx.fillStyle = "#00ff88";
+      ctx.shadowColor = "#00ff88";
+      ctx.shadowBlur = 12;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+
+    function updateMetrics(vel, acc, jerk) {
+      document.getElementById("val-vel").innerText = `${vel.toFixed(2)} px/ms`;
+      document.getElementById("val-acc").innerText = `${acc.toFixed(3)} px/ms²`;
+      document.getElementById("val-jerk").innerText = `${Math.abs(jerk).toFixed(4)}`;
+
+      // Calculate path angle entropy
+      let entropy = 0;
+      if (points.length >= 5) {
+        const angles = [];
+        for (let i = 1; i < points.length; i++) {
+          const dx = points[i].x - points[i - 1].x;
+          const dy = points[i].y - points[i - 1].y;
+          angles.push(Math.atan2(dy, dx));
+        }
+        entropy = Math.min(1.0, (new Set(angles.map(a => a.toFixed(1))).size) / angles.length);
+      }
+      document.getElementById("val-entropy").innerText = entropy.toFixed(2);
+
+      // Classify
+      let botScore = 0;
+      if (vel > 6.0) botScore += 40; // Superhuman teleport
+      if (entropy < 0.1 && points.length > 10) botScore += 50; // Perfectly straight robotic line
+      if (Math.abs(jerk) < 0.0001 && points.length > 10) botScore += 30; // Zero natural tremor
+
+      const fillEl = document.getElementById("gauge-fill");
+      const percentEl = document.getElementById("gauge-percent");
+      const verdictEl = document.getElementById("classifier-verdict");
+
+      fillEl.style.width = `${botScore}%`;
+      percentEl.innerText = `${botScore}%`;
+
+      if (botScore >= 70) {
+        verdictEl.innerText = "❌ DETECTED AS MACHINE / AUTOMATION";
+        verdictEl.style.color = "#ef4444";
+      } else if (botScore >= 35) {
+        verdictEl.innerText = "⚠ SUSPICIOUS KINEMATICS (REVIEW)";
+        verdictEl.style.color = "#ffb800";
+      } else {
+        verdictEl.innerText = "✔ NATURAL HUMAN MOTOR TRAJECTORY";
+        verdictEl.style.color = "#00ff88";
+      }
+    }
+
+    function simulateNeuroBot() {
+      clearCanvas();
+      const startX = 50;
+      const startY = canvas.height - 50;
+      const endX = canvas.width - 50;
+      const endY = 80;
+
+      // Cubic Bézier with 1/f tremor
+      const cp1X = startX + (endX - startX) * 0.25 + (Math.random() - 0.5) * 80;
+      const cp1Y = startY - 120 + (Math.random() - 0.5) * 60;
+      const cp2X = startX + (endX - startX) * 0.75 + (Math.random() - 0.5) * 80;
+      const cp2Y = endY + 120 + (Math.random() - 0.5) * 60;
+
+      let t = 0;
+      const interval = setInterval(() => {
+        t += 0.02;
+        if (t > 1.0) {
+          clearInterval(interval);
+          return;
+        }
+        // Cubic spline calculation
+        const u = 1 - t;
+        const tt = t * t;
+        const uu = u * u;
+        const uuu = uu * u;
+        const ttt = tt * t;
+
+        let x = uuu * startX + 3 * uu * t * cp1X + 3 * u * tt * cp2X + ttt * endX;
+        let y = uuu * startY + 3 * uu * t * cp1Y + 3 * u * tt * cp2Y + ttt * endY;
+
+        // Add 1/f tremor
+        x += (Math.random() - 0.5) * 2.5;
+        y += (Math.random() - 0.5) * 2.5;
+
+        points.push({ x, y, vel: 1.2, acc: 0.01, jerk: 0.001, time: performance.now() });
+        renderTrajectory();
+        updateMetrics(1.2, 0.01, 0.002);
+      }, 16);
+    }
+
+    function simulateLinearBot() {
+      clearCanvas();
+      const startX = 50;
+      const startY = canvas.height / 2;
+      const endX = canvas.width - 50;
+      const endY = canvas.height / 2;
+
+      let t = 0;
+      const interval = setInterval(() => {
+        t += 0.04;
+        if (t > 1.0) {
+          clearInterval(interval);
+          return;
+        }
+        const x = startX + (endX - startX) * t;
+        const y = startY; // Perfectly straight 0-entropy line
+        points.push({ x, y, vel: 8.5, acc: 0, jerk: 0, time: performance.now() });
+        renderTrajectory();
+        updateMetrics(8.5, 0, 0);
+      }, 16);
+    }
+
+    window.onLabTurnstileSuccess = async function(token) {
+      const statusEl = document.getElementById("turnstile-status");
+      statusEl.innerHTML = `<span style="color:#00ff88;">✔ Cloudflare Turnstile Passed! Token verified with Edge.</span>`;
+    };
+
+    function lockGate() {
+      localStorage.removeItem("sentinel_unlocked");
+      document.cookie = "sentinel_admin_key=; path=/; max-age=0";
+      window.location.href = "/";
+    }
+
+    setTimeout(resizeCanvas, 100);
+  </script>
+</body>
+</html>

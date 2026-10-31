@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Milli-Booker | Live Ticketing & Anti-Bot Arena</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <!-- Cookie Consent Modal (Tested by ConsentSniper) -->
+  <div id="cookie-consent-modal" class="cookie-banner">
+    <div class="cookie-content">
+      <span>🍪 We use cookies to improve your booking experience.</span>
+      <button id="accept-cookies" class="btn btn-sm btn-primary">Accept All Cookies</button>
+    </div>
+  </div>
+
+  <header class="app-header">
+    <div class="brand">
+      <span class="logo-badge">⚡ MILLI-BOOKER</span>
+      <h1>Grand Arena World Tour 2026</h1>
+    </div>
+    <div class="header-telemetry">
+      <div class="stat-box">
+        <span class="stat-label">DROP STATUS</span>
+        <span id="drop-status" class="stat-value text-green">LIVE</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">AVAILABLE SEATS</span>
+        <span id="seats-count" class="stat-value text-primary">50 / 50</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">SERVER CLOCK (UTC)</span>
+        <span id="server-clock" class="stat-value font-mono">--:--:--.---</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-layout">
+    <!-- Seating Chart Column -->
+    <section class="stage-section">
+      <div class="stage-curtain">
+        <div class="stage-screen">STAGE / MAIN PODIUM</div>
+      </div>
+
+      <!-- Cloudflare Challenge Gate (Tested by TurnstileSniper) -->
+      <div id="cf-turnstile-wrapper" class="challenge-box" style="display: none;">
+        <div class="cf-challenge-content">
+          <input type="checkbox" id="cf-checkbox" class="ctp-checkbox-label">
+          <label for="cf-checkbox">Verify you are human before selecting seats</label>
+        </div>
+      </div>
+
+      <!-- Dynamic Seat Grid -->
+      <div class="seating-container">
+        <div id="seat-grid" class="seat-grid">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+
+      <div class="seat-legend">
+        <div class="legend-item"><span class="legend-color seat-available"></span> Available (Optical Target RGB: 46, 204, 113)</div>
+        <div class="legend-item"><span class="legend-color seat-booked"></span> Booked</div>
+        <div class="legend-item"><span class="legend-color seat-selected"></span> Selected</div>
+      </div>
+
+      <div class="booking-controls">
+        <div class="selected-info">
+          <span>Selected Seat: <strong id="selected-seat-label">None</strong></span>
+        </div>
+        <button id="confirm-booking" class="btn btn-large btn-accent" disabled>
+          ⚡ Confirm Instant Booking
+        </button>
+        <button id="book-now-btn" class="btn btn-large btn-accent" style="display:none;">
+          Book Now
+        </button>
+      </div>
+    </section>
+
+    <!-- Real-time Telemetry & Race Feed -->
+    <aside class="telemetry-section">
+      <div class="panel-header">
+        <h3>📊 Real-Time In-Flight Telemetry</h3>
+        <button id="reset-btn" class="btn btn-sm btn-outline">↺ Reset Arena</button>
+      </div>
+
+      <div class="telemetry-card">
+        <h4>Last Transaction Metrics</h4>
+        <div class="metric-row">
+          <span>Acquisition Latency:</span>
+          <strong id="metric-latency" class="text-green">-- ms</strong>
+        </div>
+        <div class="metric-row">
+          <span>Winner Client:</span>
+          <strong id="metric-winner">--</strong>
+        </div>
+        <div class="metric-row">
+          <span>Method:</span>
+          <strong id="metric-method">--</strong>
+        </div>
+      </div>
+
+      <div class="log-container">
+        <h4>Server Event Stream (Microsecond Precision)</h4>
+        <div id="telemetry-log" class="log-feed">
+          <div class="log-item system">System initialized. Awaiting drop...</div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

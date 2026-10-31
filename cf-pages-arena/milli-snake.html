@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Milli Quantum Snake | 200 Tiles/Sec Relativistic Light-Cycle</title>
+  <style>
+    :root {
+      --bg-dark: #04060d;
+      --card-bg: #090e1a;
+      --accent-cyan: #00f0ff;
+      --accent-green: #00ff88;
+      --accent-gold: #ffd700;
+      --accent-orange: #f6821f;
+      --accent-red: #ef4444;
+      --border-color: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg-dark);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "JetBrains Mono", sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+      user-select: none;
+    }
+    .top-nav {
+      background: #0d1424;
+      border-bottom: 1px solid var(--border-color);
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900;
+      font-size: 1.1rem;
+      color: #fff;
+      text-decoration: none;
+    }
+    .nav-badge {
+      background: linear-gradient(135deg, #00ff88, #00f0ff);
+      color: #000;
+      font-size: 0.7rem;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 900;
+    }
+    .nav-links {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .nav-link:hover { color: #fff; background: rgba(255, 255, 255, 0.05); }
+    .nav-link.active {
+      color: var(--accent-green);
+      background: rgba(0, 255, 136, 0.12);
+      border: 1px solid rgba(0, 255, 136, 0.4);
+    }
+
+    .wrapper {
+      max-width: 1360px;
+      margin: 14px auto;
+      padding: 0 16px;
+    }
+    .status-bar {
+      background: linear-gradient(90deg, #09201f 0%, #0d1e38 100%);
+      border: 1px solid var(--accent-green);
+      border-radius: 12px;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 12px;
+      box-shadow: 0 4px 25px rgba(0, 255, 136, 0.2);
+    }
+    .hud-stats {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .hud-box {
+      flex: 1;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px 14px;
+      text-align: center;
+      min-width: 120px;
+    }
+    .hud-label { font-size: 0.65rem; color: var(--text-muted); font-weight: 800; letter-spacing: 0.5px; }
+    .hud-val { font-size: 1.25rem; font-weight: 900; font-family: monospace; color: #fff; margin-top: 2px; }
+
+    .arena-grid {
+      display: grid;
+      grid-template-columns: 2.7fr 1fr;
+      gap: 16px;
+    }
+    .canvas-container {
+      position: relative;
+      background: #020308;
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      overflow: hidden;
+      height: 640px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    canvas { display: block; background: #020308; }
+
+    .side-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .btn {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-weight: 800;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+      width: 100%;
+    }
+    .btn-green { background: var(--accent-green); color: #000; box-shadow: 0 0 16px rgba(0, 255, 136, 0.4); }
+    .btn-green:hover { background: #55ffb0; }
+    .btn-cyan { background: var(--accent-cyan); color: #000; }
+    .btn-cyan:hover { background: #55f3ff; }
+
+    .feed-box {
+      height: 180px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.72rem;
+      background: #03060f;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px;
+      color: #94a3b8;
+      display: flex;
+      flex-direction: column-reverse;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="/" class="nav-brand">
+      <span>🐍 MILLI QUANTUM SNAKE</span>
+      <span class="nav-badge">200 TILES/SEC LIGHT-CYCLE</span>
+    </a>
+    <div class="nav-links">
+      <a href="/" class="nav-link">🏠 Master Gate</a>
+      <a href="/drive" class="nav-link">🏎️ Drive</a>
+      <a href="/maze" class="nav-link">🌀 Maze</a>
+      <a href="/danmaku" class="nav-link">🌸 Danmaku</a>
+      <a href="/orbit" class="nav-link">🌌 Orbit</a>
+      <a href="/pong" class="nav-link">🏓 Pong</a>
+      <a href="/rhythm" class="nav-link">🎵 Rhythm</a>
+      <a href="/snake" class="nav-link active">🐍 Snake</a>
+      <a href="/swarm" class="nav-link">⚔️ Swarm</a>
+      <a href="/stealth" class="nav-link">🕶️ Stealth</a>
+      <a href="/trader" class="nav-link">📈 Trader</a>
+      <a href="/sweeper" class="nav-link">💣 Sweeper</a>
+      <a href="/defense" class="nav-link">🛸 Defense</a>
+      <a href="/portal" class="nav-link">🌀 Portal</a>
+      <a href="/circuit" class="nav-link">⚡ Circuit</a>
+    </div>
+  </nav>
+
+  <div class="wrapper">
+    <div class="status-bar">
+      <div>
+        <b style="color:var(--accent-green); font-size:1rem;">⚡ 200 TILES/SEC RELATIVISTIC QUANTUM LIGHT-CYCLE</b>
+        <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">
+          Permanent laser light wall thousands of segments long. Milli navigates self-created micro-gaps with Voronoi flood-fill AI!
+        </div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-green" onclick="toggleMilli()" id="btn-milli" style="width:auto; padding:8px 18px;">
+          🤖 Milli Light-Cycle AI: ACTIVE
+        </button>
+        <button class="btn btn-cyan" onclick="resetSnake()" style="width:auto; padding:8px 16px;">
+          🔄 Respawn Cycle
+        </button>
+      </div>
+    </div>
+
+    <div class="hud-stats">
+      <div class="hud-box">
+        <div class="hud-label">VELOCITY (TILES/SEC)</div>
+        <div id="hud-speed" class="hud-val" style="color:var(--accent-green);">35 TILES/S</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">LIGHT WALL LENGTH</div>
+        <div id="hud-len" class="hud-val" style="color:var(--accent-cyan);">1 SEGMENT</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">GRID COVERAGE</div>
+        <div id="hud-cov" class="hud-val" style="color:var(--accent-gold);">0.1%</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">VORONOI SAFE TILES</div>
+        <div id="hud-safe" class="hud-val" style="color:var(--accent-green);">4,200</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">AI PREDICTION HORIZON</div>
+        <div class="hud-val" style="color:var(--accent-cyan);">20,000 MOVES/F</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">STATUS</div>
+        <div id="hud-status" class="hud-val" style="color:var(--accent-green);">CIRCUIT CLEAR</div>
+      </div>
+    </div>
+
+    <div class="arena-grid">
+      <div class="canvas-container" id="container">
+        <canvas id="snake-canvas"></canvas>
+      </div>
+
+      <div class="side-panel">
+        <div>
+          <div style="font-size:0.85rem; font-weight:800; color:#fff; margin-bottom:8px;">⚡ SPEED OVERDRIVE</div>
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <button class="btn btn-cyan" onclick="setSpeed(60)">🚀 60 Tiles/sec</button>
+            <button class="btn btn-cyan" onclick="setSpeed(120)">⚡ 120 Tiles/sec</button>
+            <button class="btn btn-green" onclick="setSpeed(200)">🔥 200 Tiles/sec (Hypersonic)</button>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:0.85rem; font-weight:800; color:#fff; margin-bottom:8px;">🕹️ HUMAN LIGHT-CYCLE CONTROLS</div>
+          <div style="font-size:0.75rem; color:var(--text-muted); line-height:1.5;">
+            Toggle Auto-Pilot OFF to manually steer using <b>Arrow Keys / WASD</b>. At 60+ tiles/sec, human reflex latency causes instant crashes.
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:0.8rem; font-weight:700; color:#fff; margin-bottom:6px;">⚡ MILLI COGNITIVE LOGS</div>
+          <div class="feed-box" id="feed-box">
+            <div>[READY] Quantum Light-Cycle armed. Voronoi lookahead solver online.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("snake-canvas");
+    const ctx = canvas.getContext("2d");
+
+    const cols = 80;
+    const rows = 56;
+    let cellSize = 10;
+
+    canvas.width = cols * cellSize;
+    canvas.height = rows * cellSize;
+
+    let milliAuto = true;
+    let snake = [{ x: 40, y: 28 }];
+    let dir = { x: 1, y: 0 };
+    let food = { x: 60, y: 28 };
+    let speed = 35; // moves per second
+    let lastMove = 0;
+    let isAlive = true;
+
+    // Fast grid occupation lookup
+    let occupied = new Set();
+    occupied.add("40,28");
+
+    const keys = {};
+    window.addEventListener("keydown", e => {
+      if (!milliAuto) {
+        if (e.key === "ArrowUp" || e.key === "w") if (dir.y === 0) dir = { x: 0, y: -1 };
+        if (e.key === "ArrowDown" || e.key === "s") if (dir.y === 0) dir = { x: 0, y: 1 };
+        if (e.key === "ArrowLeft" || e.key === "a") if (dir.x === 0) dir = { x: -1, y: 0 };
+        if (e.key === "ArrowRight" || e.key === "d") if (dir.x === 0) dir = { x: 1, y: 0 };
+      }
+    });
+
+    function logFeed(msg) {
+      const feed = document.getElementById("feed-box");
+      const time = new Date().toISOString().substring(14, 23);
+      const div = document.createElement("div");
+      div.innerText = `[${time}] ${msg}`;
+      feed.prepend(div);
+      if (feed.children.length > 25) feed.removeChild(feed.lastChild);
+    }
+
+    function toggleMilli() {
+      milliAuto = !milliAuto;
+      document.getElementById("btn-milli").innerText = milliAuto ? "🤖 Milli Light-Cycle AI: ACTIVE" : "🕹️ Human Steer: ENGAGED";
+      document.getElementById("btn-milli").className = milliAuto ? "btn btn-green" : "btn btn-cyan";
+      logFeed(milliAuto ? "Milli Voronoi lookahead active." : "Manual steering engaged.");
+    }
+
+    function setSpeed(s) {
+      speed = s;
+      document.getElementById("hud-speed").innerText = `${speed} TILES/S`;
+      logFeed(`Cycle velocity set to ${speed} tiles/sec.`);
+    }
+
+    function spawnFood() {
+      let tries = 0;
+      while (tries < 200) {
+        const fx = Math.floor(Math.random() * cols);
+        const fy = Math.floor(Math.random() * rows);
+        if (!occupied.has(`${fx},${fy}`)) {
+          food = { x: fx, y: fy };
+          return;
+        }
+        tries++;
+      }
+    }
+
+    function resetSnake() {
+      snake = [{ x: 40, y: 28 }];
+      dir = { x: 1, y: 0 };
+      occupied.clear();
+      occupied.add("40,28");
+      spawnFood();
+      isAlive = true;
+      document.getElementById("hud-status").innerText = "CIRCUIT CLEAR";
+      document.getElementById("hud-status").style.color = "var(--accent-green)";
+      logFeed("Quantum Light-Cycle respawned.");
+    }
+
+    // MILLI VORONOI FLOOD-FILL LOOKAHEAD AI
+    function computeMilliNextDir() {
+      const head = snake[0];
+      const moves = [
+        { x: 0, y: -1 }, // Up
+        { x: 1, y: 0 },  // Right
+        { x: 0, y: 1 },  // Down
+        { x: -1, y: 0 }  // Left
+      ];
+
+      // Disallow 180 flip
+      const validMoves = moves.filter(m => !(m.x === -dir.x && m.y === -dir.y));
+
+      let bestMove = validMoves[0];
+      let maxScore = -Infinity;
+
+      validMoves.forEach(m => {
+        const nx = head.x + m.x;
+        const ny = head.y + m.y;
+
+        // Collision check
+        if (nx < 0 || nx >= cols || ny < 0 || ny >= rows || occupied.has(`${nx},${ny}`)) {
+          return; // Dead end / wall
+        }
+
+        // Flood-fill space check (Voronoi accessible tiles)
+        const reachableArea = floodFillCount(nx, ny);
+        const distToFood = Math.hypot(food.x - nx, food.y - ny);
+
+        // Score = prioritize survivable space first, then food proximity
+        const score = reachableArea * 10 - distToFood;
+
+        if (score > maxScore) {
+          maxScore = score;
+          bestMove = m;
+        }
+      });
+
+      return bestMove;
+    }
+
+    function floodFillCount(sx, sy) {
+      const q = [{ x: sx, y: sy }];
+      const visited = new Set();
+      visited.add(`${sx},${sy}`);
+      let count = 0;
+
+      while (q.length > 0 && count < 250) {
+        const curr = q.shift();
+        count++;
+
+        const neighbors = [
+          { x: curr.x + 1, y: curr.y },
+          { x: curr.x - 1, y: curr.y },
+          { x: curr.x, y: curr.y + 1 },
+          { x: curr.x, y: curr.y - 1 }
+        ];
+
+        neighbors.forEach(n => {
+          if (n.x >= 0 && n.x < cols && n.y >= 0 && n.y < rows) {
+            const key = `${n.x},${n.y}`;
+            if (!occupied.has(key) && !visited.has(key)) {
+              visited.add(key);
+              q.push(n);
+            }
+          }
+        });
+      }
+
+      return count;
+    }
+
+    function step() {
+      if (!isAlive) return;
+
+      if (milliAuto) {
+        dir = computeMilliNextDir();
+      }
+
+      const newHead = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+
+      // Wall or Self Collision
+      if (newHead.x < 0 || newHead.x >= cols || newHead.y < 0 || newHead.y >= rows || occupied.has(`${newHead.x},${newHead.y}`)) {
+        isAlive = false;
+        document.getElementById("hud-status").innerText = "LIGHT-CYCLE COLLAPSE";
+        document.getElementById("hud-status").style.color = "var(--accent-red)";
+        logFeed(`💥 Light-wall impact at (${newHead.x}, ${newHead.y})!`);
+        return;
+      }
+
+      snake.unshift(newHead);
+      occupied.add(`${newHead.x},${newHead.y}`);
+
+      // Eat food
+      if (newHead.x === food.x && newHead.y === food.y) {
+        spawnFood();
+        // Speed up compounding (+1 tile/sec)
+        if (speed < 200) speed += 1;
+        document.getElementById("hud-speed").innerText = `${speed} TILES/S`;
+        logFeed(`⚡ Quantum node consumed! Tail extended: ${snake.length} segments.`);
+      }
+
+      // Update telemetry
+      const coverage = ((snake.length / (cols * rows)) * 100).toFixed(1);
+      document.getElementById("hud-len").innerText = `${snake.length.toLocaleString()} SEGMENTS`;
+      document.getElementById("hud-cov").innerText = `${coverage}%`;
+    }
+
+    function loop(now) {
+      if (now - lastMove > 1000 / speed) {
+        step();
+        lastMove = now;
+      }
+
+      draw();
+      requestAnimationFrame(loop);
+    }
+
+    function draw() {
+      ctx.fillStyle = "#020308";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Cyber Grid
+      ctx.strokeStyle = "rgba(30, 41, 59, 0.35)";
+      ctx.lineWidth = 0.5;
+      for (let c = 0; c < cols; c += 4) {
+        ctx.beginPath();
+        ctx.moveTo(c * cellSize, 0); ctx.lineTo(c * cellSize, canvas.height);
+        ctx.stroke();
+      }
+      for (let r = 0; r < rows; r += 4) {
+        ctx.beginPath();
+        ctx.moveTo(0, r * cellSize); ctx.lineTo(canvas.width, r * cellSize);
+        ctx.stroke();
+      }
+
+      // Render Food
+      ctx.save();
+      ctx.fillStyle = "#ffd700";
+      ctx.shadowColor = "#ffd700";
+      ctx.shadowBlur = 15;
+      ctx.beginPath();
+      ctx.arc(food.x * cellSize + cellSize / 2, food.y * cellSize + cellSize / 2, cellSize * 0.45, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // Render Light Wall Ribbon
+      if (snake.length > 0) {
+        ctx.save();
+        ctx.strokeStyle = milliAuto ? "#00ff88" : "#00f0ff";
+        ctx.shadowColor = milliAuto ? "#00ff88" : "#00f0ff";
+        ctx.shadowBlur = 10;
+        ctx.lineWidth = cellSize * 0.8;
+        ctx.lineCap = "square";
+        ctx.lineJoin = "miter";
+
+        ctx.beginPath();
+        snake.forEach((pt, idx) => {
+          const px = pt.x * cellSize + cellSize / 2;
+          const py = pt.y * cellSize + cellSize / 2;
+          if (idx === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        });
+        ctx.stroke();
+
+        // Bright white core
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = cellSize * 0.25;
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Head Glow
+      const head = snake[0];
+      ctx.save();
+      ctx.fillStyle = "#ffffff";
+      ctx.shadowColor = "#00ff88";
+      ctx.shadowBlur = 18;
+      ctx.fillRect(head.x * cellSize + 1, head.y * cellSize + 1, cellSize - 2, cellSize - 2);
+      ctx.restore();
+    }
+
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>

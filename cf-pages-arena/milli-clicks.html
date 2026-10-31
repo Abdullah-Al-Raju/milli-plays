@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Milli-Clicks | Hyper-Reflex Tactical Click Game</title>
+  <style>
+    :root {
+      --bg-dark: #080d1a;
+      --card-bg: #0f172a;
+      --card-inner: #0b1122;
+      --accent-orange: #f6821f;
+      --accent-green: #00ff88;
+      --accent-cyan: #00f0ff;
+      --accent-purple: #a855f7;
+      --accent-gold: #ffd700;
+      --accent-red: #ef4444;
+      --border-color: #1e293b;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg-dark);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "JetBrains Mono", sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+      user-select: none;
+    }
+
+    /* Top Nav */
+    .top-nav {
+      background: #0d1424;
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900;
+      font-size: 1.15rem;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: 0.5px;
+    }
+    .nav-badge {
+      background: linear-gradient(135deg, #f6821f, #ff3366);
+      color: #fff;
+      font-size: 0.7rem;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 800;
+    }
+    .nav-links {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+    }
+    .nav-link:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .nav-link.active {
+      color: var(--accent-cyan);
+      background: rgba(0, 240, 255, 0.12);
+      border-color: rgba(0, 240, 255, 0.4);
+    }
+
+    .game-wrapper {
+      max-width: 1200px;
+      margin: 18px auto;
+      padding: 0 16px;
+    }
+
+    /* HUD Bar */
+    .game-hud {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 14px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+    }
+    .hud-metrics {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .metric-pill {
+      background: var(--card-inner);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 6px 14px;
+      min-width: 95px;
+      text-align: center;
+    }
+    .metric-label {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .metric-val {
+      font-size: 1.35rem;
+      font-weight: 900;
+      font-family: monospace;
+      color: #fff;
+    }
+
+    /* Controls Bar */
+    .controls-bar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 18px;
+      font-weight: 800;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    .btn-cyan { background: var(--accent-cyan); color: #000; }
+    .btn-cyan:hover { background: #55f3ff; transform: translateY(-2px); box-shadow: 0 0 15px rgba(0,240,255,0.4); }
+    .btn-purple { background: var(--accent-purple); color: #fff; }
+    .btn-purple:hover { background: #be75ff; transform: translateY(-2px); box-shadow: 0 0 15px rgba(168,85,247,0.4); }
+    .btn-outline { background: transparent; border: 1px solid #334155; color: var(--text-muted); }
+    .btn-outline:hover { color: #fff; border-color: #64748b; }
+    .btn-danger { background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #ef4444; }
+
+    /* Canvas Arena */
+    .canvas-container {
+      position: relative;
+      background: radial-gradient(circle at center, #101935 0%, #060a14 100%);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      overflow: hidden;
+      height: 520px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.7), inset 0 0 60px rgba(0,0,0,0.5);
+      cursor: crosshair;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Start / Game Over Overlay */
+    .game-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(8, 13, 26, 0.88);
+      backdrop-filter: blur(6px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      text-align: center;
+      padding: 24px;
+    }
+    .overlay-title {
+      font-size: 2.5rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #00f0ff, #a855f7, #f6821f);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+    .overlay-subtitle {
+      color: var(--text-muted);
+      font-size: 1rem;
+      max-width: 540px;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .legend-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+      font-size: 0.8rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    /* Frenzy Active Alert Banner */
+    .frenzy-banner {
+      position: absolute;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(90deg, #a855f7, #f6821f);
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 900;
+      padding: 6px 18px;
+      border-radius: 20px;
+      letter-spacing: 1px;
+      box-shadow: 0 0 25px rgba(168, 85, 247, 0.8);
+      animation: pulseGlow 0.5s infinite alternate;
+      display: none;
+      z-index: 10;
+    }
+    @keyframes pulseGlow {
+      from { transform: translateX(-50%) scale(1); }
+      to { transform: translateX(-50%) scale(1.08); }
+    }
+
+    /* Sub-panels */
+    .sub-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .panel-header {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .feed-box {
+      height: 130px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.78rem;
+      background: var(--card-inner);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px;
+      color: #94a3b8;
+      display: flex;
+      flex-direction: column-reverse;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="top-nav">
+    <a href="/" class="nav-brand">
+      <span>⚡ MILLI-CLICKS</span>
+      <span class="nav-badge">OFFICIAL GAME</span>
+    </a>
+    <div class="nav-links">
+      <a href="/" class="nav-link">🏠 Master Gate</a>
+      <a href="/drive" class="nav-link">🏎️ Milli-Drive</a>
+      <a href="/scalper-royale" class="nav-link">🏟️ Scalper Royale</a>
+      <a href="/matrix" class="nav-link">🌀 Laser Matrix</a>
+      <a href="/milli-clicks" class="nav-link active">⚡ Milli-Clicks</a>
+      <a href="/clicker" class="nav-link">⚡ Reflex &amp; CPS</a>
+      <a href="/gauntlet" class="nav-link">🎯 5-Min Gauntlet</a>
+      <a href="/arena" class="nav-link">🎫 Drop Rush</a>
+      <a href="/challenge" class="nav-link">🛡️ Turnstile</a>
+      <a href="/biometrics" class="nav-link">🔬 Biometrics</a>
+      <a href="javascript:void(0)" onclick="lockGate()" class="nav-link" style="color:#ef4444;">🔒 Lock</a>
+    </div>
+  </nav>
+
+  <div class="game-wrapper">
+    <!-- Live HUD -->
+    <header class="game-hud">
+      <div class="hud-metrics">
+        <div class="metric-pill">
+          <div class="metric-label">SCORE</div>
+          <div id="hud-score" class="metric-val" style="color:var(--accent-green);">0</div>
+        </div>
+        <div class="metric-pill">
+          <div class="metric-label">COMBO</div>
+          <div id="hud-combo" class="metric-val" style="color:var(--accent-orange);">x1</div>
+        </div>
+        <div class="metric-pill">
+          <div class="metric-label">TIMER</div>
+          <div id="hud-time" class="metric-val" style="color:var(--accent-cyan);">30.0s</div>
+        </div>
+        <div class="metric-pill">
+          <div class="metric-label">HITS / MISSED</div>
+          <div id="hud-hits" class="metric-val">0 / 0</div>
+        </div>
+        <div class="metric-pill">
+          <div class="metric-label">AVG REFLEX</div>
+          <div id="hud-reflex" class="metric-val" style="color:var(--accent-purple);">-- ms</div>
+        </div>
+      </div>
+
+      <div class="controls-bar">
+        <!-- Autoplay Bot Toggle -->
+        <button id="bot-toggle-btn" class="btn btn-purple" onclick="toggleMilliBot()">
+          🤖 Milli-Bot Autoplay: OFF
+        </button>
+        <button id="sound-btn" class="btn btn-outline" onclick="toggleSound()">
+          🔊 Sound: ON
+        </button>
+        <button id="main-btn" class="btn btn-cyan" onclick="startGame()">
+          ▶ Start Match
+        </button>
+      </div>
+    </header>
+
+    <!-- Canvas Workspace -->
+    <div class="canvas-container" id="canvas-container" onpointerdown="handleCanvasClick(event)">
+      <div id="frenzy-banner" class="frenzy-banner">🔥 QUANTUM FRENZY: 2X SCORE ACTIVE!</div>
+      <canvas id="game-canvas"></canvas>
+
+      <!-- Start / End Overlay Screen -->
+      <div id="game-overlay" class="game-overlay">
+        <div class="overlay-title" id="overlay-heading">MILLI-CLICKS</div>
+        <div class="overlay-subtitle" id="overlay-subtext">
+          High-octane tactical reflex arena. Pop glowing targets, chain combo streaks, collect Golden Milli-Coins, and dodge red volatile bombs.
+        </div>
+
+        <div class="legend-row">
+          <div class="legend-item"><span class="legend-dot" style="background:#00f0ff; box-shadow:0 0 8px #00f0ff;"></span> <b>Pulse Orb</b> (+100)</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#ffd700; box-shadow:0 0 8px #ffd700;"></span> <b>Milli-Coin</b> (+250)</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#a855f7; box-shadow:0 0 8px #a855f7;"></span> <b>Frenzy Star</b> (2x Surge)</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#ef4444; box-shadow:0 0 8px #ef4444;"></span> <b>Hazard Mine</b> (-300 &amp; Breaks Combo)</div>
+        </div>
+
+        <div id="scorecard-content" style="display:none; margin-bottom:20px;"></div>
+
+        <div style="display:flex; gap:12px;">
+          <button class="btn btn-cyan" onclick="startGame()" style="padding:12px 28px; font-size:1rem;">
+            🎮 Play as Human
+          </button>
+          <button class="btn btn-purple" onclick="startWithBot()" style="padding:12px 28px; font-size:1rem;">
+            🤖 Watch Milli-Bot Play
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Telemetry & Leaderboard Subgrid -->
+    <div class="sub-grid">
+      <div class="panel">
+        <div class="panel-header">
+          <span>⚡ REAL-TIME TACTICAL MATCH LOG</span>
+          <span style="color:var(--accent-cyan);" id="match-status">READY</span>
+        </div>
+        <div class="feed-box" id="match-log">
+          <div>[STANDBY] Milli-Clicks system loaded. Press "Start Match" or engage Milli-Bot Autoplay.</div>
+        </div>
+      </div>
+
+      <div class="panel" style="display:flex; flex-direction:column; justify-content:space-between;">
+        <div>
+          <div class="panel-header">
+            <span>🏆 ARENA LEADERBOARD</span>
+            <span style="color:var(--accent-gold);">BEST</span>
+          </div>
+          <div id="leaderboard-list" style="font-size:0.8rem; line-height:1.7;">
+            <div style="display:flex; justify-content:space-between;">
+              <span>🥇 <b>Milli-Bot (Godmode)</b></span>
+              <span style="color:var(--accent-green); font-weight:bold;">14,850 pts</span>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+              <span>🥈 <b>Esports Reflex Champ</b></span>
+              <span style="color:var(--accent-cyan); font-weight:bold;">8,400 pts</span>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+              <span>🥉 <b>You (Personal Best)</b></span>
+              <span id="pb-score" style="color:var(--accent-gold); font-weight:bold;">0 pts</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="font-size:0.75rem; color:var(--text-muted); padding-top:8px; border-top:1px solid #1e293b; display:flex; justify-content:space-between;">
+          <span>Engine: <b>60 FPS V8 Canvas</b></span>
+          <span>Version: <b>Milli-Clicks v1.0</b></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("game-canvas");
+    const ctx = canvas.getContext("2d");
+
+    // Game state
+    let isPlaying = false;
+    let score = 0;
+    let combo = 1;
+    let maxCombo = 1;
+    let hits = 0;
+    let missed = 0;
+    let reactionTimes = [];
+    let matchDuration = 30.0;
+    let timeRemaining = matchDuration;
+    let timerInterval = null;
+    let frenzyActive = false;
+    let frenzyTimer = null;
+    let botAutoplay = false;
+    let soundEnabled = true;
+    let audioCtx = null;
+
+    // Entities
+    let targets = [];
+    let particles = [];
+    let floatingTexts = [];
+    let botCursor = { x: 0, y: 0, active: false };
+    let lastSpawn = 0;
+    let spawnRateMs = 500;
+    let animId = null;
+
+    function resizeCanvas() {
+      const container = document.getElementById("canvas-container");
+      canvas.width = container.clientWidth;
+      canvas.height = container.clientHeight;
+    }
+    window.addEventListener("resize", resizeCanvas);
+
+    // Audio synthesizer
+    function playTone(freq, type = "sine", duration = 0.05, gainVal = 0.1) {
+      if (!soundEnabled) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      document.getElementById("sound-btn").innerText = soundEnabled ? "🔊 Sound: ON" : "🔇 Sound: OFF";
+    }
+
+    function toggleMilliBot() {
+      botAutoplay = !botAutoplay;
+      const btn = document.getElementById("bot-toggle-btn");
+      if (botAutoplay) {
+        btn.innerText = "🤖 Milli-Bot Autoplay: ON";
+        btn.style.background = "#00ff88";
+        btn.style.color = "#000";
+        logFeed("⚡ Milli-Bot Autoplay engaged! Target tracking active.");
+      } else {
+        btn.innerText = "🤖 Milli-Bot Autoplay: OFF";
+        btn.style.background = "var(--accent-purple)";
+        btn.style.color = "#fff";
+        logFeed("🎮 Switched to manual player controls.");
+      }
+    }
+
+    function startWithBot() {
+      botAutoplay = true;
+      document.getElementById("bot-toggle-btn").innerText = "🤖 Milli-Bot Autoplay: ON";
+      document.getElementById("bot-toggle-btn").style.background = "#00ff88";
+      document.getElementById("bot-toggle-btn").style.color = "#000";
+      startGame();
+    }
+
+    function logFeed(msg) {
+      const feed = document.getElementById("match-log");
+      const time = new Date().toISOString().substring(14, 23);
+      const div = document.createElement("div");
+      div.innerText = `[${time}] ${msg}`;
+      feed.prepend(div);
+    }
+
+    function startGame() {
+      resizeCanvas();
+      isPlaying = true;
+      score = 0;
+      combo = 1;
+      maxCombo = 1;
+      hits = 0;
+      missed = 0;
+      reactionTimes = [];
+      targets = [];
+      particles = [];
+      floatingTexts = [];
+      timeRemaining = matchDuration;
+      frenzyActive = false;
+      document.getElementById("frenzy-banner").style.display = "none";
+      document.getElementById("game-overlay").style.display = "none";
+      document.getElementById("match-status").innerText = "IN-PROGRESS";
+
+      updateHUD();
+      logFeed(`▶ Match launched! Duration: ${matchDuration}s | Autoplay: ${botAutoplay ? 'ON' : 'OFF'}`);
+
+      clearInterval(timerInterval);
+      const startTime = performance.now();
+      timerInterval = setInterval(() => {
+        const elapsed = (performance.now() - startTime) / 1000.0;
+        timeRemaining = Math.max(0, matchDuration - elapsed);
+        document.getElementById("hud-time").innerText = `${timeRemaining.toFixed(1)}s`;
+
+        if (timeRemaining <= 0) {
+          endGame();
+        }
+      }, 50);
+
+      cancelAnimationFrame(animId);
+      lastSpawn = performance.now();
+      animLoop();
+    }
+
+    function spawnTarget() {
+      const types = [
+        { type: "pulse", weight: 65, color: "#00f0ff", points: 100, radius: 28, lifespan: 1800 },
+        { type: "gold", weight: 15, color: "#ffd700", points: 250, radius: 22, lifespan: 1300 },
+        { type: "frenzy", weight: 8, color: "#a855f7", points: 200, radius: 24, lifespan: 1500 },
+        { type: "bomb", weight: 12, color: "#ef4444", points: -300, radius: 26, lifespan: 2200 }
+      ];
+
+      const totalWeight = types.reduce((acc, t) => acc + t.weight, 0);
+      let rand = Math.random() * totalWeight;
+      let chosen = types[0];
+      for (const t of types) {
+        if (rand < t.weight) { chosen = t; break; }
+        rand -= t.weight;
+      }
+
+      const padding = 60;
+      const x = Math.random() * (canvas.width - padding * 2) + padding;
+      const y = Math.random() * (canvas.height - padding * 2) + padding;
+
+      targets.push({
+        ...chosen,
+        x,
+        y,
+        spawnTime: performance.now(),
+        initialRadius: chosen.radius,
+        currentRadius: chosen.radius
+      });
+    }
+
+    function createParticles(x, y, color, count = 15) {
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 5 + 2;
+        particles.push({
+          x,
+          y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          color,
+          radius: Math.random() * 3 + 1.5,
+          alpha: 1.0,
+          decay: Math.random() * 0.03 + 0.02
+        });
+      }
+    }
+
+    function createFloatingText(text, x, y, color) {
+      floatingTexts.push({
+        text,
+        x,
+        y,
+        color,
+        alpha: 1.0,
+        vy: -1.5
+      });
+    }
+
+    function handleHit(target, idx, isBot = false) {
+      const now = performance.now();
+      const reflexMs = now - target.spawnTime;
+      reactionTimes.push(reflexMs);
+
+      targets.splice(idx, 1);
+      createParticles(target.x, target.y, target.color, 18);
+
+      if (target.type === "bomb") {
+        // Punish player
+        combo = 1;
+        score = Math.max(0, score + target.points);
+        createFloatingText("-300 BOMBED!", target.x, target.y, "#ef4444");
+        playTone(180, "sawtooth", 0.15, 0.2);
+        logFeed(`💣 BOOM! Volatile mine triggered! Combo reset.`);
+      } else {
+        hits++;
+        const multiplier = frenzyActive ? 2 : 1;
+        const pts = target.points * combo * multiplier;
+        score += pts;
+        combo = Math.min(10, combo + 1);
+        if (combo > maxCombo) maxCombo = combo;
+
+        if (target.type === "gold") {
+          playTone(880, "triangle", 0.08);
+          setTimeout(() => playTone(1320, "triangle", 0.08), 50);
+          createFloatingText(`+${pts} GOLD!`, target.x, target.y, "#ffd700");
+          logFeed(`🟡 Milli-Coin popped in ${reflexMs.toFixed(0)}ms! (+${pts})`);
+        } else if (target.type === "frenzy") {
+          triggerFrenzy();
+          createFloatingText("FRENZY 2X!", target.x, target.y, "#a855f7");
+        } else {
+          playTone(520 + combo * 35, "sine", 0.04);
+          createFloatingText(`+${pts}`, target.x, target.y, "#00f0ff");
+        }
+      }
+
+      updateHUD();
+    }
+
+    function triggerFrenzy() {
+      frenzyActive = true;
+      document.getElementById("frenzy-banner").style.display = "block";
+      playTone(660, "sawtooth", 0.2);
+      logFeed("🔥 QUANTUM FRENZY UNLEASHED! 2X Multiplier active!");
+
+      clearTimeout(frenzyTimer);
+      frenzyTimer = setTimeout(() => {
+        frenzyActive = false;
+        document.getElementById("frenzy-banner").style.display = "none";
+        logFeed("⏳ Quantum Frenzy expired.");
+      }, 5000);
+    }
+
+    function handleCanvasClick(e) {
+      if (!isPlaying) return;
+      const rect = canvas.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const clickY = e.clientY - rect.top;
+
+      let hitFound = false;
+      for (let i = targets.length - 1; i >= 0; i--) {
+        const t = targets[i];
+        const dist = Math.hypot(t.x - clickX, t.y - clickY);
+        if (dist <= t.currentRadius + 14) {
+          handleHit(t, i, false);
+          hitFound = true;
+          break;
+        }
+      }
+
+      if (!hitFound) {
+        // Miss click
+        combo = 1;
+        missed++;
+        playTone(150, "sine", 0.03, 0.05);
+        createFloatingText("MISS", clickX, clickY, "#94a3b8");
+        updateHUD();
+      }
+    }
+
+    function updateHUD() {
+      document.getElementById("hud-score").innerText = score.toLocaleString();
+      document.getElementById("hud-combo").innerText = `x${combo}`;
+      document.getElementById("hud-hits").innerText = `${hits} / ${missed}`;
+      const avgReflex = reactionTimes.length > 0
+        ? (reactionTimes.reduce((a,b)=>a+b,0) / reactionTimes.length).toFixed(0)
+        : "--";
+      document.getElementById("hud-reflex").innerText = `${avgReflex} ms`;
+    }
+
+    // Milli-Bot Autonomous AI Loop
+    function updateMilliBot(now) {
+      if (!botAutoplay || targets.length === 0) return;
+
+      // Find best target (ignoring bombs unless no other choice)
+      const validTargets = targets.filter(t => t.type !== "bomb");
+      if (validTargets.length === 0) return;
+
+      // Sort by urgency (oldest / closest to expiration)
+      validTargets.sort((a, b) => (now - b.spawnTime) - (now - a.spawnTime));
+      const target = validTargets[0];
+
+      // Smooth cursor motion to target
+      botCursor.active = true;
+      botCursor.x += (target.x - botCursor.x) * 0.45;
+      botCursor.y += (target.y - botCursor.y) * 0.45;
+
+      const dist = Math.hypot(target.x - botCursor.x, target.y - botCursor.y);
+      if (dist < 15 || now - target.spawnTime > 120) {
+        const idx = targets.indexOf(target);
+        if (idx !== -1) {
+          handleHit(target, idx, true);
+        }
+      }
+    }
+
+    function animLoop() {
+      if (!isPlaying) return;
+      const now = performance.now();
+
+      // Spawn manager
+      const rate = frenzyActive ? 260 : 450;
+      if (now - lastSpawn > rate && targets.length < 9) {
+        spawnTarget();
+        lastSpawn = now;
+      }
+
+      // Bot execution
+      updateMilliBot(now);
+
+      // Render
+      ctx.fillStyle = "rgba(8, 13, 26, 0.4)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw active targets
+      for (let i = targets.length - 1; i >= 0; i--) {
+        const t = targets[i];
+        const age = now - t.spawnTime;
+        const progress = age / t.lifespan;
+
+        if (progress >= 1.0) {
+          // Expired target
+          targets.splice(i, 1);
+          if (t.type !== "bomb") {
+            combo = 1;
+            missed++;
+            updateHUD();
+          }
+          continue;
+        }
+
+        // Shrinking timer indicator
+        t.currentRadius = t.initialRadius * (1 - progress * 0.3);
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(t.x, t.y, t.currentRadius, 0, Math.PI * 2);
+        ctx.fillStyle = t.color;
+        ctx.shadowColor = t.color;
+        ctx.shadowBlur = 18;
+        ctx.fill();
+
+        // Inner core
+        ctx.beginPath();
+        ctx.arc(t.x, t.y, t.currentRadius * 0.4, 0, Math.PI * 2);
+        ctx.fillStyle = "#ffffff";
+        ctx.fill();
+
+        // Expire ring
+        ctx.beginPath();
+        ctx.arc(t.x, t.y, t.initialRadius + 6, -Math.PI / 2, -Math.PI / 2 + (1 - progress) * Math.PI * 2);
+        ctx.strokeStyle = t.color;
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+
+        ctx.restore();
+      }
+
+      // Draw particles
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vx *= 0.94;
+        p.vy *= 0.94;
+        p.alpha -= p.decay;
+
+        if (p.alpha <= 0) {
+          particles.splice(i, 1);
+          continue;
+        }
+
+        ctx.save();
+        ctx.globalAlpha = p.alpha;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Draw floating texts
+      for (let i = floatingTexts.length - 1; i >= 0; i--) {
+        const ft = floatingTexts[i];
+        ft.y += ft.vy;
+        ft.alpha -= 0.025;
+
+        if (ft.alpha <= 0) {
+          floatingTexts.splice(i, 1);
+          continue;
+        }
+
+        ctx.save();
+        ctx.globalAlpha = ft.alpha;
+        ctx.font = "bold 14px 'JetBrains Mono', monospace";
+        ctx.fillStyle = ft.color;
+        ctx.textAlign = "center";
+        ctx.fillText(ft.text, ft.x, ft.y);
+        ctx.restore();
+      }
+
+      // Draw Milli-Bot laser cursor if active
+      if (botAutoplay && botCursor.active) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(botCursor.x, botCursor.y, 8, 0, Math.PI * 2);
+        ctx.fillStyle = "#00ff88";
+        ctx.shadowColor = "#00ff88";
+        ctx.shadowBlur = 15;
+        ctx.fill();
+
+        ctx.strokeStyle = "rgba(0, 255, 136, 0.4)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(botCursor.x, botCursor.y, 16, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      animId = requestAnimationFrame(animLoop);
+    }
+
+    function endGame() {
+      isPlaying = false;
+      clearInterval(timerInterval);
+      cancelAnimationFrame(animId);
+      document.getElementById("match-status").innerText = "FINISHED";
+
+      // Save personal best
+      const currentPb = parseInt(localStorage.getItem("milli_clicks_pb") || "0");
+      if (score > currentPb) {
+        localStorage.setItem("milli_clicks_pb", score);
+        document.getElementById("pb-score").innerText = `${score.toLocaleString()} pts`;
+      }
+
+      const totalAttempts = hits + missed;
+      const accuracy = totalAttempts > 0 ? ((hits / totalAttempts) * 100).toFixed(1) : "0.0";
+      const avgReflex = reactionTimes.length > 0
+        ? (reactionTimes.reduce((a,b)=>a+b,0) / reactionTimes.length).toFixed(0)
+        : "0";
+
+      const overlay = document.getElementById("game-overlay");
+      const heading = document.getElementById("overlay-heading");
+      const subtext = document.getElementById("overlay-subtext");
+      const card = document.getElementById("scorecard-content");
+
+      heading.innerText = "MATCH FINISHED!";
+      subtext.innerText = botAutoplay ? "Milli-Bot Autoplay session completed." : "Spectacular reflex run!";
+
+      card.style.display = "block";
+      card.innerHTML = `
+        <div style="background:var(--card-inner); border:1px solid var(--border-color); border-radius:10px; padding:16px; max-width:380px; margin:0 auto 16px auto;">
+          <div style="font-size:2rem; font-weight:900; color:#00ff88; margin-bottom:8px;">${score.toLocaleString()} PTS</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:0.85rem; text-align:left;">
+            <div>Hits: <b>${hits}</b></div>
+            <div>Accuracy: <b>${accuracy}%</b></div>
+            <div>Max Combo: <b>x${maxCombo}</b></div>
+            <div>Avg Reflex: <b>${avgReflex} ms</b></div>
+          </div>
+        </div>
+      `;
+
+      overlay.style.display = "flex";
+      logFeed(`🏁 Match over! Final Score: ${score.toLocaleString()} pts | Acc: ${accuracy}% | Hits: ${hits}`);
+    }
+
+    function lockGate() {
+      localStorage.removeItem("sentinel_unlocked");
+      document.cookie = "sentinel_admin_key=; path=/; max-age=0";
+      window.location.href = "/";
+    }
+
+    // Attach automated testing API
+    window.__MILLI_CLICKS__ = {
+      start: (durationSec = 30.0, useBot = true) => {
+        matchDuration = durationSec;
+        botAutoplay = useBot;
+        startGame();
+      },
+      getStats: () => ({
+        isPlaying,
+        score,
+        hits,
+        missed,
+        combo,
+        maxCombo,
+        reactionTimes: [...reactionTimes],
+        timeRemaining
+      })
+    };
+
+    // Load PB
+    const savedPb = localStorage.getItem("milli_clicks_pb") || "0";
+    document.getElementById("pb-score").innerText = `${parseInt(savedPb).toLocaleString()} pts`;
+    setTimeout(resizeCanvas, 50);
+  </script>
+</body>
+</html>
