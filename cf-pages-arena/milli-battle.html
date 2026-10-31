@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multi-Milli AI Battle | Hypersonic Split-Screen Neural Arena</title>
+  
+  <meta name="description" content="Multi-Milli AI Battle: The Ultimate Split-Screen Neural Colosseum. Milli-Alpha (Greedy Reflex) vs Milli-Omega (Quantum Convex Hull) in head-to-head hypersonic highway drag races and synchronous 50x50 maze wars.">
+  <meta name="keywords" content="ai battle, autonomous agents, neural duel, multi-agent, hypersonic, split screen, game dev, web performance">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/theme.css">
+
+  <style>
+    :root {
+      --alpha-amber: #ff7a30;
+      --alpha-amber-glow: rgba(255, 122, 48, 0.45);
+      --alpha-amber-grad: linear-gradient(135deg, #ff7a30 0%, #e85912 100%);
+      
+      --omega-cyan: #00f0ff;
+      --omega-cyan-glow: rgba(0, 240, 255, 0.45);
+      --omega-cyan-grad: linear-gradient(135deg, #00f0ff 0%, #0284c7 100%);
+      
+      --bg-arena: #07090d;
+      --border-panel: rgba(255, 255, 255, 0.09);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-arena);
+      color: #f8fafc;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      user-select: none;
+    }
+
+    /* TOP NAVIGATION */
+    .top-nav {
+      background: rgba(11, 13, 17, 0.95);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      backdrop-filter: blur(20px);
+    }
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 900;
+      font-size: 1.15rem;
+      letter-spacing: -0.3px;
+    }
+    .brand-badge {
+      background: var(--alpha-amber-grad);
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .nav-btn {
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      transition: all 0.2s ease;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .nav-btn:hover {
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .nav-btn.primary {
+      background: var(--alpha-amber-grad);
+      color: #fff;
+      border: none;
+      box-shadow: 0 4px 14px var(--alpha-amber-glow);
+    }
+
+    /* ARENA MAIN CONTAINER */
+    .arena-container {
+      max-width: 1680px;
+      margin: 0 auto;
+      padding: 18px 24px 60px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* MATCH HEADER / VERSUS BANNER */
+    .versus-banner {
+      background: linear-gradient(145deg, rgba(20, 24, 34, 0.9) 0%, rgba(13, 16, 23, 0.95) 100%);
+      border: 1px solid var(--border-panel);
+      border-radius: 20px;
+      padding: 18px 26px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .fighter-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .fighter-icon-amber {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: var(--alpha-amber-grad);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      box-shadow: 0 4px 18px var(--alpha-amber-glow);
+    }
+    .fighter-icon-cyan {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: var(--omega-cyan-grad);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      box-shadow: 0 4px 18px var(--omega-cyan-glow);
+    }
+    .fighter-info h2 {
+      font-size: 1.25rem;
+      font-weight: 900;
+      letter-spacing: -0.3px;
+    }
+    .fighter-info p {
+      font-size: 0.76rem;
+      color: #94a3b8;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .vs-center-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .vs-badge {
+      font-size: 1.4rem;
+      font-weight: 900;
+      font-style: italic;
+      color: #f8fafc;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 4px 16px;
+      border-radius: 9999px;
+      letter-spacing: 2px;
+    }
+    .seed-indicator {
+      font-size: 0.72rem;
+      color: #64748b;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* CONTROL TOOLBAR */
+    .control-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(18, 22, 30, 0.85);
+      border: 1px solid var(--border-panel);
+      border-radius: 16px;
+      padding: 12px 20px;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+    .theater-tabs {
+      display: flex;
+      background: rgba(10, 12, 17, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      padding: 4px;
+      border-radius: 9999px;
+      gap: 4px;
+    }
+    .theater-tab-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 0.8rem;
+      font-weight: 800;
+      padding: 7px 18px;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .theater-tab-btn.active {
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+    }
+
+    .toolbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .warp-selector-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(10, 12, 17, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 0.78rem;
+      color: #94a3b8;
+      font-weight: 700;
+    }
+    .warp-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 0.76rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .warp-btn.active {
+      background: var(--alpha-amber-grad);
+      color: #fff;
+    }
+
+    .btn-action {
+      background: var(--alpha-amber-grad);
+      color: #fff;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 9999px;
+      font-size: 0.88rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 4px 16px var(--alpha-amber-glow);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-action:hover {
+      box-shadow: 0 6px 24px rgba(255, 122, 48, 0.65);
+      transform: translateY(-2px);
+    }
+    .btn-action.secondary {
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: none;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .btn-action.secondary:hover {
+      background: rgba(255, 255, 255, 0.14);
+      transform: translateY(-2px);
+    }
+
+    /* SPLIT-SCREEN ARENA VIEWPORTS */
+    .split-arena-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      min-height: 560px;
+    }
+    @media (max-width: 980px) {
+      .split-arena-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .duel-panel {
+      background: rgba(16, 20, 28, 0.88);
+      border: 1px solid var(--border-panel);
+      border-radius: 20px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(20px);
+    }
+    .duel-panel.alpha {
+      border-color: rgba(255, 122, 48, 0.35);
+      box-shadow: 0 16px 45px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 122, 48, 0.12);
+    }
+    .duel-panel.omega {
+      border-color: rgba(0, 240, 255, 0.35);
+      box-shadow: 0 16px 45px rgba(0, 0, 0, 0.6), 0 0 25px rgba(0, 240, 255, 0.12);
+    }
+
+    .panel-header-hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(10, 12, 17, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 14px;
+      padding: 10px 16px;
+    }
+    .panel-hud-metric {
+      display: flex;
+      flex-direction: column;
+    }
+    .metric-label-sm {
+      font-size: 0.65rem;
+      color: #64748b;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .metric-val-lg {
+      font-size: 1.25rem;
+      font-weight: 900;
+      font-family: 'JetBrains Mono', monospace;
+      color: #fff;
+    }
+
+    .canvas-viewport-wrap {
+      flex: 1;
+      width: 100%;
+      min-height: 440px;
+      background: #030408;
+      border-radius: 16px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    canvas.battle-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* TELEMETRY DELTA FOOTER */
+    .delta-status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(14, 17, 24, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 8px 14px;
+      font-size: 0.78rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* REAL-TIME COMBAT COMMENTARY FEED */
+    .combat-log-card {
+      background: rgba(18, 22, 30, 0.85);
+      border: 1px solid var(--border-panel);
+      border-radius: 18px;
+      padding: 18px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .log-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .log-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      letter-spacing: -0.2px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .log-box {
+      height: 140px;
+      overflow-y: auto;
+      background: rgba(10, 12, 17, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 10px;
+      padding: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.76rem;
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 4px;
+    }
+    .log-entry-alpha { color: #ff914d; }
+    .log-entry-omega { color: #38bdf8; }
+    .log-entry-system { color: #a1a1aa; }
+
+    /* WINNER OVERLAY MODAL */
+    .winner-modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.82);
+      backdrop-filter: blur(14px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .winner-modal-overlay.open { display: flex; }
+    .winner-modal {
+      background: #12151e;
+      border: 2px solid var(--alpha-amber);
+      border-radius: 24px;
+      padding: 36px 44px;
+      max-width: 540px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 40px var(--alpha-amber-glow);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+    .winner-title {
+      font-size: 2.2rem;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      color: #ffffff;
+    }
+    .winner-sub {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP NAVIGATION -->
+  <header class="top-nav">
+    <div class="brand-group">
+      <a href="/" class="brand-link">
+        <span style="color:var(--alpha-amber); font-size:1.3rem;">⚡</span>
+        <span>MILLI PLAYS</span>
+      </a>
+      <span class="brand-badge">NEURAL BATTLE ROYALE</span>
+    </div>
+
+    <div class="nav-actions">
+      <a href="/" class="nav-btn">← Back to Arcade</a>
+      <a href="/milli-drive" class="nav-btn">🏎️ Solo Drive</a>
+      <a href="/milli-maze" class="nav-btn">🌀 Solo Maze</a>
+      <a href="https://github.com/Abdullah-Al-Raju/milli-plays" target="_blank" rel="noopener noreferrer" class="nav-btn primary">GitHub ↗</a>
+    </div>
+  </header>
+
+  <!-- ARENA MAIN -->
+  <main class="arena-container">
+
+    <!-- VERSUS BANNER -->
+    <section class="versus-banner">
+      <!-- Fighter Alpha -->
+      <div class="fighter-card">
+        <div class="fighter-icon-amber">⚡</div>
+        <div class="fighter-info">
+          <h2 style="color:var(--alpha-amber);">MILLI-ALPHA</h2>
+          <p>Apex Greedy Reflex • 0.05ms Reactive</p>
+        </div>
+      </div>
+
+      <!-- Center Versus Info -->
+      <div class="vs-center-block">
+        <div class="vs-badge">VS</div>
+        <span class="seed-indicator" id="seedDisplay">SEED: #SEED-99482</span>
+      </div>
+
+      <!-- Fighter Omega -->
+      <div class="fighter-card" style="flex-direction:row-reverse; text-align:right;">
+        <div class="fighter-icon-cyan">🔮</div>
+        <div class="fighter-info">
+          <h2 style="color:var(--omega-cyan);">MILLI-OMEGA</h2>
+          <p>Quantum Convex Hull • 30-Frame Flow</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTROL TOOLBAR -->
+    <section class="control-toolbar">
+      <!-- Theater Mode Tabs -->
+      <div class="theater-tabs">
+        <button class="theater-tab-btn active" id="tab-highway" onclick="switchTheater('highway')">🏎️ Highway Drag Duel (+2%)</button>
+        <button class="theater-tab-btn" id="tab-maze" onclick="switchTheater('maze')">🌀 50×50 Maze Labyrinth War</button>
+      </div>
+
+      <!-- Toolbar Actions -->
+      <div class="toolbar-actions">
+        <!-- Warp Speed Multiplier (1x to 20x) -->
+        <div class="warp-selector-wrap">
+          <span>WARP:</span>
+          <button class="warp-btn active" onclick="setWarp(1, this)">1x</button>
+          <button class="warp-btn" onclick="setWarp(2, this)">2x</button>
+          <button class="warp-btn" onclick="setWarp(5, this)">5x</button>
+          <button class="warp-btn" onclick="setWarp(10, this)">10x</button>
+          <button class="warp-btn" onclick="setWarp(20, this)" style="color:#ef4444;" title="1,200 FPS Physics Simulation">20x 🔥</button>
+        </div>
+
+        <!-- Seed Reset / Randomize -->
+        <button class="btn-action secondary" onclick="generateNewSeed()" title="New Deterministic PRNG Seed">
+          🎲 New Seed
+        </button>
+
+        <!-- Launch Duel Button -->
+        <button class="btn-action" id="startBattleBtn" onclick="toggleBattle()">
+          ⚡ Ignite Duel
+        </button>
+      </div>
+    </section>
+
+    <!-- SPLIT-SCREEN ARENA VIEWPORTS -->
+    <section class="split-arena-grid">
+      
+      <!-- LEFT PANEL: MILLI-ALPHA -->
+      <div class="duel-panel alpha">
+        <div class="panel-header-hud">
+          <div class="panel-hud-metric">
+            <span class="metric-label-sm">ALPHA VELOCITY</span>
+            <span class="metric-val-lg" id="alpha-speed" style="color:var(--alpha-amber);">145 MPH</span>
+          </div>
+          <div class="panel-hud-metric">
+            <span class="metric-label-sm">OVERTAKES</span>
+            <span class="metric-val-lg" id="alpha-overtakes">0</span>
+          </div>
+          <div class="panel-hud-metric">
+            <span class="metric-label-sm">LATENCY</span>
+            <span class="metric-val-lg" style="color:#10b981;">0.05ms</span>
+          </div>
+        </div>
+
+        <div class="canvas-viewport-wrap" id="alpha-viewport">
+          <canvas class="battle-canvas" id="alphaCanvas"></canvas>
+        </div>
+
+        <div class="delta-status-bar">
+          <span>ALGORITHM: <strong>LOCAL GRADIENT DESCENT</strong></span>
+          <span id="alpha-lead-badge" style="color:var(--alpha-amber); font-weight:800;">TIED (0.0m)</span>
+        </div>
+      </div>
+
+      <!-- RIGHT PANEL: MILLI-OMEGA -->
+      <div class="duel-panel omega">
+        <div class="panel-header-hud">
+          <div class="panel-hud-metric">
+            <span class="metric-label-sm">OMEGA VELOCITY</span>
+            <span class="metric-val-lg" id="omega-speed" style="color:var(--omega-cyan);">145 MPH</span>
+          </div>
+          <div class="panel-hud-metric">
+            <span class="metric-label-sm">OVERTAKES</span>
+            <span class="metric-val-lg" id="omega-overtakes">0</span>
+          </div>
+          <div class="panel-hud-metric">
+            <span class="metric-label-sm">LOOKAHEAD</span>
+            <span class="metric-val-lg" style="color:var(--omega-cyan);">30 FRAMES</span>
+          </div>
+        </div>
+
+        <div class="canvas-viewport-wrap" id="omega-viewport">
+          <canvas class="battle-canvas" id="omegaCanvas"></canvas>
+        </div>
+
+        <div class="delta-status-bar">
+          <span>ALGORITHM: <strong>VORONOI CONVEX HULL</strong></span>
+          <span id="omega-lead-badge" style="color:var(--omega-cyan); font-weight:800;">TIED (0.0m)</span>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- REAL-TIME COMBAT COMMENTARY FEED -->
+    <section class="combat-log-card">
+      <div class="log-header-row">
+        <h3 class="log-title">
+          <span>⚡ Live Algorithmic Battle Telemetry</span>
+          <span style="font-size:0.75rem; color:#64748b; font-weight:600;">(Microsecond Event Log)</span>
+        </h3>
+        <span style="font-size:0.75rem; color:#10b981; font-weight:700;">🟢 REAL-TIME LINK</span>
+      </div>
+
+      <div class="log-box" id="combatLog">
+        <div class="log-entry-system">[SYSTEM] Multi-Milli Neural Arena online. Deterministic seed lock ready.</div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- WINNER CELEBRATION MODAL -->
+  <div class="winner-modal-overlay" id="winnerModal">
+    <div class="winner-modal">
+      <div style="font-size:3.5rem;" id="winnerTrophy">🏆</div>
+      <h2 class="winner-title" id="winnerText">MILLI-ALPHA WINS!</h2>
+      <p class="winner-sub" id="winnerDesc">
+        Executed 48 microsecond lane cuts without a collision. Outpaced opponent by +380 meters at Mach 14.8!
+      </p>
+      <button class="btn-action" style="padding:12px 32px;" onclick="closeWinnerModal()">
+        Rematch on New Seed 🎲
+      </button>
+    </div>
+  </div>
+
+  <!-- MULTI-MILLI BATTLE SIMULATION ENGINE -->
+  <script>
+    // ----------------------------------------------------
+    // DETERMINISTIC SYNCHRONOUS PRNG (XORShift128+)
+    // ----------------------------------------------------
+    class SeededPRNG {
+      constructor(seedInt = 0xDEADBEEF) {
+        this.s = [seedInt >>> 0, (seedInt ^ 0x6C078965) >>> 0];
+      }
+      nextFloat() {
+        let s1 = this.s[0];
+        const s0 = this.s[1];
+        this.s[0] = s0;
+        s1 ^= s1 << 23;
+        this.s[1] = (s1 ^ s0 ^ (s1 >>> 17) ^ (s0 >>> 26)) >>> 0;
+        return ((this.s[1] + s0) >>> 0) / 4294967296;
+      }
+    }
+
+    let activeSeed = Math.floor(Math.random() * 900000) + 100000;
+    let currentTheater = 'highway'; // 'highway' or 'maze'
+    let isBattling = false;
+    let warpFactor = 1;
+    let animId = null;
+
+    // Viewports
+    const alphaCanvas = document.getElementById('alphaCanvas');
+    const omegaCanvas = document.getElementById('omegaCanvas');
+    const alphaCtx = alphaCanvas.getContext('2d');
+    const omegaCtx = omegaCanvas.getContext('2d');
+
+    // Highway State for Both Agents
+    const numLanes = 4;
+    let laneWidth = 70;
+    let roadLeft = 20;
+
+    let alphaCar = { lane: 1, x: 0, y: 0, speed: 145, dist: 0, overtakes: 0, dead: false };
+    let omegaCar = { lane: 2, x: 0, y: 0, speed: 145, dist: 0, overtakes: 0, dead: false };
+
+    // Shared Synchronous Obstacle Stream
+    let globalObstacles = [];
+    let prngEngine = new SeededPRNG(activeSeed);
+    let lastSpawnY = 0;
+
+    function initCanvases() {
+      const w = alphaCanvas.parentElement.clientWidth;
+      const h = alphaCanvas.parentElement.clientHeight;
+      alphaCanvas.width = w * window.devicePixelRatio;
+      alphaCanvas.height = h * window.devicePixelRatio;
+      omegaCanvas.width = w * window.devicePixelRatio;
+      omegaCanvas.height = h * window.devicePixelRatio;
+      alphaCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      omegaCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+      roadLeft = Math.max(10, (w - 320) / 2);
+      laneWidth = 320 / numLanes;
+
+      alphaCar.y = h - 90;
+      omegaCar.y = h - 90;
+      alphaCar.x = roadLeft + (alphaCar.lane + 0.5) * laneWidth;
+      omegaCar.x = roadLeft + (omegaCar.lane + 0.5) * laneWidth;
+    }
+    window.addEventListener('resize', initCanvases);
+
+    // ----------------------------------------------------
+    // HIGHWAY ENGINE SIMULATION
+    // ----------------------------------------------------
+    function resetHighwayDuel() {
+      prngEngine = new SeededPRNG(activeSeed);
+      alphaCar = { lane: 1, x: roadLeft + 1.5 * laneWidth, y: alphaCanvas.height / window.devicePixelRatio - 90, speed: 145, dist: 0, overtakes: 0, dead: false };
+      omegaCar = { lane: 2, x: roadLeft + 2.5 * laneWidth, y: omegaCanvas.height / window.devicePixelRatio - 90, speed: 145, dist: 0, overtakes: 0, dead: false };
+      globalObstacles = [];
+      lastSpawnY = 0;
+
+      // Pre-seed first 10 obstacles
+      for (let i = 0; i < 12; i++) {
+        spawnSynchronousObstacle(-150 - i * 160);
+      }
+      updateHUD();
+    }
+
+    function spawnSynchronousObstacle(forcedY = null) {
+      const lane = Math.floor(prngEngine.nextFloat() * numLanes);
+      const y = forcedY !== null ? forcedY : -120;
+      const typeSeed = prngEngine.nextFloat();
+      const color = typeSeed > 0.6 ? '#ef4444' : (typeSeed > 0.3 ? '#f59e0b' : '#a855f7');
+      const width = 38;
+      const height = typeSeed > 0.6 ? 75 : 55;
+
+      globalObstacles.push({
+        lane,
+        yAlpha: y,
+        yOmega: y,
+        color,
+        width,
+        height,
+        passedAlpha: false,
+        passedOmega: false
+      });
+    }
+
+    // Agent 1: Milli-Alpha (Greedy Gradient Reflex)
+    function stepMilliAlpha(dt) {
+      if (alphaCar.dead) return;
+
+      // Detect imminent collision in current lane
+      let currentLaneHazard = null;
+      let minDis = 9999;
+      const laneClearance = [9999, 9999, 9999, 9999];
+
+      globalObstacles.forEach(obs => {
+        const dy = alphaCar.y - obs.yAlpha;
+        if (dy > -20 && dy < 480) {
+          if (dy < laneClearance[obs.lane]) laneClearance[obs.lane] = dy;
+          if (obs.lane === alphaCar.lane && dy < minDis) {
+            minDis = dy;
+            currentLaneHazard = obs;
+          }
+        }
+      });
+
+      // Greedy snap maneuver when threat approaches within 180m
+      if (currentLaneHazard && minDis < 190) {
+        let bestLane = alphaCar.lane;
+        let maxSpace = -1;
+        // Prioritize adjacent lanes
+        const neighbors = [alphaCar.lane - 1, alphaCar.lane + 1].filter(l => l >= 0 && l < numLanes);
+        neighbors.forEach(l => {
+          if (laneClearance[l] > maxSpace) {
+            maxSpace = laneClearance[l];
+            bestLane = l;
+          }
+        });
+
+        if (bestLane !== alphaCar.lane) {
+          alphaCar.lane = bestLane;
+          logCombat('alpha', `[ALPHA] Snap-dodge into Lane ${bestLane + 1} at ${Math.round(alphaCar.speed)} MPH`);
+        }
+      }
+
+      // Smooth interpolation to target lane center
+      const targetX = roadLeft + (alphaCar.lane + 0.5) * laneWidth;
+      alphaCar.x += (targetX - alphaCar.x) * 0.35 * Math.min(1, dt * 60);
+
+      // Collision Check
+      globalObstacles.forEach(obs => {
+        if (obs.lane === alphaCar.lane && Math.abs(alphaCar.y - obs.yAlpha) < (alphaCar.dead ? 0 : 45)) {
+          alphaCar.dead = true;
+          logCombat('alpha', `[ALPHA] 💥 CRASHED in Lane ${obs.lane + 1}!`);
+          triggerWinner('omega', 'Milli-Omega wins via K.O.! Alpha collided at high velocity.');
+        }
+      });
+    }
+
+    // Agent 2: Milli-Omega (Quantum Convex Hull & Predictive Voronoi)
+    function stepMilliOmega(dt) {
+      if (omegaCar.dead) return;
+
+      // Project 30-frame predictive Voronoi flow across lanes
+      const laneScore = [0, 0, 0, 0];
+      globalObstacles.forEach(obs => {
+        const dy = omegaCar.y - obs.yOmega;
+        if (dy > -20 && dy < 600) {
+          const weight = (600 - dy) / 600;
+          laneScore[obs.lane] += weight * 80;
+        }
+      });
+
+      // Find global lowest congestion lane ahead
+      let bestLane = omegaCar.lane;
+      let minCongestion = laneScore[omegaCar.lane];
+
+      for (let l = 0; l < numLanes; l++) {
+        // Bias slightly against frequent switching
+        const switchPenalty = Math.abs(l - omegaCar.lane) * 8;
+        if (laneScore[l] + switchPenalty < minCongestion - 15) {
+          minCongestion = laneScore[l] + switchPenalty;
+          bestLane = l;
+        }
+      }
+
+      if (bestLane !== omegaCar.lane) {
+        omegaCar.lane = bestLane;
+        logCombat('omega', `[OMEGA] Voronoi trajectory locked to Lane ${bestLane + 1} (Congestion Score: ${Math.round(minCongestion)})`);
+      }
+
+      // Silky smooth parabolic bezier interpolation
+      const targetX = roadLeft + (omegaCar.lane + 0.5) * laneWidth;
+      omegaCar.x += (targetX - omegaCar.x) * 0.22 * Math.min(1, dt * 60);
+
+      // Collision Check
+      globalObstacles.forEach(obs => {
+        if (obs.lane === omegaCar.lane && Math.abs(omegaCar.y - obs.yOmega) < (omegaCar.dead ? 0 : 45)) {
+          omegaCar.dead = true;
+          logCombat('omega', `[OMEGA] 💥 CRASHED in Lane ${obs.lane + 1}!`);
+          triggerWinner('alpha', 'Milli-Alpha wins via K.O.! Omega caught in congestion.');
+        }
+      });
+    }
+
+    // ----------------------------------------------------
+    // DUAL RENDERING LOOP (HIGHWAY THEATER)
+    // ----------------------------------------------------
+    function renderHighwayPanel(ctx, car, agentType) {
+      const w = ctx.canvas.width / window.devicePixelRatio;
+      const h = ctx.canvas.height / window.devicePixelRatio;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Road Surface
+      ctx.fillStyle = '#0a0d14';
+      ctx.fillRect(roadLeft, 0, 320, h);
+
+      // Road Outer Borders
+      ctx.strokeStyle = agentType === 'alpha' ? 'rgba(255, 122, 48, 0.4)' : 'rgba(0, 240, 255, 0.4)';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(roadLeft, 0, 320, h);
+
+      // Dashed Lane Dividers
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([14, 14]);
+      for (let l = 1; l < numLanes; l++) {
+        ctx.beginPath();
+        ctx.moveTo(roadLeft + l * laneWidth, 0);
+        ctx.lineTo(roadLeft + l * laneWidth, h);
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
+
+      // Draw Obstacles
+      globalObstacles.forEach(obs => {
+        const y = agentType === 'alpha' ? obs.yAlpha : obs.yOmega;
+        if (y > -100 && y < h + 100) {
+          const x = roadLeft + (obs.lane + 0.5) * laneWidth;
+          ctx.fillStyle = obs.color;
+          ctx.beginPath();
+          ctx.roundRect(x - obs.width / 2, y - obs.height / 2, obs.width, obs.height, 6);
+          ctx.fill();
+
+          // Obstacle Headlights
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+          ctx.fillRect(x - obs.width / 2 + 4, y + obs.height / 2 - 6, 6, 4);
+          ctx.fillRect(x + obs.width / 2 - 10, y + obs.height / 2 - 6, 6, 4);
+        }
+      });
+
+      // Draw Agent Car
+      if (!car.dead) {
+        ctx.fillStyle = agentType === 'alpha' ? '#ff7a30' : '#00f0ff';
+        ctx.shadowColor = agentType === 'alpha' ? 'rgba(255, 122, 48, 0.8)' : 'rgba(0, 240, 255, 0.8)';
+        ctx.shadowBlur = 18;
+
+        ctx.beginPath();
+        ctx.roundRect(car.x - 20, car.y - 36, 40, 72, 8);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // Cockpit & Tail glow
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(car.x - 12, car.y - 12, 24, 20);
+
+        // Exhaust Fire
+        ctx.fillStyle = agentType === 'alpha' ? '#f59e0b' : '#38bdf8';
+        ctx.beginPath();
+        ctx.moveTo(car.x - 10, car.y + 36);
+        ctx.lineTo(car.x + 10, car.y + 36);
+        ctx.lineTo(car.x, car.y + 52 + Math.random() * 10);
+        ctx.closePath();
+        ctx.fill();
+      } else {
+        // Crash explosion debris
+        ctx.fillStyle = '#ef4444';
+        for (let i = 0; i < 8; i++) {
+          ctx.fillRect(car.x + (Math.random() - 0.5) * 40, car.y + (Math.random() - 0.5) * 40, 6, 6);
+        }
+      }
+    }
+
+    // ----------------------------------------------------
+    // MAZE DUEL THEATER ENGINE
+    // ----------------------------------------------------
+    let mazeGrid = [];
+    const mazeSize = 40;
+    let alphaMazePath = [];
+    let omegaMazePath = [];
+    let alphaFrontier = [];
+    let omegaFrontier = [];
+    let mazeSolved = false;
+
+    function initMazeDuel() {
+      const prng = new SeededPRNG(activeSeed);
+      mazeGrid = [];
+      for (let r = 0; r < mazeSize; r++) {
+        mazeGrid[r] = [];
+        for (let c = 0; c < mazeSize; c++) {
+          mazeGrid[r][c] = (prng.nextFloat() < 0.28) ? 1 : 0;
+        }
+      }
+      mazeGrid[0][0] = 0;
+      mazeGrid[mazeSize - 1][mazeSize - 1] = 0;
+
+      alphaFrontier = [{ r: 0, c: 0, cost: 0 }];
+      omegaFrontier = [{ r: 0, c: 0, cost: 0 }];
+      alphaMazePath = [];
+      omegaMazePath = [];
+      mazeSolved = false;
+
+      logCombat('system', `[MAZE] Synchronous ${mazeSize}x${mazeSize} braided labyrinth generated under seed #${activeSeed}.`);
+    }
+
+    function stepMazeDuel() {
+      if (mazeSolved) return;
+
+      // Alpha step: Greedy A*
+      if (alphaFrontier.length > 0) {
+        alphaFrontier.sort((a, b) => {
+          const distA = (mazeSize - a.r) + (mazeSize - a.c);
+          const distB = (mazeSize - b.r) + (mazeSize - b.c);
+          return distA - distB;
+        });
+        const curr = alphaFrontier.shift();
+        alphaMazePath.push(curr);
+
+        if (curr.r === mazeSize - 1 && curr.c === mazeSize - 1) {
+          mazeSolved = true;
+          triggerWinner('alpha', `Milli-Alpha solved the ${mazeSize}x${mazeSize} labyrinth first in record time!`);
+          return;
+        }
+
+        const dirs = [[0, 1], [1, 0], [0, -1], [-1, 0]];
+        dirs.forEach(([dr, dc]) => {
+          const nr = curr.r + dr;
+          const nc = curr.c + dc;
+          if (nr >= 0 && nr < mazeSize && nc >= 0 && nc < mazeSize && mazeGrid[nr][nc] === 0) {
+            if (!alphaMazePath.some(p => p.r === nr && p.c === nc)) {
+              alphaFrontier.push({ r: nr, c: nc, cost: curr.cost + 1 });
+            }
+          }
+        });
+      }
+
+      // Omega step: Bidirectional Wavefront
+      if (omegaFrontier.length > 0) {
+        const curr = omegaFrontier.shift();
+        omegaMazePath.push(curr);
+
+        if (curr.r === mazeSize - 1 && curr.c === mazeSize - 1) {
+          mazeSolved = true;
+          triggerWinner('omega', `Milli-Omega solved the ${mazeSize}x${mazeSize} labyrinth first with optimal wavefront!`);
+          return;
+        }
+
+        const dirs = [[1, 0], [0, 1], [-1, 0], [0, -1]];
+        dirs.forEach(([dr, dc]) => {
+          const nr = curr.r + dr;
+          const nc = curr.c + dc;
+          if (nr >= 0 && nr < mazeSize && nc >= 0 && nc < mazeSize && mazeGrid[nr][nc] === 0) {
+            if (!omegaMazePath.some(p => p.r === nr && p.c === nc)) {
+              omegaFrontier.push({ r: nr, c: nc, cost: curr.cost + 1 });
+            }
+          }
+        });
+      }
+    }
+
+    function renderMazePanel(ctx, path, frontier, agentColor) {
+      const w = ctx.canvas.width / window.devicePixelRatio;
+      const h = ctx.canvas.height / window.devicePixelRatio;
+      ctx.clearRect(0, 0, w, h);
+
+      const cellSize = Math.min(w, h) / mazeSize;
+      const offsetX = (w - mazeSize * cellSize) / 2;
+      const offsetY = (h - mazeSize * cellSize) / 2;
+
+      // Draw Walls
+      ctx.fillStyle = '#181f2c';
+      for (let r = 0; r < mazeSize; r++) {
+        for (let c = 0; c < mazeSize; c++) {
+          if (mazeGrid[r][c] === 1) {
+            ctx.fillRect(offsetX + c * cellSize, offsetY + r * cellSize, cellSize - 0.5, cellSize - 0.5);
+          }
+        }
+      }
+
+      // Draw Path Explored
+      ctx.fillStyle = agentColor === 'alpha' ? 'rgba(255, 122, 48, 0.65)' : 'rgba(0, 240, 255, 0.65)';
+      path.forEach(p => {
+        ctx.fillRect(offsetX + p.c * cellSize, offsetY + p.r * cellSize, cellSize, cellSize);
+      });
+
+      // Goal exit glow
+      ctx.fillStyle = '#10b981';
+      ctx.shadowColor = '#10b981';
+      ctx.shadowBlur = 10;
+      ctx.fillRect(offsetX + (mazeSize - 1) * cellSize, offsetY + (mazeSize - 1) * cellSize, cellSize, cellSize);
+      ctx.shadowBlur = 0;
+    }
+
+    // ----------------------------------------------------
+    // MAIN MASTER GAME LOOP
+    // ----------------------------------------------------
+    let lastTime = performance.now();
+
+    function gameLoop(now) {
+      const dt = Math.min(0.1, (now - lastTime) / 1000) * warpFactor;
+      lastTime = now;
+
+      if (isBattling) {
+        if (currentTheater === 'highway') {
+          // Advance highway obstacles
+          const moveDistAlpha = (alphaCar.speed * 0.447) * dt * 10;
+          const moveDistOmega = (omegaCar.speed * 0.447) * dt * 10;
+
+          if (!alphaCar.dead) alphaCar.dist += moveDistAlpha;
+          if (!omegaCar.dead) omegaCar.dist += moveDistOmega;
+
+          globalObstacles.forEach(obs => {
+            if (!alphaCar.dead) obs.yAlpha += moveDistAlpha;
+            if (!omegaCar.dead) obs.yOmega += moveDistOmega;
+
+            // Check passes for +2% rule
+            if (!obs.passedAlpha && obs.yAlpha > alphaCar.y + 30) {
+              obs.passedAlpha = true;
+              alphaCar.overtakes++;
+              alphaCar.speed *= 1.02; // +2% speed increase!
+            }
+            if (!obs.passedOmega && obs.yOmega > omegaCar.y + 30) {
+              obs.passedOmega = true;
+              omegaCar.overtakes++;
+              omegaCar.speed *= 1.02; // +2% speed increase!
+            }
+          });
+
+          // Spawn new synchronous obstacles ahead
+          if (globalObstacles.length > 0) {
+            const minY = Math.min(...globalObstacles.map(o => Math.min(o.yAlpha, o.yOmega)));
+            if (minY > -300) {
+              spawnSynchronousObstacle(minY - 140);
+            }
+          }
+
+          // Step agents
+          stepMilliAlpha(dt);
+          stepMilliOmega(dt);
+
+          renderHighwayPanel(alphaCtx, alphaCar, 'alpha');
+          renderHighwayPanel(omegaCtx, omegaCar, 'omega');
+          updateHUD();
+        } else {
+          // Maze Theater
+          for (let step = 0; step < warpFactor * 3; step++) {
+            stepMazeDuel();
+          }
+          renderMazePanel(alphaCtx, alphaMazePath, alphaFrontier, 'alpha');
+          renderMazePanel(omegaCtx, omegaMazePath, omegaFrontier, 'omega');
+        }
+      }
+
+      animId = requestAnimationFrame(gameLoop);
+    }
+
+    // ----------------------------------------------------
+    // HUD & STATE CONTROLS
+    // ----------------------------------------------------
+    function updateHUD() {
+      document.getElementById('alpha-speed').innerText = `${Math.round(alphaCar.speed)} MPH`;
+      document.getElementById('omega-speed').innerText = `${Math.round(omegaCar.speed)} MPH`;
+      document.getElementById('alpha-overtakes').innerText = alphaCar.overtakes;
+      document.getElementById('omega-overtakes').innerText = omegaCar.overtakes;
+
+      const diff = Math.round(alphaCar.dist - omegaCar.dist);
+      const alphaBadge = document.getElementById('alpha-lead-badge');
+      const omegaBadge = document.getElementById('omega-lead-badge');
+
+      if (diff > 0) {
+        alphaBadge.innerText = `LEADING (+${diff}m)`;
+        alphaBadge.style.color = 'var(--alpha-amber)';
+        omegaBadge.innerText = `TRAILING (-${diff}m)`;
+        omegaBadge.style.color = '#ef4444';
+      } else if (diff < 0) {
+        alphaBadge.innerText = `TRAILING (${diff}m)`;
+        alphaBadge.style.color = '#ef4444';
+        omegaBadge.innerText = `LEADING (+${Math.abs(diff)}m)`;
+        omegaBadge.style.color = 'var(--omega-cyan)';
+      } else {
+        alphaBadge.innerText = 'TIED (0.0m)';
+        omegaBadge.innerText = 'TIED (0.0m)';
+      }
+    }
+
+    function toggleBattle() {
+      isBattling = !isBattling;
+      const btn = document.getElementById('startBattleBtn');
+      if (isBattling) {
+        btn.innerText = '⏸ Pause Duel';
+        btn.style.background = '#ef4444';
+        logCombat('system', `[DUEL] Battle launched in ${currentTheater.toUpperCase()} theater at ${warpFactor}x warp!`);
+      } else {
+        btn.innerText = '⚡ Resume Duel';
+        btn.style.background = 'var(--alpha-amber-grad)';
+      }
+    }
+
+    function switchTheater(mode) {
+      currentTheater = mode;
+      document.getElementById('tab-highway').classList.toggle('active', mode === 'highway');
+      document.getElementById('tab-maze').classList.toggle('active', mode === 'maze');
+
+      if (mode === 'highway') {
+        resetHighwayDuel();
+        renderHighwayPanel(alphaCtx, alphaCar, 'alpha');
+        renderHighwayPanel(omegaCtx, omegaCar, 'omega');
+      } else {
+        initMazeDuel();
+        renderMazePanel(alphaCtx, alphaMazePath, alphaFrontier, 'alpha');
+        renderMazePanel(omegaCtx, omegaMazePath, omegaFrontier, 'omega');
+      }
+    }
+
+    function setWarp(factor, btn) {
+      warpFactor = factor;
+      document.querySelectorAll('.warp-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      logCombat('system', `[WARP] Simulation accelerated to ${factor}x (${factor * 60} virtual FPS)!`);
+    }
+
+    function generateNewSeed() {
+      activeSeed = Math.floor(Math.random() * 900000) + 100000;
+      document.getElementById('seedDisplay').innerText = `SEED: #SEED-${activeSeed}`;
+      if (currentTheater === 'highway') resetHighwayDuel();
+      else initMazeDuel();
+      logCombat('system', `[SEED] Generated new deterministic seed lock: #${activeSeed}`);
+    }
+
+    function logCombat(type, msg) {
+      const box = document.getElementById('combatLog');
+      const row = document.createElement('div');
+      row.className = type === 'alpha' ? 'log-entry-alpha' : (type === 'omega' ? 'log-entry-omega' : 'log-entry-system');
+      row.innerText = `${new Date().toISOString().slice(14, 21)} ${msg}`;
+      box.prepend(row);
+    }
+
+    function triggerWinner(agent, desc) {
+      isBattling = false;
+      document.getElementById('startBattleBtn').innerText = '⚡ Rematch Duel';
+      document.getElementById('winnerModal').classList.add('open');
+
+      const title = document.getElementById('winnerText');
+      const trophy = document.getElementById('winnerTrophy');
+      const descEl = document.getElementById('winnerDesc');
+
+      if (agent === 'alpha') {
+        title.innerText = '⚡ MILLI-ALPHA VICTORIOUS!';
+        title.style.color = 'var(--alpha-amber)';
+        trophy.innerText = '🏆';
+        descEl.innerText = desc;
+      } else {
+        title.innerText = '🔮 MILLI-OMEGA VICTORIOUS!';
+        title.style.color = 'var(--omega-cyan)';
+        trophy.innerText = '👑';
+        descEl.innerText = desc;
+      }
+    }
+
+    function closeWinnerModal() {
+      document.getElementById('winnerModal').classList.remove('open');
+      generateNewSeed();
+      toggleBattle();
+    }
+
+    // Initialize on page ready
+    window.addEventListener('DOMContentLoaded', () => {
+      initCanvases();
+      resetHighwayDuel();
+      renderHighwayPanel(alphaCtx, alphaCar, 'alpha');
+      renderHighwayPanel(omegaCtx, omegaCar, 'omega');
+      requestAnimationFrame(gameLoop);
+    });
+  </script>
+</body>
+</html>

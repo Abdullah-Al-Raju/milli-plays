@@ -1,24 +1,26 @@
 # ⚡ Milli Plays: Hypersonic Autonomous Cyber-Arcade & Neural Telemetry Hub
 
 [![Cloudflare Pages](https://img.shields.io/badge/Deployed%20on-Cloudflare%20Pages-f38020?style=for-the-badge&logo=cloudflare&logoColor=white)](https://milli-plays.pages.dev/)
-[![Live Demo](https://img.shields.io/badge/Live%20Arena-ticket--booker--arena.pages.dev-00f0ff?style=for-the-badge)](https://milli-plays.pages.dev/)
-[![Engines](https://img.shields.io/badge/Hypersonic%20Engines-16%20Active-ff7a30?style=for-the-badge)](https://milli-plays.pages.dev/)
-[![Reaction Speed](https://img.shields.io/badge/Reaction%20Latency-0.18%20ms-10b981?style=for-the-badge)](https://milli-plays.pages.dev/)
+[![Live Demo](https://img.shields.io/badge/Live%20Arena-milli--plays.pages.dev-00f0ff?style=for-the-badge)](https://milli-plays.pages.dev/)
+[![Engines](https://img.shields.io/badge/Hypersonic%20Engines-17%20Active-ff7a30?style=for-the-badge)](https://milli-plays.pages.dev/)
+[![Reaction Speed](https://img.shields.io/badge/Reaction%20Latency-0.05%20ms-10b981?style=for-the-badge)](https://milli-plays.pages.dev/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
-> **Milli Plays** is the world's first open-source **Hypersonic Autonomous Cyber-Arcade and Neural Telemetry Suite**. Featuring **16 real-time AI-driven game engines**, Milli demonstrates how algorithmic autonomy, microsecond pathfinding, and computational geometry outmaneuver human reaction times by orders of magnitude (**0.18 ms** vs. **2,800 ms**).
+> **Milli Plays** is the world's first open-source **Hypersonic Autonomous Cyber-Arcade, Neural Telemetry Hub & Multi-AI Battle Royale Suite**. Featuring **17 real-time AI-driven game engines** and a **head-to-head split-screen neural colosseum**, Milli demonstrates how algorithmic autonomy, microsecond pathfinding, and computational geometry outmaneuver human reaction times by orders of magnitude (**0.05 – 0.18 ms** vs. **2,800 ms**).
 
 🌐 **Public Live Deployment:** [https://milli-plays.pages.dev/](https://milli-plays.pages.dev/)  
+⚔️ **Multi-Milli AI Battle Arena:** [https://milli-plays.pages.dev/battle](https://milli-plays.pages.dev/battle)  
 📦 **Public GitHub Repository:** [https://github.com/Abdullah-Al-Raju/milli-plays](https://github.com/Abdullah-Al-Raju/milli-plays)
 
 ---
 
-## 🎮 The 16 Hypersonic Game Engines
+## 🎮 The 17 Hypersonic Game Engines
 
-All engines feature real-time HTML5 Canvas physics, zero-lag microsecond autopilot algorithms, and interactive toggles to switch between human input and Milli autonomous mastery:
+All engines feature real-time HTML5 Canvas physics, zero-lag microsecond autopilot algorithms, and interactive controls to switch between human input and Milli autonomous mastery:
 
 | # | Game Engine | Live Route | Core Algorithmic Architecture | Peak Throughput / Speed |
 |---|---|---|---|---|
+| ⚔️ | **Multi-Milli AI Battle Royale** | [`/battle`](https://milli-plays.pages.dev/battle) | Split-screen neural colosseum: Milli-Alpha (Greedy Reflex) vs Milli-Omega (Convex Hull), deterministic XORShift128+ seed lock, 1x–20x warp | 1,200 virtual FPS simulation |
 | 🏎️ | **Milli-Drive Super-Speed** | [`/milli-drive`](https://milli-plays.pages.dev/milli-drive) | Multi-ray optical clearance, dynamic lane scoring, **+2% speed increase on every pass** | Mach 15+ (1,840+ MPH) |
 | 🌀 | **Braided Hyper-Maze** | [`/milli-maze`](https://milli-plays.pages.dev/milli-maze) | Multi-route braided labyrinth generator, blind exploration exit-finder, **global optimal path highlighter** | 50×50 grid in 0.42 ms |
 | 🌸 | **Danmaku Core** | [`/danmaku`](https://milli-plays.pages.dev/danmaku) | 20-frame lookahead convex hull, 1-pixel hitbox, Voronoi safe pocket clustering | 2,500 simultaneous bullets |

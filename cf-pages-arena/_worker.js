@@ -186,6 +186,7 @@ export default {
 
     // Clean Short-form Aliases -> Extensionless Clean URLs
     const shortAliases = {
+      "/battle": "/milli-battle",
       "/drive": "/milli-drive",
       "/scalper-royale": "/milli-scalper-royale",
       "/matrix": "/milli-matrix",
